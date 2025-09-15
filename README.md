@@ -209,6 +209,28 @@ where:
 
 ## 🖥️ Dashboard Features
 
+### Dashboard Screenshots
+
+#### Original Dashboard View
+![Original Dashboard](https://github.com/DNYoussef/trader-ai/assets/your-username/original-dashboard.png)
+*Clean, professional trading interface with real-time portfolio metrics and position tracking*
+
+#### Enhanced Dashboard - Overview Tab
+![Enhanced Overview](https://github.com/DNYoussef/trader-ai/assets/your-username/enhanced-overview.png)
+*Mobile app-inspired interface with key metrics, portfolio value chart, and active positions*
+
+#### Trading Terminal
+![Trading Terminal](https://github.com/DNYoussef/trader-ai/assets/your-username/trading-terminal.png)
+*Professional trading terminal with real-time price action, AI signals, and quick trade execution*
+
+#### Learn Tab - Educational Hub
+![Learn Tab](https://github.com/DNYoussef/trader-ai/assets/your-username/learn-tab.png)
+*Gamified learning modules covering Gate System, P(ruin), Portfolio Construction, and Risk Management*
+
+#### Progress Tracking
+![Progress View](https://github.com/DNYoussef/trader-ai/assets/your-username/progress-view.png)
+*Visual progression through capital gates with achievement tracking and milestone rewards*
+
 ### Enhanced UI with Mobile App Psychology
 
 The dashboard implements 6 phases of mobile app engagement psychology:
