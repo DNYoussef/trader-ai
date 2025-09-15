@@ -213,6 +213,21 @@ where:
 
 > **Note:** To view the dashboard live, run `start_ui.bat` (Windows) or `./start_ui.sh` (Linux/Mac) and navigate to http://localhost:3000
 
+![Gary×Taleb Trading Dashboard - Original View](docs/images/dashboard-original.png)
+*Original Dashboard with purple gradient design showing portfolio metrics and active positions*
+
+![Gary×Taleb Trading Dashboard - Enhanced Overview](docs/images/dashboard-enhanced.png)
+*Enhanced mobile-inspired interface with real-time portfolio tracking*
+
+![Gary×Taleb Trading Dashboard - Trading Terminal](docs/images/dashboard-terminal.png)
+*Professional trading terminal with AI signals and quick trade execution*
+
+![Gary×Taleb Trading Dashboard - Learn Tab](docs/images/dashboard-learn.png)
+*Gamified educational modules covering all aspects of the trading system*
+
+![Gary×Taleb Trading Dashboard - Progress View](docs/images/dashboard-progress.png)
+*Visual progression through capital gates with achievements*
+
 #### Original Dashboard View
 <details>
 <summary>Click to view Original Dashboard</summary>

@@ -1,0 +1,9 @@
+Please add your screenshot images to this folder with the following names:
+
+1. dashboard-original.png - The purple gradient dashboard screenshot
+2. dashboard-enhanced.png - The enhanced overview tab screenshot
+3. dashboard-terminal.png - The trading terminal tab screenshot
+4. dashboard-learn.png - The Learn tab screenshot
+5. dashboard-progress.png - The progress/in progress screenshot
+
+Once added, the images will automatically appear in the README.md file.
