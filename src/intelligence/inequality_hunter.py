@@ -73,6 +73,23 @@ class ContrarianHypothesis:
     created_at: datetime
 
 
+@dataclass
+class ContrarianOpportunity:
+    """A specific contrarian trading opportunity based on inequality analysis"""
+    asset: str
+    opportunity_type: str  # 'inequality_play', 'wealth_flow', 'consensus_miss'
+    description: str
+    inequality_thesis: str
+    consensus_view: str
+    contrarian_view: str
+    confidence: float  # 0-1
+    expected_return: float
+    risk_level: str  # 'low', 'medium', 'high'
+    time_horizon: str  # 'short', 'medium', 'long'
+    supporting_data: Dict[str, Any]
+    created_at: datetime
+
+
 class InequalityHunter:
     """
     AI system for finding mispricings caused by inequality blindness.

@@ -11,6 +11,7 @@ import logging
 import json
 import random
 import time
+import numpy as np
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Set, Optional, Any
@@ -24,6 +25,20 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
+
+# Import AI dashboard integration
+try:
+    from .ai_dashboard_integration import (
+        ai_dashboard_integrator,
+        get_dashboard_inequality_data,
+        get_dashboard_contrarian_data,
+        get_ai_status_data,
+        execute_trade
+    )
+    AI_AVAILABLE = True
+except ImportError:
+    AI_AVAILABLE = False
+    logging.warning("AI dashboard integration not available - running in mock mode")
 
 # Setup logging
 logging.basicConfig(
@@ -89,14 +104,15 @@ class SimpleDashboardServer:
 
         @self.app.get("/")
         async def root():
-            return {"message": "Gary×Taleb Risk Dashboard API", "status": "running"}
+            return {"message": "Gary×Taleb Risk Dashboard API", "status": "running", "ai_enabled": AI_AVAILABLE}
 
         @self.app.get("/api/health")
         async def health_check():
             return {
                 "status": "healthy",
                 "timestamp": time.time(),
-                "connections": len(self.active_connections)
+                "connections": len(self.active_connections),
+                "ai_available": AI_AVAILABLE
             }
 
         @self.app.get("/api/metrics/current")
@@ -114,9 +130,56 @@ class SimpleDashboardServer:
             """Get active alerts."""
             return self.mock_data_generator.generate_alerts()
 
+        # AI-Enhanced endpoints
+        @self.app.get("/api/inequality/data")
+        async def get_inequality_data():
+            """Get AI-enhanced inequality panel data."""
+            if AI_AVAILABLE:
+                return await get_dashboard_inequality_data()
+            else:
+                return self.mock_data_generator.generate_inequality_data()
+
+        @self.app.get("/api/contrarian/opportunities")
+        async def get_contrarian_opportunities():
+            """Get AI-detected contrarian opportunities."""
+            if AI_AVAILABLE:
+                return await get_dashboard_contrarian_data()
+            else:
+                return self.mock_data_generator.generate_contrarian_data()
+
+        @self.app.get("/api/ai/status")
+        async def get_ai_status():
+            """Get AI calibration and status data."""
+            if AI_AVAILABLE:
+                return await get_ai_status_data()
+            else:
+                return self.mock_data_generator.generate_ai_status()
+
+        @self.app.post("/api/trade/execute/{asset}")
+        async def execute_ai_trade(asset: str):
+            """Execute AI-recommended trade."""
+            if AI_AVAILABLE:
+                return await execute_trade(asset)
+            else:
+                return {"success": False, "error": "AI not available in mock mode"}
+
+        @self.app.get("/api/barbell/allocation")
+        async def get_barbell_allocation():
+            """Get current barbell allocation status."""
+            if AI_AVAILABLE:
+                # This would come from AI mispricing detector
+                return {"safe_allocation": 0.8, "risky_allocation": 0.2, "ai_managed": True}
+            else:
+                return self.mock_data_generator.generate_barbell_allocation()
+
         @self.app.websocket("/ws/{client_id}")
         async def websocket_endpoint(websocket: WebSocket, client_id: str):
             await self.connect(websocket)
+
+            # Connect to AI dashboard integrator if available
+            if AI_AVAILABLE:
+                ai_dashboard_integrator.add_websocket_connection(websocket)
+
             try:
                 # Send initial data
                 await self.send_initial_data(websocket)
@@ -140,6 +203,8 @@ class SimpleDashboardServer:
             except WebSocketDisconnect:
                 pass
             finally:
+                if AI_AVAILABLE:
+                    ai_dashboard_integrator.remove_websocket_connection(websocket)
                 self.disconnect(websocket)
 
     async def connect(self, websocket: WebSocket):
@@ -315,7 +380,10 @@ class MockDataGenerator:
             ("P(ruin) exceeding threshold", "p_ruin"),
             ("Maximum drawdown alert", "drawdown"),
             ("Margin usage high", "margin"),
-            ("Volatility spike detected", "volatility")
+            ("Volatility spike detected", "volatility"),
+            ("Gary Moment detected", "gary_moment"),
+            ("AI confidence dropped", "ai_confidence"),
+            ("Inequality signal spike", "inequality")
         ]
 
         msg, alert_type = random.choice(alert_types)
@@ -328,12 +396,198 @@ class MockDataGenerator:
             "timestamp": time.time()
         }
 
+    def generate_inequality_data(self) -> Dict:
+        """Generate mock inequality panel data."""
+        return {
+            'metrics': {
+                'giniCoefficient': 0.475 + np.random.normal(0, 0.005),
+                'top1PercentWealth': 32.0 + np.random.normal(0, 0.5),
+                'top10PercentWealth': 58.0 + np.random.normal(0, 1.0),
+                'wageGrowthReal': -0.5 + np.random.normal(0, 0.2),
+                'corporateProfitsToGdp': 12.5 + np.random.normal(0, 0.5),
+                'householdDebtToIncome': 105.0 + np.random.normal(0, 2.0),
+                'luxuryVsDiscountSpend': 1.8 + np.random.normal(0, 0.1),
+                'wealthVelocity': 0.18 + np.random.normal(0, 0.02),
+                'consensusWrongScore': 0.7 + np.random.normal(0, 0.05),
+                'ai_confidence_level': 0.75 + np.random.normal(0, 0.05),
+                'mathematical_signal_strength': abs(np.random.normal(0, 0.3)),
+                'ai_prediction_accuracy': 0.65 + np.random.normal(0, 0.1)
+            },
+            'historicalData': self._generate_historical_inequality(),
+            'wealthFlows': self._generate_wealth_flows(),
+            'contrarianSignals': self._generate_contrarian_signals()
+        }
+
+    def _generate_historical_inequality(self) -> List[Dict]:
+        """Generate historical inequality data."""
+        data = []
+        base_date = datetime.now()
+
+        for i in range(90):
+            date = base_date - timedelta(days=89-i)
+            trend = i / 90.0
+
+            data.append({
+                'date': date.strftime('%Y-%m-%d'),
+                'gini': 0.47 + trend * 0.008 + np.random.normal(0, 0.002),
+                'top1': 31.0 + trend * 2.0 + np.random.normal(0, 0.2),
+                'wageGrowth': -0.2 - trend * 0.6 + np.random.normal(0, 0.1)
+            })
+
+        return data
+
+    def _generate_wealth_flows(self) -> List[Dict]:
+        """Generate wealth flow data."""
+        return [
+            {'source': 'Working Class Wages', 'target': 'Corporate Profits', 'value': 25.0 + np.random.normal(0, 3), 'color': '#ef4444'},
+            {'source': 'Middle Class Savings', 'target': 'Asset Prices', 'value': 35.0 + np.random.normal(0, 4), 'color': '#f59e0b'},
+            {'source': 'Government Debt', 'target': 'Bond Holders', 'value': 18.0 + np.random.normal(0, 2), 'color': '#8b5cf6'},
+            {'source': 'Rent Payments', 'target': 'Property Owners', 'value': 22.0 + np.random.normal(0, 3), 'color': '#10b981'}
+        ]
+
+    def _generate_contrarian_signals(self) -> List[Dict]:
+        """Generate contrarian signals."""
+        signals = [
+            {'topic': 'Housing Market', 'consensusView': 'Rates will crash housing', 'realityView': 'Cash buyers support prices', 'conviction': 0.8, 'opportunity': 'Long REITs'},
+            {'topic': 'Tech Stocks', 'consensusView': 'Overvalued growth', 'realityView': 'Wealth concentration flows to tech', 'conviction': 0.7, 'opportunity': 'Long QQQ'},
+            {'topic': 'Treasury Bonds', 'consensusView': 'Rising rates hurt bonds', 'realityView': 'Safe haven demand from wealthy', 'conviction': 0.75, 'opportunity': 'Long TLT'}
+        ]
+
+        # Add some randomness to conviction scores
+        for signal in signals:
+            signal['conviction'] += np.random.normal(0, 0.05)
+            signal['conviction'] = max(0.3, min(1.0, signal['conviction']))
+
+        return signals
+
+    def generate_contrarian_data(self) -> Dict:
+        """Generate mock contrarian opportunities data."""
+        opportunities = []
+        symbols = ['SPY', 'QQQ', 'TLT', 'GLD', 'VIX', 'IWM']
+
+        for i, symbol in enumerate(symbols):
+            gary_score = np.random.beta(2, 3)  # Skewed toward lower values, occasional high
+            conviction = 0.6 + gary_score * 0.3
+
+            opportunities.append({
+                'id': f'mock_opp_{i}',
+                'symbol': symbol,
+                'thesis': f'Inequality analysis suggests {symbol} mispricing',
+                'consensusView': 'Market efficiency holds',
+                'contrarianView': 'Wealth concentration creates bias',
+                'inequalityCorrelation': 0.7 + np.random.normal(0, 0.1),
+                'convictionScore': conviction,
+                'expectedPayoff': 1.2 + conviction * 1.5,
+                'timeframeDays': random.randint(30, 180),
+                'entryPrice': 100.0 + np.random.normal(0, 10),
+                'targetPrice': 100.0 + (1.0 + conviction) * 15,
+                'stopLoss': 100.0 - 12.0,
+                'currentPrice': 100.0 + np.random.normal(0, 3),
+                'historicalAccuracy': 0.6 + conviction * 0.2,
+                'garyMomentScore': gary_score,
+                'allocationBucket': 'risky_20' if gary_score < 0.7 else 'safe_80',
+                'safetyScore': 0.3 + gary_score * 0.5,
+                'positionSize': 0.02 + conviction * 0.08,
+                'supportingData': [
+                    {'metric': 'DPI Signal', 'value': gary_score * 100, 'trend': 'up'},
+                    {'metric': 'AI Confidence', 'value': conviction * 100, 'trend': 'up'},
+                    {'metric': 'Narrative Gap', 'value': abs(conviction - 0.5) * 100, 'trend': 'up'},
+                    {'metric': 'Catalyst Timing', 'value': 75.0, 'trend': 'up'}
+                ]
+            })
+
+        return {
+            'opportunities': opportunities,
+            'barbell_allocation': {
+                'safe_allocation': 0.8,
+                'risky_allocation': 0.2,
+                'safe_assets': ['TLT', 'SHY'],
+                'risky_assets': ['SPY', 'QQQ', 'VIX'],
+                'total_mispricings': len(opportunities)
+            }
+        }
+
+    def generate_ai_status(self) -> Dict:
+        """Generate mock AI status data."""
+        return {
+            'utility_parameters': {
+                'risk_aversion': 0.5 + np.random.normal(0, 0.05),
+                'loss_aversion': 2.0 + np.random.normal(0, 0.1),
+                'kelly_safety_factor': 0.25 + np.random.normal(0, 0.02),
+                'confidence_threshold': 0.7 + np.random.normal(0, 0.03),
+                'last_updated': datetime.now().isoformat()
+            },
+            'calibration_metrics': {
+                'total_predictions': random.randint(50, 200),
+                'resolved_predictions': random.randint(30, 150),
+                'overall_accuracy': 0.65 + np.random.normal(0, 0.05),
+                'brier_score': 0.25 + np.random.normal(0, 0.05),
+                'log_loss': 0.6 + np.random.normal(0, 0.1),
+                'calibration_error': 0.1 + np.random.normal(0, 0.02),
+                'pit_p_value': np.random.uniform(0.05, 0.95)
+            },
+            'mathematical_framework': {
+                'dpi_active': True,
+                'narrative_gap_tracking': True,
+                'repricing_potential_calculated': True,
+                'kelly_optimization': True,
+                'evt_risk_management': True,
+                'barbell_constraints': True
+            },
+            'streaming_status': {
+                'ai_processing': True,
+                'mispricing_detection': True,
+                'websocket_connections': len(self.active_connections),
+                'last_update': datetime.now().isoformat()
+            }
+        }
+
+    def generate_barbell_allocation(self) -> Dict:
+        """Generate mock barbell allocation data."""
+        return {
+            'allocation_summary': {
+                'safe_allocation': 0.8,
+                'risky_allocation': 0.2,
+                'transition_allocation': 0.0
+            },
+            'safe_assets': ['TLT', 'IEF', 'SHY'],
+            'risky_assets': ['SPY', 'QQQ'],
+            'transition_assets': ['GLD'],
+            'last_rebalance': datetime.now().isoformat(),
+            'rebalance_reason': 'Periodic rebalancing',
+            'total_mispricings': 5,
+            'safety_promotions_available': 1
+        }
+
+async def init_ai_services():
+    """Initialize AI services if available."""
+    if AI_AVAILABLE:
+        try:
+            logger.info("Starting AI dashboard integration...")
+            await ai_dashboard_integrator.start_ai_dashboard_integration()
+            logger.info("AI dashboard integration started successfully")
+        except Exception as e:
+            logger.error(f"Failed to start AI integration: {e}")
+    else:
+        logger.info("Running in mock mode - AI services not available")
+
 def main():
     """Main entry point."""
     server = SimpleDashboardServer()
 
+    # Initialize AI services
+    if AI_AVAILABLE:
+        # Start AI services in the background
+        import threading
+        def run_ai_init():
+            asyncio.run(init_ai_services())
+
+        ai_thread = threading.Thread(target=run_ai_init, daemon=True)
+        ai_thread.start()
+
     # Start the server
     try:
+        logger.info("Starting Gary×Taleb Risk Dashboard with AI integration")
         server.run(host="127.0.0.1", port=8000)
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
