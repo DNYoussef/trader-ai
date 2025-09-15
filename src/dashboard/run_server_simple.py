@@ -13,7 +13,7 @@ import random
 import time
 import numpy as np
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Set, Optional, Any
 from dataclasses import dataclass, asdict
 
@@ -28,17 +28,22 @@ import uvicorn
 
 # Import AI dashboard integration
 try:
-    from .ai_dashboard_integration import (
-        ai_dashboard_integrator,
-        get_dashboard_inequality_data,
-        get_dashboard_contrarian_data,
-        get_ai_status_data,
-        execute_trade
-    )
+    # Add current directory to path for direct imports
+    sys.path.insert(0, str(Path(__file__).parent))
+    import ai_dashboard_integration
+
+    # Import functions
+    ai_dashboard_integrator = ai_dashboard_integration.ai_dashboard_integrator
+    get_dashboard_inequality_data = getattr(ai_dashboard_integration, 'get_dashboard_inequality_data', None)
+    get_dashboard_contrarian_data = getattr(ai_dashboard_integration, 'get_dashboard_contrarian_data', None)
+    get_ai_status_data = getattr(ai_dashboard_integration, 'get_ai_status_data', None)
+    execute_trade = getattr(ai_dashboard_integration, 'execute_trade', None)
+
     AI_AVAILABLE = True
-except ImportError:
+    logging.info("AI dashboard integration loaded successfully")
+except ImportError as e:
     AI_AVAILABLE = False
-    logging.warning("AI dashboard integration not available - running in mock mode")
+    logging.warning(f"AI dashboard integration not available - running in mock mode: {e}")
 
 # Setup logging
 logging.basicConfig(

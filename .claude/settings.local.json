@@ -24,7 +24,9 @@
       "WebSearch",
       "WebFetch(domain:guildoftherose.org)",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []

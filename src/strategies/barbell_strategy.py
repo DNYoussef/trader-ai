@@ -565,7 +565,7 @@ ACTIVE CONTRARIAN THEMES:
             explanation += f"\n  Conviction: {opp.conviction_score:.0%}, Expected Payoff: {opp.expected_payoff:.1f}x\n"
 
         if allocation.rebalance_needed:
-            explanation += "\n⚠️  REBALANCE NEEDED - Allocation has drifted from targets"
+            explanation += "\n!!! REBALANCE NEEDED - Allocation has drifted from targets"
 
         explanation += """
 

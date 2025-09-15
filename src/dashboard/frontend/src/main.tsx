@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-// import App from './App.tsx'
-import AppWithEnhanced from './AppWithEnhanced.tsx'
+import AppUnified from './AppUnified'
 import './index.css'
 
+// Unified App with MECE organization and feature modes
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AppWithEnhanced />
+    <AppUnified />
   </React.StrictMode>,
 )

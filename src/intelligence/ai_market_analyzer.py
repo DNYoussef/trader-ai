@@ -362,7 +362,7 @@ class AIMarketAnalyzer:
             action = 'gary_moment'
             position_size = min(0.15, ai_signal.ai_confidence * 0.2)  # Max 15% for Gary moments
             time_horizon = 'long'
-            reasoning_parts.append("🚨 GARY MOMENT: High conviction contrarian opportunity detected")
+            reasoning_parts.append("!!! GARY MOMENT: High conviction contrarian opportunity detected")
 
         # Strong buy signal
         elif (ai_signal.composite_signal > 0.5 and

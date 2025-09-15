@@ -11,11 +11,27 @@ import logging
 import numpy as np
 from fastapi import WebSocket
 
-# Import AI systems
-from ..intelligence.ai_calibration_engine import ai_calibration_engine
-from ..intelligence.ai_data_stream_integration import ai_data_stream_integrator
-from ..intelligence.ai_mispricing_detector import ai_mispricing_detector
-from ..intelligence.ai_signal_generator import ai_signal_generator
+# Import AI systems - use fallback if not available
+try:
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+    from src.intelligence.ai_calibration_engine import ai_calibration_engine
+    from src.intelligence.ai_data_stream_integration import ai_data_stream_integrator
+    from src.intelligence.ai_mispricing_detector import ai_mispricing_detector
+    from src.intelligence.ai_signal_generator import ai_signal_generator
+    AI_SYSTEMS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"AI systems not available, using fallbacks: {e}")
+    AI_SYSTEMS_AVAILABLE = False
+    # Create mock objects
+    class MockAISystem:
+        def __getattr__(self, name):
+            return lambda *args, **kwargs: {}
+    ai_calibration_engine = MockAISystem()
+    ai_data_stream_integrator = MockAISystem()
+    ai_mispricing_detector = MockAISystem()
+    ai_signal_generator = MockAISystem()
 
 logger = logging.getLogger(__name__)
 

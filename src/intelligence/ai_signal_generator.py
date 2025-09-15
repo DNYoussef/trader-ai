@@ -51,7 +51,7 @@ class AISignalGenerator:
     """
     AI-driven signal generation using mathematical framework:
 
-    1. DPI_t = Σ(ω_g^AI × ΔNetCashFlow_g) - learned cohort weights
+    1. DPI_t = Sum(omega_g^AI * DeltaNetCashFlow_g) - learned cohort weights
     2. NG_t^(i) = E^AI[Path_i] - E^market[Path_i] - AI vs market expectations
     3. RP_t^(i) = |NG_t^(i)| × Conf_AI,t × φ(catalyst_t) - CarryCost_t^(i)
     4. S_i,AI = w1^AI × (ΔDPI) + w2^AI × NG_i + w3^AI × φ(catalyst) - w4^AI × carry_i
@@ -85,7 +85,7 @@ class AISignalGenerator:
         """
         Calculate Distributional Pressure Index with AI-learned weights
 
-        DPI_t = Σ(ω_g^AI × ΔNetCashFlow_g)
+        DPI_t = Sum(omega_g^AI * DeltaNetCashFlow_g)
         where ω_g^AI are learned through gradient descent on prediction accuracy
         """
         if not cohort_data:
@@ -442,7 +442,7 @@ class AISignalGenerator:
             interpretations.append("Distant or weak catalysts")
 
         if signal.signal_strength == 'gary_moment':
-            interpretations.append("🚨 GARY MOMENT: High conviction contrarian opportunity")
+            interpretations.append("!!! GARY MOMENT: High conviction contrarian opportunity")
 
         return "; ".join(interpretations) if interpretations else "Mixed signals - proceed with caution"
 

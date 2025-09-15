@@ -154,10 +154,10 @@ const AppEnhancedFull: React.FC = () => {
   }, [metrics]);
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'terminal', label: 'Trading Terminal', icon: '📈' },
-    { id: 'learn', label: 'Learn', icon: '🧠' },
-    { id: 'progress', label: 'Progress', icon: '🎯' }
+    { id: 'overview', label: 'Overview', icon: '[CHART]' },
+    { id: 'terminal', label: 'Trading Terminal', icon: '[TREND]' },
+    { id: 'learn', label: 'Learn', icon: '[BRAIN]' },
+    { id: 'progress', label: 'Progress', icon: '[TARGET]' }
   ];
 
   return (
@@ -607,11 +607,11 @@ const AppEnhancedFull: React.FC = () => {
               marginBottom: '30px'
             }}>
               {[
-                { label: 'Total Trades', value: '147', icon: '📊' },
-                { label: 'Win Rate', value: '67%', icon: '🎯' },
-                { label: 'Avg Profit', value: '$342', icon: '💰' },
-                { label: 'Best Month', value: '+12.3%', icon: '🏆' },
-                { label: 'Risk Score', value: 'A+', icon: '🛡️' },
+                { label: 'Total Trades', value: '147', icon: '[CHART]' },
+                { label: 'Win Rate', value: '67%', icon: '[TARGET]' },
+                { label: 'Avg Profit', value: '$342', icon: '[MONEY]' },
+                { label: 'Best Month', value: '+12.3%', icon: '[TROPHY]' },
+                { label: 'Risk Score', value: 'A+', icon: '[SHIELD]' },
                 { label: 'Learning Hours', value: '24', icon: '📚' }
               ].map(stat => (
                 <div key={stat.label} style={{
@@ -639,9 +639,9 @@ const AppEnhancedFull: React.FC = () => {
               <h3 style={{ margin: '0 0 20px 0', color: '#111827' }}>Recent Achievements</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
                 {[
-                  { title: 'First Trade', desc: 'Executed your first trade', icon: '🎉', date: '2 days ago' },
-                  { title: 'Risk Master', desc: 'Maintained P(ruin) < 10% for 30 days', icon: '🛡️', date: '1 week ago' },
-                  { title: 'Profit Maker', desc: 'Achieved 5 consecutive profitable trades', icon: '💰', date: '2 weeks ago' },
+                  { title: 'First Trade', desc: 'Executed your first trade', icon: '[PARTY]', date: '2 days ago' },
+                  { title: 'Risk Master', desc: 'Maintained P(ruin) < 10% for 30 days', icon: '[SHIELD]', date: '1 week ago' },
+                  { title: 'Profit Maker', desc: 'Achieved 5 consecutive profitable trades', icon: '[MONEY]', date: '2 weeks ago' },
                   { title: 'Knowledge Seeker', desc: 'Completed 3 educational courses', icon: '📚', date: '1 month ago' }
                 ].map(achievement => (
                   <div key={achievement.title} style={{

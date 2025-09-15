@@ -32,9 +32,9 @@ class AIPrediction:
 @dataclass
 class AIUtilityParameters:
     """AI's learned utility function parameters"""
-    risk_aversion: float = 0.5  # γ parameter in CRRA utility
+    risk_aversion: float = 0.5  # gamma parameter in CRRA utility
     loss_aversion: float = 2.0  # Prospect theory loss aversion multiplier
-    kelly_safety_factor: float = 0.25  # k ∈ [0.2, 0.5]
+    kelly_safety_factor: float = 0.25  # k in [0.2, 0.5]
     confidence_threshold: float = 0.7  # Minimum confidence for action
     learning_rate: float = 0.01
     last_updated: datetime = field(default_factory=datetime.now)
