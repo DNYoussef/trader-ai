@@ -211,25 +211,74 @@ where:
 
 ### Dashboard Screenshots
 
+> **Note:** To view the dashboard live, run `start_ui.bat` (Windows) or `./start_ui.sh` (Linux/Mac) and navigate to http://localhost:3000
+
 #### Original Dashboard View
-![Original Dashboard](https://github.com/DNYoussef/trader-ai/assets/your-username/original-dashboard.png)
-*Clean, professional trading interface with real-time portfolio metrics and position tracking*
+<details>
+<summary>Click to view Original Dashboard</summary>
+
+The original dashboard features a purple gradient design with comprehensive trading metrics:
+- **Portfolio Value**: $15,579.68 with daily P&L tracking
+- **Risk Metrics**: P(ruin) at 2.81%, VaR at $681.78
+- **Performance**: Sharpe Ratio of 2.35, Max Drawdown 22.53%
+- **Active Positions**: Real-time tracking of AAPL, GOOGL, MSFT, AMZN, TSLA with P&L
+- **Visual Design**: Professional purple gradient with white cards
+
+</details>
 
 #### Enhanced Dashboard - Overview Tab
-![Enhanced Overview](https://github.com/DNYoussef/trader-ai/assets/your-username/enhanced-overview.png)
-*Mobile app-inspired interface with key metrics, portfolio value chart, and active positions*
+<details>
+<summary>Click to view Enhanced Overview</summary>
+
+Modern, mobile-inspired interface featuring:
+- **Portfolio Value**: $25,397.46 with +$366.70 daily gain
+- **Key Metrics**: P(ruin) 12.1%, Sharpe 1.85, Max Drawdown 8.0%
+- **Portfolio Chart**: Real-time value tracking with gradient area chart
+- **Open Positions**: SPY, ULTY, AMDY, VTIP, IAU with live P&L
+- **Alert System**: High P(ruin), Market Update, Trade Executed notifications
+
+</details>
 
 #### Trading Terminal
-![Trading Terminal](https://github.com/DNYoussef/trader-ai/assets/your-username/trading-terminal.png)
-*Professional trading terminal with real-time price action, AI signals, and quick trade execution*
+<details>
+<summary>Click to view Trading Terminal</summary>
+
+Professional trading interface with:
+- **Ticker Cards**: SPY ($405.13), ULTY ($431.33), AMDY ($422.62), VTIP ($434.84), IAU ($444.61)
+- **Advanced Chart**: Multi-line chart showing Price, High/Low bands, and AI Signals
+- **Time Controls**: 1m, 5m, 15m, 1h, 4h, 1d intervals
+- **Quick Trade**: One-click BUY/SELL buttons
+- **AI Integration**: 85% confidence signals with BUY recommendation
+
+</details>
 
 #### Learn Tab - Educational Hub
-![Learn Tab](https://github.com/DNYoussef/trader-ai/assets/your-username/learn-tab.png)
-*Gamified learning modules covering Gate System, P(ruin), Portfolio Construction, and Risk Management*
+<details>
+<summary>Click to view Educational Modules</summary>
+
+Gamified learning experience with:
+- **Gate System Fundamentals**: 8 modules, 100% complete (2h duration)
+- **Understanding P(ruin)**: 6 modules, 75% complete (1.5h duration)
+- **Portfolio Construction**: 10 modules, 45% complete (3h duration)
+- **Trading Psychology**: 12 modules, 30% complete (4h duration)
+- **Technical Analysis**: 15 modules, 60% complete (5h duration)
+- **Risk Management**: 9 modules, 85% complete (2.5h duration)
+- **Featured Course**: "Understanding Risk Management" with Gary's DPI methodology
+
+</details>
 
 #### Progress Tracking
-![Progress View](https://github.com/DNYoussef/trader-ai/assets/your-username/progress-view.png)
-*Visual progression through capital gates with achievement tracking and milestone rewards*
+<details>
+<summary>Click to view Progress System</summary>
+
+Visual progression system showing:
+- **Current Gate**: Track progression from G0 ($200) to G12 ($10M+)
+- **Achievements**: Milestone rewards and accomplishments
+- **Performance Metrics**: Historical performance tracking
+- **Learning Progress**: Course completion percentages
+- **Social Features**: Optional leaderboards and community features
+
+</details>
 
 ### Enhanced UI with Mobile App Psychology
 
