@@ -19,7 +19,12 @@
       "Bash(git branch:*)",
       "Bash(git remote add:*)",
       "Bash(git push:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "WebFetch(domain:theguildoftherose.org)",
+      "WebSearch",
+      "WebFetch(domain:guildoftherose.org)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

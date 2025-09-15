@@ -267,18 +267,50 @@ Professional trading interface with:
 
 </details>
 
-#### Learn Tab - Educational Hub
+#### Learn Tab - Guild of the Rose Education Hub
 <details>
-<summary>Click to view Educational Modules</summary>
+<summary>Click to view Enhanced Educational System</summary>
 
-Gamified learning experience with:
-- **Gate System Fundamentals**: 8 modules, 100% complete (2h duration)
-- **Understanding P(ruin)**: 6 modules, 75% complete (1.5h duration)
-- **Portfolio Construction**: 10 modules, 45% complete (3h duration)
-- **Trading Psychology**: 12 modules, 30% complete (4h duration)
-- **Technical Analysis**: 15 modules, 60% complete (5h duration)
-- **Risk Management**: 9 modules, 85% complete (2.5h duration)
-- **Featured Course**: "Understanding Risk Management" with Gary's DPI methodology
+**🌹 Guild of the Rose Integration**: Revolutionary education system combining Gary×Taleb trading principles with Guild of the Rose's proven self-improvement methodologies.
+
+**Core Educational Modules:**
+
+- **🧮 Decision Theory & Risk Calculators** (3h)
+  - Interactive decision trees for trade evaluation
+  - Certain Equivalent calculator with risk aversion adjustment
+  - P(ruin) scenario training and catastrophic outcome avoidance
+  - *Based on Guild's "Applied Decision Theory 5", "Decision Theory 6 (Ruin)", and "Certain Equivalent" workshops*
+
+- **⚖️ Antifragility & Barbell Strategy** (4h)
+  - Interactive barbell portfolio builder (90% safe / 10% aggressive)
+  - Mediocristan vs Extremistan domain classification
+  - Black swan event simulator with positive exposure optimization
+  - *Inspired by Guild's "Chaos, Risk, and Antifragility" workshop and Taleb methodology*
+
+- **🏛️ Progressive Quest System** (2h)
+  - Collaborative learning with "Babble & Prune" methodology
+  - Gate progression quests (G0-G12) with team challenges
+  - Structured skill development through iterative improvement
+  - *Based on Guild's "Quest Creation" and "Quest Planning" workshops*
+
+- **📜 Character Sheet & Skill Trees** (1.5h)
+  - RPG-style skill development across 5 categories (Risk, Strategy, Psychology, Technical, Meta)
+  - Energy management system with trading session optimization
+  - Achievement tracking and progression rewards
+  - *Influenced by Guild's "Level Up Session 2.0", "Metalearning", and "Soul Mapping" workshops*
+
+- **⏱️ Trading Time Management** (2.5h)
+  - Energy-aware session templates for different market conditions
+  - Productivity insights and cognitive pattern recognition
+  - "Exobrain" system for capturing and organizing trading insights
+  - *Based on Guild's "Contrarian Time Management" and "Creating an Exobrain" workshops*
+
+**Key Features:**
+- **Weekly Workshop Releases**: New educational content every Friday (synchronized with trading cycles)
+- **Cohort Learning**: 4-8 person groups for collaborative strategy development
+- **Gamified Progress**: Badges, achievements, skill points, and level progression
+- **Meta-Cognitive Development**: Learning how to learn trading more effectively
+- **Real-time Integration**: Connected to live trading metrics and gate progression
 
 </details>
 

@@ -27,6 +27,7 @@ import {
 import { PositionTable } from './components/PositionTable';
 import { AlertList } from './components/AlertList';
 import { RiskChart } from './components/RiskChart';
+import { EducationHub } from './components/education/EducationHub';
 
 // Mock data for demonstration
 const mockMetrics = {
@@ -591,93 +592,7 @@ const AppEnhancedFull: React.FC = () => {
         )}
 
         {activeTab === 'learn' && (
-          <div>
-            <h2 style={{ color: '#111827', marginBottom: '20px' }}>Causal Education Hub</h2>
-
-            {/* Featured Course */}
-            <div style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              padding: '30px',
-              borderRadius: '12px',
-              color: 'white',
-              marginBottom: '30px'
-            }}>
-              <h3 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Understanding Risk Management</h3>
-              <p style={{ margin: '0 0 20px 0', opacity: 0.9 }}>
-                Master the fundamentals of risk management with Gary's DPI methodology
-              </p>
-              <button style={{
-                padding: '12px 24px',
-                backgroundColor: 'white',
-                color: '#667eea',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}>
-                Continue Learning →
-              </button>
-            </div>
-
-            {/* Course Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '20px'
-            }}>
-              {[
-                { title: 'Gate System Fundamentals', emoji: '🚪', progress: 100, modules: 8, duration: '2h' },
-                { title: 'Understanding P(ruin)', emoji: '🎯', progress: 75, modules: 6, duration: '1.5h' },
-                { title: 'Portfolio Construction', emoji: '📊', progress: 45, modules: 10, duration: '3h' },
-                { title: 'Trading Psychology', emoji: '🧠', progress: 30, modules: 12, duration: '4h' },
-                { title: 'Technical Analysis', emoji: '📈', progress: 60, modules: 15, duration: '5h' },
-                { title: 'Risk Management', emoji: '🛡️', progress: 85, modules: 9, duration: '2.5h' }
-              ].map(course => (
-                <div key={course.title} style={{
-                  backgroundColor: 'white',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  ':hover': { transform: 'translateY(-2px)' }
-                }}>
-                  <div style={{
-                    padding: '20px',
-                    background: course.progress === 100
-                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                      : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    color: 'white'
-                  }}>
-                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>{course.emoji}</div>
-                    <h3 style={{ margin: 0, fontSize: '18px' }}>{course.title}</h3>
-                  </div>
-                  <div style={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                      <span style={{ color: '#6b7280', fontSize: '14px' }}>{course.modules} modules</span>
-                      <span style={{ color: '#6b7280', fontSize: '14px' }}>{course.duration}</span>
-                    </div>
-                    <div style={{
-                      backgroundColor: '#e5e7eb',
-                      height: '8px',
-                      borderRadius: '4px',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        backgroundColor: course.progress === 100 ? '#10b981' : '#3b82f6',
-                        height: '100%',
-                        width: `${course.progress}%`,
-                        transition: 'width 0.3s'
-                      }} />
-                    </div>
-                    <p style={{ margin: '10px 0 0 0', color: '#111827', fontSize: '14px', fontWeight: '600' }}>
-                      {course.progress}% Complete
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <EducationHub />
         )}
 
         {activeTab === 'progress' && (

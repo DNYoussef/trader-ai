@@ -182,6 +182,23 @@ npm run dev
 - **WebSocket Updates**: Sub-second latency for all metrics
 - **Mock Data Mode**: Development mode with simulated data
 
+### Guild of the Rose Education System
+**Location**: `src/dashboard/frontend/src/components/education/`
+
+**Core Components**:
+- **EducationHub.tsx**: Main education portal with module navigation
+- **DecisionTheory.tsx**: Interactive decision trees and risk calculators
+- **Antifragility.tsx**: Barbell strategy builder and black swan simulator
+- **QuestSystem.tsx**: Collaborative learning quests with gate progression
+- **CharacterSheet.tsx**: Skill trees and energy management system
+- **TimeManagement.tsx**: Trading session optimization and exobrain
+
+**Integration**:
+- Seamlessly integrated into AppEnhancedFull.tsx Learn tab
+- Real-time connection to trading metrics and gate progression
+- Weekly workshop releases synchronized with Friday trading cycles
+- Collaborative cohort system for group learning
+
 ## Project Structure
 
 ```
