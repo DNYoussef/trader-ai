@@ -295,16 +295,7 @@ Visual progression system showing:
 
 </details>
 
-### Enhanced UI with Mobile App Psychology
 
-The dashboard implements 6 phases of mobile app engagement psychology:
-
-1. **Smooth Onboarding** - Progressive disclosure of features
-2. **Irresistible Value Proposition** - Clear profit/risk visualization
-3. **Variable-Rate Reward Schedule** - Achievement notifications
-4. **Investment & Stored Value** - Portfolio growth tracking
-5. **Scalable Social Features** - Performance sharing (optional)
-6. **Progress & Advancement** - Gate progression visualization
 
 ### Real-Time Monitoring
 
