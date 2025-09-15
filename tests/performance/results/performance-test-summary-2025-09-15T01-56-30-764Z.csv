@@ -1,0 +1,8 @@
+Test Name,Type,Critical,Passed,Grade,Score,Duration,Error
+"system-health-validation","health","true","true","A+","100","1.23",""
+"load-performance-test","load","true","false","F","0","32197.70",""
+"integration-performance-test","integration","true","true","A+","100","6167.72",""
+"benchmark-performance-test","benchmark","true","true","A+","100","20616.62",""
+"resource-efficiency-test","resource","false","true","A+","100.2","600.78",""
+"concurrent-load-test","concurrency","false","true","A+","100","233.40",""
+"sustained-performance-test","sustained","false","true","A+","99.5","60360.27",""

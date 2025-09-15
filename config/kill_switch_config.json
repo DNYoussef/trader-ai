@@ -1,0 +1,140 @@
+{
+  "kill_switch": {
+    "enabled": true,
+    "response_time_target_ms": 500,
+    "heartbeat_timeout": 30,
+    "monitoring_active": true,
+
+    "hardware_auth": {
+      "enabled": true,
+      "require_multi_factor": false,
+      "allowed_methods": [
+        "master_key",
+        "emergency_override",
+        "yubikey",
+        "windows_hello",
+        "touch_id",
+        "face_recognition"
+      ],
+
+      "yubikey": {
+        "client_id": "${YUBIKEY_CLIENT_ID}",
+        "secret_key": "${YUBIKEY_SECRET_KEY}",
+        "timeout_seconds": 5
+      },
+
+      "biometric": {
+        "faces_directory": "config/faces",
+        "timeout_seconds": 5,
+        "confidence_threshold": 0.6
+      },
+
+      "master_keys": {
+        "default": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "admin": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "emergency": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+      },
+
+      "emergency_override_hash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+    },
+
+    "triggers": {
+      "loss_limits": {
+        "enabled": true,
+        "session_loss_percent": -5.0,
+        "session_loss_absolute": -200.0,
+        "drawdown_percent": -3.0,
+        "consecutive_loss_trades": 5,
+        "max_daily_loss": -100.0
+      },
+
+      "position_limits": {
+        "enabled": true,
+        "max_exposure_ratio": 0.95,
+        "max_single_position_ratio": 0.4,
+        "max_position_count": 10,
+        "max_leverage": 1.0
+      },
+
+      "api_failure": {
+        "enabled": true,
+        "response_timeout": 5000,
+        "connection_timeout": 30,
+        "consecutive_failures": 3,
+        "error_rate_threshold": 0.5
+      },
+
+      "network": {
+        "enabled": true,
+        "max_ping_ms": 2000,
+        "connectivity_check_interval": 30,
+        "max_connection_failures": 5
+      },
+
+      "system_health": {
+        "enabled": true,
+        "max_memory_usage_percent": 90,
+        "max_cpu_usage_percent": 95,
+        "min_disk_space_mb": 100
+      }
+    },
+
+    "audit": {
+      "enabled": true,
+      "storage_path": ".claude/.artifacts/audit",
+      "retain_days": 90,
+      "compress_old_logs": true,
+      "export_format": "csv",
+      "integrity_checks": true
+    },
+
+    "notifications": {
+      "enabled": true,
+      "email": {
+        "enabled": false,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "${EMAIL_USERNAME}",
+        "password": "${EMAIL_PASSWORD}",
+        "recipients": [
+          "trader@example.com",
+          "risk@example.com"
+        ]
+      },
+      "webhook": {
+        "enabled": false,
+        "url": "${WEBHOOK_URL}",
+        "timeout_seconds": 5
+      }
+    },
+
+    "testing": {
+      "test_mode": false,
+      "simulate_failures": false,
+      "test_triggers": [
+        "manual_panic",
+        "api_failure",
+        "loss_limit"
+      ]
+    }
+  },
+
+  "integration": {
+    "trading_engine": {
+      "stop_on_kill_switch": true,
+      "flatten_positions": true,
+      "cancel_pending_orders": true,
+      "disable_new_trades": true
+    },
+
+    "risk_management": {
+      "override_position_limits": false,
+      "emergency_mode_duration": 300,
+      "recovery_checks": [
+        "api_connectivity",
+        "account_equity",
+        "system_health"
+      ]
+    }
+  }
+}

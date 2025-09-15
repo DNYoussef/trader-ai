@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-09-14T17:29:38.083256+00:00",
+  "import_results": {
+    "alpaca_adapter": true,
+    "gate_manager": true,
+    "trading_engine": false
+  },
+  "test_results": {
+    "gate_manager": false,
+    "alpaca_adapter": false,
+    "trading_engine": false
+  },
+  "theater_risk": "CRITICAL",
+  "success_rate": 0.0,
+  "next_phase_ready": false
+}

@@ -1,0 +1,332 @@
+{
+  "project": "Trader AI - Robust Dual-Strategy Trading System",
+  "version": "3.0.0",
+  "goals": [
+    "Build resilient automated trading system with dual strategies",
+    "Implement both mean reversion and momentum for diversification",
+    "Start with $1000 minimum, scale through 5 capability gates",
+    "Achieve 15-20% annual returns with Sharpe >0.75",
+    "Create robust operational infrastructure with redundancy"
+  ],
+  "constraints": {
+    "initial_capital": 1000,
+    "regulatory": "Swing trading only until $25k (PDT rules)",
+    "technical": "Simple, reliable, configurable",
+    "risk": "Max 2 concurrent positions, 15% max drawdown",
+    "validation": "100+ paper trades with >45% win rate before live"
+  },
+  "architecture": {
+    "frontend": {
+      "framework": "Flask + WebSocket for real-time",
+      "ui": "Bootstrap 5 + Chart.js",
+      "updates": "Server-sent events for live data",
+      "mobile": "Responsive design for monitoring"
+    },
+    "backend": {
+      "language": "Python 3.11+",
+      "database": "SQLite with WAL mode for concurrency",
+      "broker": "Alpaca API with retry logic",
+      "indicators": "TA-Lib + custom implementations",
+      "config": "YAML configuration files"
+    },
+    "infrastructure": {
+      "deployment": "Systemd service with auto-restart",
+      "monitoring": "Health checks every 60s",
+      "logging": "Rotating logs with 30-day retention",
+      "backup": "Hourly database snapshots"
+    }
+  },
+  "strategies": {
+    "mean_reversion": {
+      "indicators": ["RSI(14)", "Bollinger Bands(20,2)", "Volume"],
+      "entry_conditions": [
+        "RSI < 30 or RSI > 70",
+        "Price outside Bollinger Bands",
+        "Volume > 1.5x average"
+      ],
+      "exit_conditions": [
+        "RSI crosses 50",
+        "Price returns to middle band",
+        "Stop loss at 2%"
+      ],
+      "allocation": "40% of trading capital"
+    },
+    "momentum": {
+      "indicators": ["MACD(12,26,9)", "SMA(20,50)", "ADX"],
+      "entry_conditions": [
+        "MACD crossover",
+        "Price > SMA(20) > SMA(50)",
+        "ADX > 25 (trending)"
+      ],
+      "exit_conditions": [
+        "MACD divergence",
+        "Price crosses below SMA(20)",
+        "Stop loss at 3%"
+      ],
+      "allocation": "40% of trading capital"
+    },
+    "reserve": {
+      "allocation": "20% for opportunities",
+      "conditions": "High conviction setups only"
+    }
+  },
+  "risk_management": {
+    "position_sizing": {
+      "method": "Volatility-adjusted Kelly",
+      "base_size": "$200",
+      "max_size": "20% of NAV",
+      "volatility_scalar": "1/ATR(14)"
+    },
+    "stop_losses": {
+      "initial": "2% for mean reversion, 3% for momentum",
+      "trailing": "Activate at 2% profit",
+      "time_based": "Exit after 10 days if flat"
+    },
+    "portfolio_limits": {
+      "max_positions": 2,
+      "max_correlation": 0.7,
+      "sector_concentration": "50% max",
+      "daily_loss_limit": "5% of NAV"
+    }
+  },
+  "operational_resilience": {
+    "process_management": {
+      "supervisor": "systemd with restart policy",
+      "health_check": "HTTP endpoint on port 8080",
+      "heartbeat": "Every 60 seconds to monitoring",
+      "crash_recovery": "Auto-restart with 30s delay"
+    },
+    "data_quality": {
+      "freshness_check": "Data must be <5 minutes old",
+      "validation": "Price sanity checks (±10% daily)",
+      "fallback": "Cache last known good values",
+      "reconciliation": "Compare multiple sources"
+    },
+    "error_handling": {
+      "api_failures": "Exponential backoff retry",
+      "network_issues": "Circuit breaker pattern",
+      "data_gaps": "Forward-fill with warning",
+      "order_failures": "Alert and manual intervention"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Core Engine",
+      "duration_weeks": 2,
+      "goals": [
+        "Dual strategy implementation",
+        "Configuration system",
+        "Paper trading connection",
+        "Process monitoring",
+        "Basic logging"
+      ],
+      "success_criteria": {
+        "strategies_coded": true,
+        "config_external": true,
+        "paper_trades_executing": true,
+        "auto_restart_working": true
+      }
+    },
+    {
+      "id": "phase-2",
+      "name": "Validation",
+      "duration_weeks": 2,
+      "goals": [
+        "Backtesting both strategies",
+        "A/B testing framework",
+        "50+ paper trades",
+        "Performance analysis",
+        "Parameter tuning"
+      ],
+      "success_criteria": {
+        "backtest_sharpe": ">0.5",
+        "paper_win_rate": ">40%",
+        "strategies_compared": true,
+        "parameters_optimized": true
+      }
+    },
+    {
+      "id": "phase-3",
+      "name": "Interface",
+      "duration_weeks": 2,
+      "goals": [
+        "Web dashboard",
+        "Real-time updates",
+        "Performance charts",
+        "Kill switch UI",
+        "Mobile responsive"
+      ],
+      "success_criteria": {
+        "dashboard_live": true,
+        "websocket_working": true,
+        "charts_updating": true,
+        "kill_switch_tested": true
+      }
+    },
+    {
+      "id": "phase-4",
+      "name": "Production",
+      "duration_weeks": 2,
+      "goals": [
+        "100+ paper trades validated",
+        "Live trading activation",
+        "Alert system",
+        "Profit siphon",
+        "Documentation"
+      ],
+      "success_criteria": {
+        "paper_sharpe": ">0.75",
+        "live_system_stable": true,
+        "alerts_working": true,
+        "monthly_siphon_tested": true
+      }
+    }
+  ],
+  "config_schema": {
+    "trading": {
+      "strategies": {
+        "mean_reversion": {
+          "enabled": true,
+          "rsi_period": 14,
+          "rsi_oversold": 30,
+          "rsi_overbought": 70,
+          "bb_period": 20,
+          "bb_std": 2,
+          "volume_multiplier": 1.5,
+          "stop_loss": 0.02,
+          "take_profit": 0.03
+        },
+        "momentum": {
+          "enabled": true,
+          "macd_fast": 12,
+          "macd_slow": 26,
+          "macd_signal": 9,
+          "sma_fast": 20,
+          "sma_slow": 50,
+          "adx_threshold": 25,
+          "stop_loss": 0.03,
+          "take_profit": 0.05
+        }
+      },
+      "risk": {
+        "max_positions": 2,
+        "position_size_usd": 200,
+        "max_position_pct": 0.20,
+        "daily_loss_limit_pct": 0.05,
+        "cash_floor_pct": 0.70
+      },
+      "time_filters": {
+        "avoid_first_minutes": 30,
+        "avoid_last_minutes": 30,
+        "trade_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "avoid_holidays": true
+      }
+    },
+    "operational": {
+      "data_freshness_seconds": 300,
+      "health_check_interval": 60,
+      "log_retention_days": 30,
+      "backup_interval_hours": 1
+    }
+  },
+  "monitoring_metrics": {
+    "system_health": [
+      "process_uptime",
+      "last_heartbeat",
+      "api_connectivity",
+      "data_freshness"
+    ],
+    "trading_performance": [
+      "total_pnl",
+      "win_rate",
+      "sharpe_ratio",
+      "max_drawdown",
+      "trades_today"
+    ],
+    "risk_metrics": [
+      "current_positions",
+      "daily_pnl",
+      "var_95",
+      "correlation_matrix"
+    ],
+    "strategy_performance": [
+      "mean_reversion_pnl",
+      "momentum_pnl",
+      "strategy_correlation",
+      "parameter_drift"
+    ]
+  },
+  "alert_conditions": {
+    "critical": [
+      "process_down",
+      "api_disconnected",
+      "daily_loss_exceeded",
+      "position_limit_breached"
+    ],
+    "warning": [
+      "data_stale",
+      "high_slippage",
+      "strategy_underperformance",
+      "low_win_rate"
+    ],
+    "info": [
+      "trade_executed",
+      "daily_summary",
+      "weekly_performance",
+      "monthly_siphon"
+    ]
+  },
+  "testing_requirements": {
+    "unit_tests": {
+      "coverage_target": "80%",
+      "critical_paths": [
+        "signal_generation",
+        "risk_management",
+        "order_execution",
+        "kill_switch"
+      ]
+    },
+    "integration_tests": {
+      "api_connectivity": true,
+      "data_pipeline": true,
+      "strategy_execution": true,
+      "alert_system": true
+    },
+    "paper_trading_validation": {
+      "minimum_trades": 100,
+      "minimum_duration_days": 30,
+      "required_win_rate": 0.45,
+      "required_sharpe": 0.75
+    }
+  },
+  "documentation": {
+    "user_manual": {
+      "sections": [
+        "installation",
+        "configuration",
+        "strategy_overview",
+        "risk_management",
+        "troubleshooting"
+      ]
+    },
+    "operational_runbook": {
+      "procedures": [
+        "daily_startup",
+        "performance_review",
+        "parameter_adjustment",
+        "incident_response",
+        "disaster_recovery"
+      ]
+    },
+    "api_documentation": {
+      "endpoints": [
+        "health_check",
+        "positions",
+        "performance",
+        "kill_switch",
+        "configuration"
+      ]
+    }
+  }
+}

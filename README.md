@@ -1,0 +1,1 @@
+# Gary×Taleb Trading System

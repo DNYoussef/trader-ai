@@ -1,0 +1,6 @@
+Suite,Passed,Duration,Operations,Success Rate,Avg Execution Time,Peak Memory MB,Compliance,Errors
+cpu-intensive,true,102.10,3,100.0,33.82,51.1,100.0,0
+memory-operations,true,60.98,3,100.0,20.13,124.4,100.0,0
+io-operations,true,75.51,2,100.0,37.53,130.3,100.0,0
+concurrent-operations,true,259.92,2,100.0,129.74,76.2,100.0,0
+real-world-simulation,true,17.45,2,100.0,8.52,76.7,100.0,0

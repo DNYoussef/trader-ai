@@ -1,0 +1,50 @@
+{
+  "name": "trader-ai-performance-testing",
+  "version": "1.0.0",
+  "description": "Real executable performance testing framework for trader-ai CI/CD system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "build:watch": "tsc --build --watch",
+    "clean": "rimraf dist compiled",
+    "compile": "npm run clean && npm run build && npm run copy-compiled",
+    "copy-compiled": "cpx \"dist/**/*\" compiled/",
+    "performance:test": "node tests/performance/real_performance_tests.js",
+    "performance:benchmark": "node src/performance/benchmarker/compiled/performance_benchmarker.js",
+    "performance:load": "node src/performance/benchmarker/load_test_runner.js",
+    "performance:integration": "node src/performance/benchmarker/real_integration_tests.js",
+    "test": "npm run performance:test",
+    "test:all": "npm run performance:test && npm run performance:load && npm run performance:integration",
+    "validate": "npm run test:all",
+    "prestart": "npm run compile",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^5.0.0",
+    "cpx": "^1.5.0",
+    "ts-node": "^10.9.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.0",
+    "node-fetch": "^3.3.0",
+    "ws": "^8.14.0",
+    "systeminformation": "^5.21.0",
+    "pidusage": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "performance",
+    "testing",
+    "benchmarking",
+    "ci-cd",
+    "real-time",
+    "load-testing"
+  ],
+  "author": "Performance Testing Framework",
+  "license": "MIT"
+}

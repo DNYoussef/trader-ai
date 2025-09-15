@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Bash(npm install)",
+      "Bash(pip install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(powershell:*)",
+      "Bash(node:*)",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

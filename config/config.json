@@ -1,0 +1,9 @@
+{
+  "mode": "paper",
+  "broker": "alpaca",
+  "initial_capital": 200,
+  "api_key": "",
+  "secret_key": "",
+  "audit_enabled": true,
+  "rebalance_frequency_minutes": 5
+}

@@ -1,0 +1,7 @@
+{"event": "engine_initialized", "mode": "paper", "broker": "alpaca", "gate": "G0", "timestamp": "2025-09-14T12:13:14.743258"}
+{"event": "initialization_error", "error": "asyncio.run() cannot be called from a running event loop", "timestamp": "2025-09-14T14:15:07.122340"}
+{"event": "production_flow_test_failed", "error": "Failed to initialize trading engine", "timestamp": "2025-09-14T14:15:07.127355"}
+{"event": "initialization_error", "error": "asyncio.run() cannot be called from a running event loop", "timestamp": "2025-09-14T14:20:35.057549"}
+{"event": "production_flow_test_failed", "error": "Failed to initialize trading engine", "timestamp": "2025-09-14T14:20:35.057549"}
+{"event": "initialization_error", "error": "PRODUCTION ERROR: API credentials required when alpaca-py is available", "timestamp": "2025-09-14T14:23:21.296118"}
+{"event": "production_flow_test_failed", "error": "Failed to initialize trading engine", "timestamp": "2025-09-14T14:23:21.297154"}

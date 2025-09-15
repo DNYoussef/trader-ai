@@ -1,0 +1,71 @@
+{
+  "export_timestamp": "2025-09-14T23:46:28.303647",
+  "ng_signals": [
+    {
+      "timestamp": "2025-09-14T23:46:28.301652",
+      "ng_score": 0.05,
+      "position_multiplier": 1.05,
+      "market_price": 100.0,
+      "consensus_forecast": 105.0,
+      "gary_estimate": 110.0,
+      "signal_strength": "strong"
+    },
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "ng_score": 0.03,
+      "position_multiplier": 1.03,
+      "market_price": 150.0,
+      "consensus_forecast": 152.0,
+      "gary_estimate": 155.0,
+      "signal_strength": "moderate"
+    }
+  ],
+  "brier_history": [
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "brier_score": 0.25,
+      "prediction_count": 10,
+      "recent_accuracy": 0.75,
+      "risk_adjustment": 0.75,
+      "alert_level": "normal"
+    },
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "brier_score": 0.3,
+      "prediction_count": 12,
+      "recent_accuracy": 0.7,
+      "risk_adjustment": 0.7,
+      "alert_level": "warning"
+    }
+  ],
+  "dpi_history": [
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "base_dpi": 0.6,
+      "wealth_flow_score": 0.3,
+      "enhanced_dpi": 0.78,
+      "regime_detected": "bullish",
+      "confidence": 0.85
+    }
+  ],
+  "alerts": [
+    {
+      "timestamp": "2025-09-14T23:46:28.301652",
+      "type": "low_ng_frequency",
+      "message": "Low NG signal frequency: 1 in last hour",
+      "severity": "medium"
+    },
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "type": "low_ng_frequency",
+      "message": "Low NG signal frequency: 2 in last hour",
+      "severity": "medium"
+    },
+    {
+      "timestamp": "2025-09-14T23:46:28.302650",
+      "type": "brier_warning",
+      "message": "Warning Brier score: 0.3000",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,0 +1,1063 @@
+{
+  "summary": {
+    "totalSuites": 5,
+    "passedSuites": 5,
+    "successRate": 100,
+    "duration": 20611.89,
+    "timestamp": "2025-09-15T01:32:08.756Z",
+    "environment": {
+      "nodeVersion": "v20.17.0",
+      "platform": "win32",
+      "arch": "x64",
+      "cpuCores": 12,
+      "totalMemory": 17063505920,
+      "freeMemory": 2905534464,
+      "uptime": 308185.406
+    }
+  },
+  "suites": {
+    "cpu-intensive": {
+      "name": "cpu-intensive",
+      "duration": 94.45260000000053,
+      "operations": [
+        {
+          "name": "prime-calculation",
+          "executionTime": 6.593300000000454,
+          "memoryDelta": 1814528,
+          "cpuDelta": 0,
+          "result": 5133,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899918205,
+              "memory": {
+                "rss": 41119744,
+                "heapUsed": 4531568,
+                "heapTotal": 4939776,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 93000,
+                "system": 31000,
+                "usage": 0.10333333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 3014275072,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.3349604346725,
+                "uptime": 10.0998614,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10100.6858
+              }
+            },
+            "end": {
+              "timestamp": 1757899918211,
+              "memory": {
+                "rss": 42934272,
+                "heapUsed": 4281936,
+                "heapTotal": 6512640,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 93000,
+                "system": 31000,
+                "usage": 0.10333333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 3005480960,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.38649797942578,
+                "uptime": 10.1064608,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10107.3546
+              }
+            }
+          }
+        },
+        {
+          "name": "mathematical-operations",
+          "executionTime": 36.089500000000044,
+          "memoryDelta": 57344,
+          "cpuDelta": 0.026666666666666672,
+          "result": 666666166.6620736,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899918212,
+              "memory": {
+                "rss": 42934272,
+                "heapUsed": 4289680,
+                "heapTotal": 6512640,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 93000,
+                "system": 31000,
+                "usage": 0.10333333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 3004141568,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.39434743314462,
+                "uptime": 10.1067831,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10107.6194
+              }
+            },
+            "end": {
+              "timestamp": 1757899918248,
+              "memory": {
+                "rss": 42991616,
+                "heapUsed": 4907568,
+                "heapTotal": 6512640,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 125000,
+                "system": 31000,
+                "usage": 0.13,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2988724224,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.48470016647083,
+                "uptime": 10.1428879,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10143.6918
+              }
+            }
+          }
+        },
+        {
+          "name": "sorting-algorithm",
+          "executionTime": 50.96340000000055,
+          "memoryDelta": 11255808,
+          "cpuDelta": 0.05083333333333334,
+          "result": 100000,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899918248,
+              "memory": {
+                "rss": 42991616,
+                "heapUsed": 4913712,
+                "heapTotal": 6512640,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 125000,
+                "system": 31000,
+                "usage": 0.13,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2988724224,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.48470016647083,
+                "uptime": 10.1430747,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10143.8441
+              }
+            },
+            "end": {
+              "timestamp": 1757899918299,
+              "memory": {
+                "rss": 54247424,
+                "heapUsed": 8813648,
+                "heapTotal": 17412096,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 171000,
+                "system": 46000,
+                "usage": 0.18083333333333335,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 3008417792,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.36928679191386,
+                "uptime": 10.1940599,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 10194.8607
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "totalOperations": 3,
+        "successfulOperations": 3,
+        "failedOperations": 0,
+        "totalExecutionTime": 93.64620000000104,
+        "averageExecutionTime": 31.215400000000347,
+        "peakMemoryUsageMB": 51.734375,
+        "successRate": 100
+      },
+      "compliance": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "93.6ms (limit: 5000ms)",
+          "memoryUsage": "51.7MB (limit: 100MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "passed": true,
+      "timestamp": 1757899918299
+    },
+    "memory-operations": {
+      "name": "memory-operations",
+      "duration": 60.915499999999156,
+      "operations": [
+        {
+          "name": "large-array-creation",
+          "executionTime": 4.154099999999744,
+          "memoryDelta": 4689920,
+          "cpuDelta": 0,
+          "result": 100,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899920306,
+              "memory": {
+                "rss": 56193024,
+                "heapUsed": 8847440,
+                "heapTotal": 17412096,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 203000,
+                "system": 46000,
+                "usage": 0.20750000000000002,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2997858304,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.4311702527308,
+                "uptime": 12.2010643,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12201.8911
+              }
+            },
+            "end": {
+              "timestamp": 1757899920310,
+              "memory": {
+                "rss": 60882944,
+                "heapUsed": 17291360,
+                "heapTotal": 28946432,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 203000,
+                "system": 46000,
+                "usage": 0.20750000000000002,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2981773312,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.52543571069361,
+                "uptime": 12.2052234,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12206.0357
+              }
+            }
+          }
+        },
+        {
+          "name": "object-allocation",
+          "executionTime": 55.17449999999917,
+          "memoryDelta": 58220544,
+          "cpuDelta": 0.1433333333333333,
+          "result": 50000,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899920310,
+              "memory": {
+                "rss": 60891136,
+                "heapUsed": 17297368,
+                "heapTotal": 28946432,
+                "external": 1597563,
+                "arrayBuffers": 10555
+              },
+              "cpu": {
+                "user": 203000,
+                "system": 46000,
+                "usage": 0.20750000000000002,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2981773312,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.52543571069361,
+                "uptime": 12.2054094,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12206.1858
+              }
+            },
+            "end": {
+              "timestamp": 1757899920365,
+              "memory": {
+                "rss": 119111680,
+                "heapUsed": 49754960,
+                "heapTotal": 84520960,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2896822272,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.02328791292148,
+                "uptime": 12.2606165,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12261.4177
+              }
+            }
+          }
+        },
+        {
+          "name": "string-manipulation",
+          "executionTime": 0.9426000000003114,
+          "memoryDelta": 77824,
+          "cpuDelta": 0,
+          "result": 618890,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899920366,
+              "memory": {
+                "rss": 119111680,
+                "heapUsed": 49761144,
+                "heapTotal": 84520960,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2896683008,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.02410406407267,
+                "uptime": 12.2607916,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12261.5564
+              }
+            },
+            "end": {
+              "timestamp": 1757899920366,
+              "memory": {
+                "rss": 119189504,
+                "heapUsed": 51174288,
+                "heapTotal": 84783104,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2896056320,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.02777674425303,
+                "uptime": 12.2617411,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 12262.5381
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "totalOperations": 3,
+        "successfulOperations": 3,
+        "failedOperations": 0,
+        "totalExecutionTime": 60.271199999999226,
+        "averageExecutionTime": 20.090399999999743,
+        "peakMemoryUsageMB": 113.66796875,
+        "successRate": 100
+      },
+      "compliance": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "60.3ms (limit: 3000ms)",
+          "memoryUsage": "113.7MB (limit: 200MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "passed": true,
+      "timestamp": 1757899920367
+    },
+    "io-operations": {
+      "name": "io-operations",
+      "duration": 77.11470000000008,
+      "operations": [
+        {
+          "name": "file-write-read",
+          "executionTime": 4.148800000000847,
+          "memoryDelta": 2142208,
+          "cpuDelta": 0,
+          "result": 1048576,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899922371,
+              "memory": {
+                "rss": 119353344,
+                "heapUsed": 51203368,
+                "heapTotal": 84783104,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2929799168,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.83002812120804,
+                "uptime": 14.2667501,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 14267.6164
+              }
+            },
+            "end": {
+              "timestamp": 1757899922376,
+              "memory": {
+                "rss": 121495552,
+                "heapUsed": 53312696,
+                "heapTotal": 86896640,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2931838976,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.81807390728763,
+                "uptime": 14.2709031,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 14271.7009
+              }
+            }
+          }
+        },
+        {
+          "name": "json-serialization",
+          "executionTime": 72.50640000000021,
+          "memoryDelta": 3301376,
+          "cpuDelta": 0.065,
+          "result": 10000,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899922376,
+              "memory": {
+                "rss": 121495552,
+                "heapUsed": 53318704,
+                "heapTotal": 86896640,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 343000,
+                "system": 78000,
+                "usage": 0.35083333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2931838976,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.81807390728763,
+                "uptime": 14.271081,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 14271.8867
+              }
+            },
+            "end": {
+              "timestamp": 1757899922448,
+              "memory": {
+                "rss": 124796928,
+                "heapUsed": 60963864,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2920603648,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.88391810163243,
+                "uptime": 14.3436045,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 14344.4003
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "totalOperations": 2,
+        "successfulOperations": 2,
+        "failedOperations": 0,
+        "totalExecutionTime": 76.65520000000106,
+        "averageExecutionTime": 38.32760000000053,
+        "peakMemoryUsageMB": 119.015625,
+        "successRate": 100
+      },
+      "compliance": {
+        "executionTime": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "76.7ms (limit: 10000ms)",
+          "memoryUsage": "119.0MB (limit: undefinedMB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "passed": true,
+      "timestamp": 1757899922449
+    },
+    "concurrent-operations": {
+      "name": "concurrent-operations",
+      "duration": 255.261199999999,
+      "operations": [
+        {
+          "name": "concurrent-promises",
+          "executionTime": 107.71660000000156,
+          "memoryDelta": 20480,
+          "cpuDelta": 0,
+          "result": 328350,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899924455,
+              "memory": {
+                "rss": 124801024,
+                "heapUsed": 60992272,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2921938944,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.87609265235922,
+                "uptime": 16.3501631,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 16351.2696
+              }
+            },
+            "end": {
+              "timestamp": 1757899924563,
+              "memory": {
+                "rss": 124821504,
+                "heapUsed": 61131760,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2921938944,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.87609265235922,
+                "uptime": 16.4578887,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 16458.721
+              }
+            }
+          }
+        },
+        {
+          "name": "worker-simulation",
+          "executionTime": 147.0747999999985,
+          "memoryDelta": 12288,
+          "cpuDelta": 0,
+          "result": 37946.8114947104,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899924563,
+              "memory": {
+                "rss": 124821504,
+                "heapUsed": 61137768,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2921938944,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.87609265235922,
+                "uptime": 16.4581806,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 16459.0257
+              }
+            },
+            "end": {
+              "timestamp": 1757899924710,
+              "memory": {
+                "rss": 124833792,
+                "heapUsed": 61476112,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2913665024,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.92458163251834,
+                "uptime": 16.6051924,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 16605.9942
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "totalOperations": 2,
+        "successfulOperations": 2,
+        "failedOperations": 0,
+        "totalExecutionTime": 254.79140000000007,
+        "averageExecutionTime": 127.39570000000003,
+        "peakMemoryUsageMB": 119.05078125,
+        "successRate": 100
+      },
+      "compliance": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "254.8ms (limit: 8000ms)",
+          "memoryUsage": "119.1MB (limit: 150MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "passed": true,
+      "timestamp": 1757899924710
+    },
+    "real-world-simulation": {
+      "name": "real-world-simulation",
+      "duration": 16.054299999999785,
+      "operations": [
+        {
+          "name": "data-processing-pipeline",
+          "executionTime": 12.563700000002427,
+          "memoryDelta": 1892352,
+          "cpuDelta": 0.012500000000000011,
+          "result": 3,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899926726,
+              "memory": {
+                "rss": 124837888,
+                "heapUsed": 61504256,
+                "heapTotal": 88539136,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 406000,
+                "system": 93000,
+                "usage": 0.41583333333333333,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2907496448,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 82.96073232762707,
+                "uptime": 18.6207677,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 18621.576
+              }
+            },
+            "end": {
+              "timestamp": 1757899926738,
+              "memory": {
+                "rss": 126730240,
+                "heapUsed": 68051768,
+                "heapTotal": 89063424,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 421000,
+                "system": 93000,
+                "usage": 0.42833333333333334,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2882912256,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.1048070102583,
+                "uptime": 18.6333341,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 18634.1678
+              }
+            }
+          }
+        },
+        {
+          "name": "cache-simulation",
+          "executionTime": 3.0408000000024913,
+          "memoryDelta": 1527808,
+          "cpuDelta": 0,
+          "result": 0.4811,
+          "success": true,
+          "metrics": {
+            "start": {
+              "timestamp": 1757899926738,
+              "memory": {
+                "rss": 126734336,
+                "heapUsed": 68057792,
+                "heapTotal": 89063424,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 421000,
+                "system": 93000,
+                "usage": 0.42833333333333334,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2882842624,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.10521508583389,
+                "uptime": 18.6335459,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 18634.3226
+              }
+            },
+            "end": {
+              "timestamp": 1757899926741,
+              "memory": {
+                "rss": 128262144,
+                "heapUsed": 69272256,
+                "heapTotal": 89063424,
+                "external": 1595197,
+                "arrayBuffers": 10515
+              },
+              "cpu": {
+                "user": 421000,
+                "system": 93000,
+                "usage": 0.42833333333333334,
+                "loadAverage": 0
+              },
+              "system": {
+                "freeMem": 2881114112,
+                "totalMem": 17063505920,
+                "memoryUsagePercent": 83.11534496188693,
+                "uptime": 18.6365967,
+                "pid": 24300
+              },
+              "performance": {
+                "timestamp": 18637.4034
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "totalOperations": 2,
+        "successfulOperations": 2,
+        "failedOperations": 0,
+        "totalExecutionTime": 15.604500000004919,
+        "averageExecutionTime": 7.802250000002459,
+        "peakMemoryUsageMB": 122.3203125,
+        "successRate": 100
+      },
+      "compliance": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "15.6ms (limit: 15000ms)",
+          "memoryUsage": "122.3MB (limit: 300MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "passed": true,
+      "timestamp": 1757899926742
+    }
+  },
+  "performance": {
+    "memory": {
+      "min": 51.75,
+      "max": 122.34765625,
+      "average": 105.37890625,
+      "growth": 136.4205917874396,
+      "variance": 27786496.049765527,
+      "leakDetected": false
+    },
+    "cpu": {
+      "min": 0.18083333333333335,
+      "max": 0.42833333333333334,
+      "average": 0.361,
+      "variance": 0.08793368713600795,
+      "efficiency": 99.639,
+      "spikes": 0
+    },
+    "system": {
+      "systemMemoryUsage": {
+        "average": 82.82836461312635,
+        "peak": 83.02182364173845
+      },
+      "loadAverage": {
+        "average": 0,
+        "peak": 0
+      },
+      "stability": 86.06278513154923
+    },
+    "overhead": {
+      "memory": 169.6971817609245,
+      "cpu": 297.43119266055044,
+      "overall": 233.5641872107375
+    },
+    "efficiency": {
+      "operationsPerSecond": 23.953601873171362,
+      "successRate": 100,
+      "efficiency": 23.953601873171362,
+      "resourceEfficiency": 94.5505546875
+    },
+    "trends": {
+      "memory": {
+        "trend": "increasing",
+        "stability": false
+      },
+      "cpu": {
+        "trend": "increasing",
+        "stability": true
+      }
+    }
+  },
+  "systemMetrics": {
+    "totalSamples": 10,
+    "samplingRate": 0.4851568117054599,
+    "baseline": {
+      "memory": {
+        "rss": 40971059.2,
+        "heapUsed": 4475752
+      },
+      "cpu": {
+        "usage": 0.09083333333333334
+      }
+    }
+  },
+  "compliance": {
+    "overall": 1,
+    "suiteCompliance": {
+      "cpu-intensive": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "93.6ms (limit: 5000ms)",
+          "memoryUsage": "51.7MB (limit: 100MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "memory-operations": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "60.3ms (limit: 3000ms)",
+          "memoryUsage": "113.7MB (limit: 200MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "io-operations": {
+        "executionTime": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "76.7ms (limit: 10000ms)",
+          "memoryUsage": "119.0MB (limit: undefinedMB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "concurrent-operations": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "254.8ms (limit: 8000ms)",
+          "memoryUsage": "119.1MB (limit: 150MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      },
+      "real-world-simulation": {
+        "executionTime": true,
+        "memoryUsage": true,
+        "errorRate": true,
+        "successRate": true,
+        "overall": 1,
+        "details": {
+          "executionTime": "15.6ms (limit: 15000ms)",
+          "memoryUsage": "122.3MB (limit: 300MB)",
+          "errors": "0 errors",
+          "successRate": "100.0%"
+        }
+      }
+    },
+    "passRate": 100
+  },
+  "errors": [],
+  "warnings": [],
+  "assessment": {
+    "grade": "A+",
+    "status": "EXCELLENT",
+    "recommendation": "System demonstrates excellent performance characteristics",
+    "productionReady": false,
+    "overallScore": 100
+  },
+  "recommendations": [
+    {
+      "category": "System Overhead",
+      "priority": "Medium",
+      "issue": "High system overhead: 233.6%",
+      "recommendation": "Reduce system overhead through algorithmic optimizations"
+    }
+  ]
+}

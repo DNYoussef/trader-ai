@@ -1,0 +1,143 @@
+{
+  "current_gate": "G0",
+  "current_capital": 0.0,
+  "graduation_metrics": {
+    "consecutive_compliant_days": 0,
+    "total_violations_30d": 10,
+    "avg_cash_utilization_30d": 0.0,
+    "max_drawdown_30d": 0.0,
+    "sharpe_ratio_30d": null,
+    "performance_score": 0.0,
+    "last_violation_date": "2025-09-15T10:32:19.462712"
+  },
+  "violation_history": [
+    {
+      "timestamp": "2025-09-15T10:29:46.035362",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:29:46.036358",
+      "gate_level": "G0",
+      "violation_type": "cash_floor_violation",
+      "message": "Trade would violate 50% cash floor",
+      "details": {
+        "post_trade_cash": -4200.0,
+        "required_cash": 100.0,
+        "cash_floor_pct": 0.5
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:29:46.036358",
+      "gate_level": "G0",
+      "violation_type": "position_size_exceeded",
+      "message": "Trade would exceed 25% position size limit",
+      "details": {
+        "symbol": "SPY",
+        "current_position_value": 0,
+        "new_position_value": 4400.0,
+        "max_position_value": 50.0
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:29:46.045335",
+      "gate_level": "G0",
+      "violation_type": "cash_floor_violation",
+      "message": "Trade would violate 50% cash floor",
+      "details": {
+        "post_trade_cash": -175.0,
+        "required_cash": 100.0,
+        "cash_floor_pct": 0.5
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:29:46.046332",
+      "gate_level": "G0",
+      "violation_type": "position_size_exceeded",
+      "message": "Trade would exceed 25% position size limit",
+      "details": {
+        "symbol": "ULTY",
+        "current_position_value": 0,
+        "new_position_value": 275.0,
+        "max_position_value": 50.0
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:32:19.452521",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:32:19.452521",
+      "gate_level": "G0",
+      "violation_type": "cash_floor_violation",
+      "message": "Trade would violate 50% cash floor",
+      "details": {
+        "post_trade_cash": -4200.0,
+        "required_cash": 100.0,
+        "cash_floor_pct": 0.5
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:32:19.453518",
+      "gate_level": "G0",
+      "violation_type": "position_size_exceeded",
+      "message": "Trade would exceed 25% position size limit",
+      "details": {
+        "symbol": "SPY",
+        "current_position_value": 0,
+        "new_position_value": 4400.0,
+        "max_position_value": 50.0
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:32:19.461743",
+      "gate_level": "G0",
+      "violation_type": "cash_floor_violation",
+      "message": "Trade would violate 50% cash floor",
+      "details": {
+        "post_trade_cash": -175.0,
+        "required_cash": 100.0,
+        "cash_floor_pct": 0.5
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2025-09-15T10:32:19.462712",
+      "gate_level": "G0",
+      "violation_type": "position_size_exceeded",
+      "message": "Trade would exceed 25% position size limit",
+      "details": {
+        "symbol": "ULTY",
+        "current_position_value": 0,
+        "new_position_value": 275.0,
+        "max_position_value": 50.0
+      },
+      "resolved": false
+    }
+  ]
+}

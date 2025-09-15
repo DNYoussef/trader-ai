@@ -1,0 +1,98 @@
+{
+  "broker": {
+    "provider": "alpaca",
+    "api_key": "${ALPACA_API_KEY}",
+    "api_secret": "${ALPACA_API_SECRET}",
+    "base_url": "https://paper-api.alpaca.markets",
+    "paper_trading": true,
+    "timeout_seconds": 30,
+    "retry_attempts": 3
+  },
+  "risk": {
+    "max_position_size": 0.25,
+    "max_kelly": 0.25,
+    "cash_floor": 0.5,
+    "loss_limit_daily": 0.05,
+    "loss_limit_weekly": 0.10,
+    "max_drawdown": 0.15,
+    "var_confidence": 0.95,
+    "evt_threshold": 0.95
+  },
+  "kill_switch": {
+    "response_time_target_ms": 500,
+    "triggers": {
+      "api_failure": true,
+      "loss_limit": true,
+      "position_limit": true,
+      "heartbeat_timeout": true,
+      "network_failure": true,
+      "unauthorized_access": true
+    },
+    "thresholds": {
+      "api_failure_count": 3,
+      "heartbeat_timeout_seconds": 60,
+      "position_limit_ratio": 1.5,
+      "loss_limit_ratio": 1.0
+    },
+    "hardware_auth": {
+      "enabled": false,
+      "yubikey": false,
+      "biometric": false,
+      "master_key_hash": ""
+    }
+  },
+  "siphon": {
+    "schedule": {
+      "day": "friday",
+      "time": "18:00",
+      "timezone": "US/Eastern",
+      "holiday_behavior": "defer_to_next_trading_day"
+    },
+    "profit_split": 0.5,
+    "minimum_profit": 100,
+    "maximum_withdrawal": 10000,
+    "safety_buffer": 50,
+    "base_capital": 200,
+    "auto_execute": false
+  },
+  "kelly": {
+    "max_kelly_fraction": 0.25,
+    "confidence_threshold": 0.6,
+    "lookback_days": 30,
+    "cache_ttl_seconds": 300,
+    "parallel_calculation": true,
+    "risk_adjustment_factor": 0.8
+  },
+  "evt": {
+    "tail_threshold_percentile": 0.95,
+    "block_maxima_size": 20,
+    "bootstrap_samples": 1000,
+    "backtesting_window_days": 252,
+    "model_selection_metric": "aic",
+    "confidence_levels": [0.95, 0.99],
+    "cache_results": true
+  },
+  "dashboard": {
+    "websocket_port": 8080,
+    "http_port": 3000,
+    "update_interval_ms": 1000,
+    "history_retention_hours": 24,
+    "alert_retention_count": 100,
+    "enable_logging": true
+  },
+  "integration": {
+    "phase1_dependency_check": true,
+    "phase2_health_check_interval": 60,
+    "system_startup_timeout": 120,
+    "graceful_shutdown_timeout": 30,
+    "enable_performance_monitoring": true,
+    "enable_audit_trail": true
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file_path": "logs/phase2_integration.log",
+    "max_file_size_mb": 100,
+    "backup_count": 5
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-09-14T23:47:57.244167",
+  "ng_signals_last_hour": 0,
+  "ng_avg_multiplier": 0,
+  "current_brier_score": null,
+  "current_brier_alert": null,
+  "current_enhanced_dpi": null,
+  "current_regime": null,
+  "recent_alerts": 0,
+  "system_health": "good"
+}

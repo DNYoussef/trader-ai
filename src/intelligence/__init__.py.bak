@@ -1,0 +1,136 @@
+"""
+AI Intelligence Module for Gary×Taleb Trading System
+
+Provides comprehensive AI-powered risk alerting with:
+- Machine learning-based anomaly detection
+- Pattern recognition for market regime changes
+- Predictive early warnings (5-15 minute horizon)
+- Context-aware filtering to reduce false positives
+- Integration with DPI and antifragility systems
+
+Success Metrics:
+- Alert accuracy: <5% false positive rate
+- Early warning: 5-15 minute advance notice
+- Pattern detection: Identify risk regime changes
+- Context awareness: Market-condition alert filtering
+
+Usage:
+    from src.intelligence import IntelligenceIntegrationLayer
+
+    # Initialize with DPI calculator and trading engine
+    intelligence = IntelligenceIntegrationLayer(
+        dpi_calculator=dpi_calc,
+        trading_engine=engine
+    )
+
+    # Initialize system
+    intelligence.initialize()
+
+    # Process market data for alerts
+    alerts = intelligence.process_market_data_with_intelligence(
+        symbol='ULTY',
+        market_data=market_data,
+        portfolio_context=portfolio_context
+    )
+"""
+
+from .ai_alert_system import (
+    AIAlertSystem,
+    RiskAlert,
+    AlertSeverity,
+    RiskPattern,
+    AlertContext
+)
+
+from .risk_pattern_engine import (
+    RiskPatternEngine,
+    PatternDetection,
+    MarketRegime,
+    PatternType,
+    RegimeAnalysis
+)
+
+from .predictive_warning_system import (
+    PredictiveWarningSystem,
+    EarlyWarning,
+    WarningLevel,
+    RiskEvent,
+    PredictionMetrics,
+    RiskForecast
+)
+
+from .context_filter import (
+    ContextAwareFilter,
+    FilterResult,
+    MarketContext,
+    MarketSession,
+    VolatilityRegime,
+    CorrelationRegime
+)
+
+from .alert_orchestrator import (
+    AlertOrchestrator,
+    AlertMessage,
+    AlertPriority,
+    ProcessingStatus,
+    SystemMetrics
+)
+
+from .integration_layer import (
+    IntelligenceIntegrationLayer,
+    IntegrationStatus,
+    IntegrationMetrics,
+    ValidationResult
+)
+
+__all__ = [
+    # Main integration interface
+    'IntelligenceIntegrationLayer',
+
+    # AI Alert System
+    'AIAlertSystem',
+    'RiskAlert',
+    'AlertSeverity',
+    'RiskPattern',
+    'AlertContext',
+
+    # Pattern Recognition Engine
+    'RiskPatternEngine',
+    'PatternDetection',
+    'MarketRegime',
+    'PatternType',
+    'RegimeAnalysis',
+
+    # Predictive Warning System
+    'PredictiveWarningSystem',
+    'EarlyWarning',
+    'WarningLevel',
+    'RiskEvent',
+    'PredictionMetrics',
+    'RiskForecast',
+
+    # Context Filter
+    'ContextAwareFilter',
+    'FilterResult',
+    'MarketContext',
+    'MarketSession',
+    'VolatilityRegime',
+    'CorrelationRegime',
+
+    # Alert Orchestrator
+    'AlertOrchestrator',
+    'AlertMessage',
+    'AlertPriority',
+    'ProcessingStatus',
+    'SystemMetrics',
+
+    # Integration Layer
+    'IntegrationStatus',
+    'IntegrationMetrics',
+    'ValidationResult'
+]
+
+# Version information
+__version__ = "1.0.0"
+__author__ = "AI Engineer Agent - SPEK Phase 2 Division 4"
+__description__ = "Intelligent Alert System with AI-powered insights"

@@ -1,0 +1,798 @@
+"""
+Kelly Criterion Position Sizing System for Gary×Taleb Trading Framework
+
+This module implements dynamic position sizing using the Kelly Criterion formula
+integrated with Gary's DPI signals and Taleb's antifragility principles.
+
+Mathematical Foundation:
+- Kelly % = (bp - q) / b
+  where: b = odds, p = probability of win, q = probability of loss
+- Enhanced with DPI edge detection and overleverage protection
+- Real-time calculations optimized for <50ms latency
+
+Risk Management:
+- Hard caps at Kelly = 1.0 (100% allocation prevention)
+- Integration with gate system constraints (G0-G3)
+- Volatility adjustments and drawdown protection
+"""
+
+import logging
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional, Union
+from dataclasses import dataclass
+from enum import Enum
+import time
+from concurrent.futures import ThreadPoolExecutor
+import threading
+
+from ..strategies.dpi_calculator import DistributionalPressureIndex, PositionSizingOutput
+from ..trading.narrative_gap import NarrativeGap
+from ..gates.gate_manager import GateManager, GateLevel
+from ..trading.narrative_gap import NarrativeGap
+
+logger = logging.getLogger(__name__)
+
+
+class KellyRegime(Enum):
+    """Kelly calculation regimes"""
+    AGGRESSIVE = "aggressive"      # Kelly > 0.25
+    MODERATE = "moderate"          # 0.1 < Kelly <= 0.25
+    CONSERVATIVE = "conservative"  # 0.05 < Kelly <= 0.1
+    MINIMAL = "minimal"            # Kelly <= 0.05
+    NO_BET = "no_bet"             # Kelly <= 0
+
+
+@dataclass
+class KellyComponents:
+    """Components of Kelly Criterion calculation"""
+    edge: float                    # (bp - q) numerator
+    odds: float                    # b denominator
+    win_probability: float         # p
+    loss_probability: float        # q
+    raw_kelly: float              # Unconstrained Kelly %
+    capped_kelly: float           # Kelly capped at 1.0
+    dpi_adjustment: float         # DPI-based adjustment factor
+    final_kelly: float            # Final recommended Kelly %
+
+
+@dataclass
+class KellyRiskMetrics:
+    """Risk metrics for Kelly position sizing"""
+    max_drawdown_risk: float      # Estimated max drawdown
+    time_to_ruin: Optional[float] # Expected time to ruin (None if safe)
+    volatility_adjustment: float  # Vol-based scaling factor
+    confidence_interval: Tuple[float, float]  # 95% CI for Kelly estimate
+    sharpe_expectation: float     # Expected Sharpe ratio
+
+
+@dataclass
+class PositionSizeRecommendation:
+    """Final position sizing recommendation"""
+    symbol: str
+    kelly_percentage: float       # Kelly % (0-1)
+    dollar_amount: float         # Dollar position size
+    share_quantity: int          # Number of shares
+    confidence_score: float      # Confidence in recommendation (0-1)
+    risk_metrics: KellyRiskMetrics
+    gate_compliant: bool         # Passes gate system validation
+    execution_time_ms: float     # Calculation time in milliseconds
+
+
+class KellyCriterionCalculator:
+    """
+    Kelly Criterion position sizing with DPI integration and overleverage protection
+
+    Core Features:
+    1. Real-time Kelly calculations optimized for <50ms latency
+    2. DPI-enhanced edge estimation from Gary's methodology
+    3. Hard overleverage protection (Kelly never exceeds 1.0)
+    4. Gate system compliance validation
+    5. Volatility and drawdown risk adjustments
+    """
+
+    def __init__(
+        self,
+        dpi_calculator: DistributionalPressureIndex,
+        gate_manager: GateManager,
+        narrative_gap_calculator: Optional[NarrativeGap] = None,
+        max_kelly: float = 0.25,  # Conservative max Kelly (25%)
+        min_edge: float = 0.01,   # Minimum edge required (1%)
+        lookback_periods: int = 252  # 1 year for statistics
+    ):
+        """
+        Initialize Kelly Criterion calculator
+
+        Args:
+            dpi_calculator: Gary's DPI calculator instance
+            gate_manager: Gate system manager
+            max_kelly: Maximum allowed Kelly percentage (default 25%)
+            min_edge: Minimum edge required for position (default 1%)
+            lookback_periods: Periods for statistical estimation
+        """
+        self.dpi_calculator = dpi_calculator
+        self.gate_manager = gate_manager
+        self.narrative_gap_calculator = narrative_gap_calculator or NarrativeGap()
+        self.max_kelly = min(max_kelly, 1.0)  # Ensure never exceeds 100%
+        self.min_edge = min_edge
+        self.lookback_periods = lookback_periods
+
+        # Performance optimization for <50ms latency
+        self.cache = {}
+        self.cache_timeout = 300  # 5-minute cache
+        self.thread_pool = ThreadPoolExecutor(max_workers=4)
+        self.calculation_lock = threading.RLock()
+
+        # Kelly calculation parameters
+        self.volatility_lookback = 60  # Days for volatility calculation
+        self.confidence_level = 0.95   # For confidence intervals
+
+        # Risk management parameters
+        self.max_position_risk = 0.02  # 2% portfolio risk per position
+        self.drawdown_threshold = 0.15 # 15% max drawdown tolerance
+
+        logger.info(f"Kelly Calculator initialized: max_kelly={max_kelly:.1%}, min_edge={min_edge:.1%}")
+
+    def calculate_kelly_position(
+        self,
+        symbol: str,
+        current_price: float,
+        available_capital: float,
+        historical_data: Optional[pd.DataFrame] = None
+    ) -> PositionSizeRecommendation:
+        """
+        Calculate optimal Kelly position size for a symbol
+
+        Args:
+            symbol: Trading symbol
+            current_price: Current market price
+            available_capital: Available capital for position
+            historical_data: Optional pre-fetched historical data
+
+        Returns:
+            PositionSizeRecommendation with complete position sizing analysis
+        """
+        start_time = time.time()
+
+        try:
+            logger.debug(f"Calculating Kelly position for {symbol} at ${current_price:.2f}")
+
+            # Check cache first for performance
+            cache_key = f"{symbol}_{current_price}_{available_capital}"
+            if self._check_cache(cache_key):
+                cached_result = self.cache[cache_key]
+                cached_result.execution_time_ms = (time.time() - start_time) * 1000
+                return cached_result
+
+            with self.calculation_lock:
+                # 1. Calculate DPI-enhanced edge estimation
+                dpi_score, dpi_components = self.dpi_calculator.calculate_dpi(symbol)
+                edge_estimate = self._calculate_edge_from_dpi(dpi_score, dpi_components)
+
+                # 2. Estimate win/loss probabilities and odds
+                probabilities = self._estimate_probabilities(symbol, historical_data)
+                odds = self._calculate_odds(symbol, historical_data)
+
+                # 3. Calculate raw Kelly percentage
+                kelly_components = self._calculate_kelly_components(
+                    edge_estimate, probabilities, odds, dpi_score
+                )
+
+                # 4. Apply risk adjustments and constraints
+                risk_metrics = self._calculate_risk_metrics(symbol, kelly_components, historical_data)
+
+                # 4.5. Apply Narrative Gap multiplier for alpha generation
+                ng_multiplier = self._calculate_narrative_gap_multiplier(
+                    symbol, current_price, kelly_components, dpi_score
+                )
+
+                # 5. Convert to dollar amounts and shares
+                base_kelly = self._apply_constraints(kelly_components, risk_metrics)
+                final_kelly = min(base_kelly * ng_multiplier, 1.0)  # Apply NG multiplier with hard cap
+                dollar_amount = available_capital * final_kelly
+                share_quantity = int(dollar_amount / current_price) if current_price > 0 else 0
+
+                # 6. Validate against gate system
+                gate_compliant = self._validate_gate_compliance(
+                    symbol, dollar_amount, available_capital
+                )
+
+                # 7. Calculate confidence score
+                confidence_score = self._calculate_confidence_score(
+                    kelly_components, risk_metrics, dpi_score
+                )
+
+                # Create final recommendation
+                recommendation = PositionSizeRecommendation(
+                    symbol=symbol,
+                    kelly_percentage=final_kelly,
+                    dollar_amount=dollar_amount,
+                    share_quantity=share_quantity,
+                    confidence_score=confidence_score,
+                    risk_metrics=risk_metrics,
+                    gate_compliant=gate_compliant,
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
+
+                # Cache result
+                self._cache_result(cache_key, recommendation)
+
+                logger.info(f"Kelly calculation for {symbol}: {final_kelly:.1%} "
+                           f"(${dollar_amount:.2f}, {share_quantity} shares) "
+                           f"in {recommendation.execution_time_ms:.1f}ms")
+
+                return recommendation
+
+        except Exception as e:
+            logger.error(f"Error calculating Kelly position for {symbol}: {e}")
+            # Return safe default recommendation
+            return self._create_safe_default(symbol, available_capital, start_time)
+
+    def _calculate_edge_from_dpi(self, dpi_score: float, dpi_components) -> float:
+        """
+        Calculate trading edge from DPI analysis
+
+        Args:
+            dpi_score: Normalized DPI score [-1, 1]
+            dpi_components: DPI component breakdown
+
+        Returns:
+            Estimated edge (expected return advantage)
+        """
+        try:
+            # Base edge from DPI signal strength
+            base_edge = abs(dpi_score) * 0.05  # Up to 5% edge
+
+            # Adjust based on DPI component quality
+            quality_multiplier = 1.0
+
+            # Strong order flow pressure adds confidence
+            if abs(dpi_components.order_flow_pressure) > 0.5:
+                quality_multiplier *= 1.2
+
+            # Volume-weighted skew confirmation
+            if np.sign(dpi_score) == np.sign(dpi_components.volume_weighted_skew):
+                quality_multiplier *= 1.1
+
+            # Momentum alignment
+            if np.sign(dpi_score) == np.sign(dpi_components.price_momentum_bias):
+                quality_multiplier *= 1.1
+
+            edge = base_edge * quality_multiplier
+
+            # Ensure minimum edge requirement
+            if edge < self.min_edge:
+                edge = 0.0
+
+            return min(edge, 0.15)  # Cap at 15% edge
+
+        except Exception as e:
+            logger.error(f"Error calculating edge from DPI: {e}")
+            return 0.0
+
+    def _estimate_probabilities(self, symbol: str, historical_data: Optional[pd.DataFrame] = None) -> Dict[str, float]:
+        """
+        Estimate win/loss probabilities from historical data
+
+        Args:
+            symbol: Trading symbol
+            historical_data: Optional historical data
+
+        Returns:
+            Dictionary with win_prob and loss_prob
+        """
+        try:
+            if historical_data is None:
+                historical_data = self.dpi_calculator._fetch_market_data(
+                    symbol, self.lookback_periods
+                )
+
+            if historical_data.empty:
+                # Default probabilities for no data
+                return {'win_prob': 0.55, 'loss_prob': 0.45}
+
+            # Calculate daily returns
+            returns = historical_data['Close'].pct_change().dropna()
+
+            if len(returns) < 10:
+                return {'win_prob': 0.55, 'loss_prob': 0.45}
+
+            # Calculate win rate
+            win_rate = (returns > 0).mean()
+            loss_rate = 1 - win_rate
+
+            # Adjust for recent performance (weight recent data more heavily)
+            recent_returns = returns.tail(min(60, len(returns)))  # Last 60 days
+            recent_win_rate = (recent_returns > 0).mean()
+
+            # Weighted average (70% recent, 30% historical)
+            adjusted_win_rate = 0.7 * recent_win_rate + 0.3 * win_rate
+            adjusted_loss_rate = 1 - adjusted_win_rate
+
+            return {
+                'win_prob': max(0.3, min(0.7, adjusted_win_rate)),  # Bound between 30-70%
+                'loss_prob': max(0.3, min(0.7, adjusted_loss_rate))
+            }
+
+        except Exception as e:
+            logger.error(f"Error estimating probabilities for {symbol}: {e}")
+            return {'win_prob': 0.55, 'loss_prob': 0.45}
+
+    def _calculate_odds(self, symbol: str, historical_data: Optional[pd.DataFrame] = None) -> float:
+        """
+        Calculate average odds (b) from historical win/loss magnitudes
+
+        Args:
+            symbol: Trading symbol
+            historical_data: Optional historical data
+
+        Returns:
+            Odds ratio (average win / average loss)
+        """
+        try:
+            if historical_data is None:
+                historical_data = self.dpi_calculator._fetch_market_data(
+                    symbol, self.lookback_periods
+                )
+
+            if historical_data.empty:
+                return 1.0  # Default 1:1 odds
+
+            returns = historical_data['Close'].pct_change().dropna()
+
+            if len(returns) < 10:
+                return 1.0
+
+            # Separate wins and losses
+            wins = returns[returns > 0]
+            losses = returns[returns < 0]
+
+            if len(wins) == 0 or len(losses) == 0:
+                return 1.0
+
+            # Calculate average magnitudes
+            avg_win = wins.mean()
+            avg_loss = abs(losses.mean())
+
+            if avg_loss == 0:
+                return 2.0  # Default favorable odds
+
+            odds = avg_win / avg_loss
+
+            # Bound odds to reasonable range
+            return max(0.5, min(3.0, odds))
+
+        except Exception as e:
+            logger.error(f"Error calculating odds for {symbol}: {e}")
+            return 1.0
+
+    def _calculate_kelly_components(
+        self,
+        edge: float,
+        probabilities: Dict[str, float],
+        odds: float,
+        dpi_score: float
+    ) -> KellyComponents:
+        """
+        Calculate all Kelly criterion components
+
+        Args:
+            edge: Estimated trading edge
+            probabilities: Win/loss probabilities
+            odds: Win/loss odds ratio
+            dpi_score: DPI score for adjustment
+
+        Returns:
+            KellyComponents with all calculation details
+        """
+        try:
+            p = probabilities['win_prob']
+            q = probabilities['loss_prob']
+            b = odds
+
+            # Kelly formula: f* = (bp - q) / b
+            numerator = (b * p) - q
+            raw_kelly = numerator / b if b != 0 else 0.0
+
+            # Apply DPI adjustment
+            dpi_adjustment = 1.0 + (abs(dpi_score) * 0.2)  # Up to 20% adjustment
+            adjusted_kelly = raw_kelly * dpi_adjustment
+
+            # Apply overleverage protection (hard cap at 100%)
+            capped_kelly = min(adjusted_kelly, 1.0)
+
+            # Final Kelly with additional constraints
+            final_kelly = min(capped_kelly, self.max_kelly)
+
+            # Ensure non-negative
+            if final_kelly < 0:
+                final_kelly = 0.0
+
+            return KellyComponents(
+                edge=edge,
+                odds=odds,
+                win_probability=p,
+                loss_probability=q,
+                raw_kelly=raw_kelly,
+                capped_kelly=capped_kelly,
+                dpi_adjustment=dpi_adjustment,
+                final_kelly=final_kelly
+            )
+
+        except Exception as e:
+            logger.error(f"Error calculating Kelly components: {e}")
+            return KellyComponents(0, 1, 0.5, 0.5, 0, 0, 1, 0)
+
+    def _calculate_risk_metrics(
+        self,
+        symbol: str,
+        kelly_components: KellyComponents,
+        historical_data: Optional[pd.DataFrame] = None
+    ) -> KellyRiskMetrics:
+        """
+        Calculate risk metrics for Kelly position
+
+        Args:
+            symbol: Trading symbol
+            kelly_components: Kelly calculation components
+            historical_data: Optional historical data
+
+        Returns:
+            KellyRiskMetrics with risk analysis
+        """
+        try:
+            if historical_data is None:
+                historical_data = self.dpi_calculator._fetch_market_data(
+                    symbol, self.volatility_lookback
+                )
+
+            if historical_data.empty:
+                return self._default_risk_metrics()
+
+            returns = historical_data['Close'].pct_change().dropna()
+
+            if len(returns) < 10:
+                return self._default_risk_metrics()
+
+            # Calculate volatility
+            volatility = returns.std() * np.sqrt(252)  # Annualized
+
+            # Estimate maximum drawdown risk
+            max_drawdown_risk = self._estimate_max_drawdown(
+                kelly_components.final_kelly, volatility, returns
+            )
+
+            # Time to ruin calculation (simplified)
+            time_to_ruin = self._calculate_time_to_ruin(
+                kelly_components.final_kelly, kelly_components.edge, volatility
+            )
+
+            # Volatility adjustment factor
+            target_vol = 0.15  # 15% target volatility
+            vol_adjustment = min(1.0, target_vol / max(volatility, 0.05))
+
+            # Confidence interval for Kelly estimate
+            confidence_interval = self._calculate_kelly_confidence_interval(
+                kelly_components, returns
+            )
+
+            # Expected Sharpe ratio
+            expected_sharpe = kelly_components.edge / max(volatility, 0.01)
+
+            return KellyRiskMetrics(
+                max_drawdown_risk=max_drawdown_risk,
+                time_to_ruin=time_to_ruin,
+                volatility_adjustment=vol_adjustment,
+                confidence_interval=confidence_interval,
+                sharpe_expectation=expected_sharpe
+            )
+
+        except Exception as e:
+            logger.error(f"Error calculating risk metrics for {symbol}: {e}")
+            return self._default_risk_metrics()
+
+    def _apply_constraints(
+        self,
+        kelly_components: KellyComponents,
+        risk_metrics: KellyRiskMetrics
+    ) -> float:
+        """
+        Apply final constraints to Kelly percentage
+
+        Args:
+            kelly_components: Kelly calculation components
+            risk_metrics: Risk metrics
+
+        Returns:
+            Final constrained Kelly percentage
+        """
+        try:
+            final_kelly = kelly_components.final_kelly
+
+            # Apply volatility adjustment
+            final_kelly *= risk_metrics.volatility_adjustment
+
+            # Apply drawdown protection
+            if risk_metrics.max_drawdown_risk > self.drawdown_threshold:
+                drawdown_scalar = self.drawdown_threshold / risk_metrics.max_drawdown_risk
+                final_kelly *= drawdown_scalar
+
+            # Apply position risk limit
+            if final_kelly > self.max_position_risk:
+                final_kelly = self.max_position_risk
+
+            # Ensure minimum viable position
+            if final_kelly < 0.01:  # Less than 1%
+                final_kelly = 0.0
+
+            return final_kelly
+
+        except Exception as e:
+            logger.error(f"Error applying Kelly constraints: {e}")
+            return 0.0
+
+    def _validate_gate_compliance(
+        self,
+        symbol: str,
+        dollar_amount: float,
+        available_capital: float
+    ) -> bool:
+        """
+        Validate position against gate system constraints
+
+        Args:
+            symbol: Trading symbol
+            dollar_amount: Proposed position size in dollars
+            available_capital: Available capital
+
+        Returns:
+            True if gate compliant, False otherwise
+        """
+        try:
+            # Mock trade details for validation
+            trade_details = {
+                'symbol': symbol,
+                'side': 'BUY',
+                'quantity': 1,  # Will be scaled
+                'price': dollar_amount,  # Using dollar amount as proxy
+                'trade_type': 'STOCK'
+            }
+
+            # Mock portfolio state
+            portfolio_state = {
+                'cash': available_capital,
+                'positions': {},
+                'total_value': available_capital
+            }
+
+            # Validate against current gate
+            validation_result = self.gate_manager.validate_trade(trade_details, portfolio_state)
+
+            return validation_result.is_valid
+
+        except Exception as e:
+            logger.error(f"Error validating gate compliance for {symbol}: {e}")
+            return False  # Conservative default
+
+    def _calculate_confidence_score(
+        self,
+        kelly_components: KellyComponents,
+        risk_metrics: KellyRiskMetrics,
+        dpi_score: float
+    ) -> float:
+        """
+        Calculate overall confidence in the Kelly recommendation
+
+        Args:
+            kelly_components: Kelly calculation components
+            risk_metrics: Risk metrics
+            dpi_score: DPI score
+
+        Returns:
+            Confidence score [0, 1]
+        """
+        try:
+            confidence = 0.0
+
+            # Edge quality (40% weight)
+            if kelly_components.edge > self.min_edge:
+                edge_confidence = min(1.0, kelly_components.edge / 0.05)  # Scale to 5%
+                confidence += 0.4 * edge_confidence
+
+            # DPI signal strength (25% weight)
+            dpi_confidence = abs(dpi_score)
+            confidence += 0.25 * dpi_confidence
+
+            # Risk metrics quality (25% weight)
+            risk_confidence = 1.0
+            if risk_metrics.max_drawdown_risk > self.drawdown_threshold:
+                risk_confidence *= 0.5
+            if risk_metrics.sharpe_expectation < 0.5:
+                risk_confidence *= 0.7
+            confidence += 0.25 * risk_confidence
+
+            # Statistical confidence (10% weight)
+            ci_width = risk_metrics.confidence_interval[1] - risk_metrics.confidence_interval[0]
+            stat_confidence = max(0.0, 1.0 - ci_width)
+            confidence += 0.1 * stat_confidence
+
+            return min(1.0, max(0.0, confidence))
+
+        except Exception as e:
+            logger.error(f"Error calculating confidence score: {e}")
+            return 0.5
+
+    def _calculate_narrative_gap_multiplier(
+        self,
+        symbol: str,
+        current_price: float,
+        kelly_components: KellyComponents,
+        dpi_score: float
+    ) -> float:
+        """
+        Calculate Narrative Gap multiplier for position sizing
+
+        Args:
+            symbol: Trading symbol
+            current_price: Current market price
+            kelly_components: Kelly calculation components
+            dpi_score: DPI score
+
+        Returns:
+            Position multiplier [1.0, 2.0] based on narrative gap
+        """
+        try:
+            # For this implementation, we'll use simplified estimates
+            # In production, these would come from real consensus and distribution models
+            
+            # Mock consensus forecast (in practice, from analyst estimates or market implied)
+            # Using a simple momentum-based estimate for demonstration
+            consensus_forecast = current_price * (1.0 + kelly_components.edge * 0.5)
+            
+            # Mock Gary's distribution estimate (in practice, from sophisticated distribution models)
+            # Using DPI-enhanced estimate for demonstration
+            distribution_estimate = current_price * (1.0 + kelly_components.edge * (1.0 + abs(dpi_score)))
+            
+            # Calculate narrative gap
+            ng = self.narrative_gap_calculator.calculate_ng(
+                market_price=current_price,
+                consensus_forecast=consensus_forecast,
+                distribution_estimate=distribution_estimate,
+                confidence=min(0.8, abs(dpi_score) + 0.3)  # Higher DPI = higher confidence
+            )
+            
+            # Convert to position multiplier
+            multiplier = self.narrative_gap_calculator.get_position_multiplier(ng)
+            
+            logger.debug(f"NG calculation for {symbol}: "
+                        f"consensus=, "
+                        f"estimate=, "
+                        f"NG={ng:.4f}, multiplier={multiplier:.2f}x")
+            
+            return multiplier
+            
+        except Exception as e:
+            logger.error(f"Error calculating narrative gap multiplier for {symbol}: {e}")
+            return 1.0  # Safe default
+    
+    # Helper methods
+    def _estimate_max_drawdown(self, kelly: float, volatility: float, returns: pd.Series) -> float:
+        """Estimate maximum drawdown risk"""
+        try:
+            # Simplified drawdown estimation
+            leveraged_returns = returns * kelly
+            cumulative_returns = (1 + leveraged_returns).cumprod()
+            drawdowns = (cumulative_returns / cumulative_returns.expanding().max()) - 1
+            max_drawdown = abs(drawdowns.min())
+
+            # Scale by volatility
+            vol_adjusted_dd = max_drawdown * (volatility / 0.15)
+
+            return min(1.0, vol_adjusted_dd)
+
+        except Exception:
+            return kelly * 2.0  # Conservative estimate
+
+    def _calculate_time_to_ruin(self, kelly: float, edge: float, volatility: float) -> Optional[float]:
+        """Calculate expected time to ruin (simplified)"""
+        try:
+            if kelly <= 0 or edge <= 0:
+                return None
+
+            # Simplified time to ruin calculation
+            # Based on Kelly criterion theory
+            if kelly >= 1.0:
+                return 1.0  # High risk of ruin with overleverage
+
+            risk_of_ruin = np.exp(-2 * edge * kelly / (volatility ** 2))
+
+            if risk_of_ruin >= 0.99:
+                return float('inf')  # Essentially never
+            elif risk_of_ruin <= 0.01:
+                return 1.0  # Very high risk
+            else:
+                return -np.log(risk_of_ruin) / (edge * kelly)
+
+        except Exception:
+            return None
+
+    def _calculate_kelly_confidence_interval(
+        self,
+        kelly_components: KellyComponents,
+        returns: pd.Series
+    ) -> Tuple[float, float]:
+        """Calculate confidence interval for Kelly estimate"""
+        try:
+            # Simplified confidence interval based on return variance
+            kelly_std = returns.std() / np.sqrt(len(returns))
+            margin_of_error = 1.96 * kelly_std  # 95% CI
+
+            lower = max(0.0, kelly_components.final_kelly - margin_of_error)
+            upper = min(1.0, kelly_components.final_kelly + margin_of_error)
+
+            return (lower, upper)
+
+        except Exception:
+            k = kelly_components.final_kelly
+            return (max(0.0, k - 0.05), min(1.0, k + 0.05))
+
+    def _default_risk_metrics(self) -> KellyRiskMetrics:
+        """Return default risk metrics when calculation fails"""
+        return KellyRiskMetrics(
+            max_drawdown_risk=0.10,
+            time_to_ruin=None,
+            volatility_adjustment=0.8,
+            confidence_interval=(0.0, 0.1),
+            sharpe_expectation=0.5
+        )
+
+    def _check_cache(self, cache_key: str) -> bool:
+        """Check if cached result is still valid"""
+        if cache_key not in self.cache:
+            return False
+
+        cached_time = self.cache[cache_key + "_time"]
+        return (time.time() - cached_time) < self.cache_timeout
+
+    def _cache_result(self, cache_key: str, result: PositionSizeRecommendation):
+        """Cache calculation result"""
+        self.cache[cache_key] = result
+        self.cache[cache_key + "_time"] = time.time()
+
+    def _create_safe_default(
+        self,
+        symbol: str,
+        available_capital: float,
+        start_time: float
+    ) -> PositionSizeRecommendation:
+        """Create safe default recommendation on error"""
+        return PositionSizeRecommendation(
+            symbol=symbol,
+            kelly_percentage=0.0,
+            dollar_amount=0.0,
+            share_quantity=0,
+            confidence_score=0.0,
+            risk_metrics=self._default_risk_metrics(),
+            gate_compliant=True,
+            execution_time_ms=(time.time() - start_time) * 1000
+        )
+
+    def get_regime_classification(self, kelly_percentage: float) -> KellyRegime:
+        """Classify Kelly percentage into regime"""
+        if kelly_percentage <= 0:
+            return KellyRegime.NO_BET
+        elif kelly_percentage <= 0.05:
+            return KellyRegime.MINIMAL
+        elif kelly_percentage <= 0.1:
+            return KellyRegime.CONSERVATIVE
+        elif kelly_percentage <= 0.25:
+            return KellyRegime.MODERATE
+        else:
+            return KellyRegime.AGGRESSIVE
+
+    def clear_cache(self):
+        """Clear calculation cache"""
+        with self.calculation_lock:
+            self.cache.clear()
+            logger.info("Kelly calculation cache cleared")

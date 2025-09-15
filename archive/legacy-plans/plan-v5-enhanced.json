@@ -1,0 +1,253 @@
+{
+  "project": "Gary×Taleb Autonomous Trading System",
+  "version": "5.0-enhanced",
+  "methodology": "SPEK with 9-part development loops",
+  "timeline": "8 weeks",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Foundation Phase",
+      "duration": "2 weeks",
+      "objectives": [
+        "Build core trading engine with G0 gate",
+        "Implement weekly buy/siphon cycle",
+        "Create broker integration",
+        "Develop basic UI with kill switch"
+      ],
+      "loops": {
+        "loop1_foundation": {
+          "specification": "Define G0 gate requirements and trading cycle",
+          "research": "Broker APIs, ETF characteristics, order types",
+          "planning": "Architecture design, component interfaces",
+          "premortem": "Connection failures, order rejections, siphon errors"
+        },
+        "loop2_execution": {
+          "development": "Trading engine, broker adapter, weekly cycle",
+          "quality_gates": "Unit tests, integration tests, paper trading",
+          "github_integration": "CI/CD pipeline, automated testing"
+        },
+        "loop3_verification": {
+          "theater_detection": "Check for fake success metrics",
+          "reality_validation": "Verify actual execution capabilities"
+        }
+      },
+      "deliverables": [
+        "src/trading_engine.py",
+        "src/brokers/alpaca_adapter.py",
+        "src/gates/gate_manager.py",
+        "src/ui/components/Dashboard.tsx",
+        "tests/test_weekly_cycle.py"
+      ],
+      "success_criteria": {
+        "paper_trades_executed": ">10",
+        "weekly_cycle_success": "100%",
+        "audit_log_coverage": "100%",
+        "test_coverage": ">80%"
+      }
+    },
+    {
+      "id": "phase-2",
+      "name": "Risk & Quality Phase",
+      "duration": "2 weeks",
+      "objectives": [
+        "Implement EVT tail modeling",
+        "Build pre-trade validation pipeline",
+        "Create barbell allocator",
+        "Add paper/live mode switching"
+      ],
+      "loops": {
+        "loop1_foundation": {
+          "specification": "Define risk constraints and validation rules",
+          "research": "EVT mathematics, CVaR calculations, barbell theory",
+          "planning": "Risk engine architecture, validation pipeline",
+          "premortem": "False positives, calculation errors, edge cases"
+        },
+        "loop2_execution": {
+          "development": "Risk engine, EVT model, pre-trade checks",
+          "quality_gates": "Stress testing, Monte Carlo validation",
+          "github_integration": "Risk validation workflows"
+        },
+        "loop3_verification": {
+          "theater_detection": "Verify risk metrics are real not performative",
+          "reality_validation": "Confirm constraints actually prevent losses"
+        }
+      },
+      "deliverables": [
+        "src/risk/risk_engine.py",
+        "src/risk/evt_model.py",
+        "src/risk/barbell_allocator.py",
+        "src/risk/pre_trade_checks.py",
+        "tests/test_risk_constraints.py"
+      ],
+      "success_criteria": {
+        "risk_violations": "0",
+        "evt_model_accuracy": ">95%",
+        "pre_trade_check_speed": "<100ms",
+        "stress_test_pass": "100%"
+      }
+    },
+    {
+      "id": "phase-3",
+      "name": "Intelligence Layer Phase",
+      "duration": "2 weeks",
+      "objectives": [
+        "Build DPI calculator",
+        "Implement NG analyzer",
+        "Create regime detector",
+        "Develop forecast card system"
+      ],
+      "loops": {
+        "loop1_foundation": {
+          "specification": "Define intelligence metrics and data sources",
+          "research": "DPI components, narrative analysis, regime detection",
+          "planning": "Data pipeline, calculation methodology",
+          "premortem": "Data quality issues, calculation complexity"
+        },
+        "loop2_execution": {
+          "development": "DPI calculator, NG analyzer, regime HMM",
+          "quality_gates": "Accuracy validation, performance testing",
+          "github_integration": "Data pipeline monitoring"
+        },
+        "loop3_verification": {
+          "theater_detection": "Ensure signals have real predictive power",
+          "reality_validation": "Verify edge exists in live markets"
+        }
+      },
+      "deliverables": [
+        "src/intelligence/dpi_calculator.py",
+        "src/intelligence/ng_analyzer.py",
+        "src/intelligence/regime_detector.py",
+        "src/intelligence/forecast_cards.py",
+        "tests/test_intelligence.py"
+      ],
+      "success_criteria": {
+        "dpi_accuracy": ">90%",
+        "ng_correlation": ">0.3",
+        "regime_classification": ">80%",
+        "forecast_calibration": "Brier<0.3"
+      }
+    },
+    {
+      "id": "phase-4",
+      "name": "Scale & Learning Phase",
+      "duration": "2 weeks",
+      "objectives": [
+        "Implement gate progression system",
+        "Build learning/ML pipeline",
+        "Create performance attribution",
+        "Deploy to production"
+      ],
+      "loops": {
+        "loop1_foundation": {
+          "specification": "Define learning objectives and gate criteria",
+          "research": "LoRA training, calibration methods, attribution",
+          "planning": "ML pipeline, training schedule, deployment",
+          "premortem": "Model degradation, overfitting, deployment issues"
+        },
+        "loop2_execution": {
+          "development": "Gate system, LoRA trainer, attribution engine",
+          "quality_gates": "Model validation, A/B testing, gradual rollout",
+          "github_integration": "Deployment automation, monitoring"
+        },
+        "loop3_verification": {
+          "theater_detection": "Verify genuine learning not overfitting",
+          "reality_validation": "Confirm production readiness"
+        }
+      },
+      "deliverables": [
+        "src/gates/progression_system.py",
+        "src/learning/lora_trainer.py",
+        "src/learning/calibration_scorer.py",
+        "src/learning/attribution_engine.py",
+        "deployment/production_config.yaml"
+      ],
+      "success_criteria": {
+        "gate_progression_logic": "100% tested",
+        "model_improvement": ">5%",
+        "production_uptime": ">99.9%",
+        "live_capital_deployed": "$200"
+      }
+    }
+  ],
+  "resources": {
+    "team": {
+      "developers": 1,
+      "hours_per_week": 40,
+      "total_hours": 320
+    },
+    "infrastructure": {
+      "development": "Local machine",
+      "staging": "Cloud VM",
+      "production": "Dedicated server",
+      "broker": "Alpaca/IBKR"
+    },
+    "budget": {
+      "infrastructure": "$500",
+      "data_feeds": "$200/month",
+      "initial_capital": "$200",
+      "total": "$900"
+    }
+  },
+  "risks": {
+    "technical": [
+      {
+        "risk": "Broker API changes",
+        "probability": 0.2,
+        "impact": "medium",
+        "mitigation": "Abstract broker interface, multiple adapters"
+      },
+      {
+        "risk": "Data quality issues",
+        "probability": 0.3,
+        "impact": "high",
+        "mitigation": "Multiple data sources, validation pipeline"
+      }
+    ],
+    "financial": [
+      {
+        "risk": "Initial capital loss",
+        "probability": 0.1,
+        "impact": "low",
+        "mitigation": "Start with $200, strict risk controls"
+      },
+      {
+        "risk": "Market regime change",
+        "probability": 0.4,
+        "impact": "medium",
+        "mitigation": "Adaptive regime detection, conservative defaults"
+      }
+    ],
+    "operational": [
+      {
+        "risk": "System downtime",
+        "probability": 0.05,
+        "impact": "low",
+        "mitigation": "Redundancy, automatic recovery, kill switch"
+      }
+    ]
+  },
+  "success_metrics": {
+    "phase_1": {
+      "completion_date": "Week 2",
+      "key_results": ["Trading engine operational", "Broker connected", "UI functional"]
+    },
+    "phase_2": {
+      "completion_date": "Week 4",
+      "key_results": ["Risk engine complete", "Pre-trade checks working", "Paper trading successful"]
+    },
+    "phase_3": {
+      "completion_date": "Week 6",
+      "key_results": ["Intelligence layer operational", "Signals generating", "Forecasts calibrated"]
+    },
+    "phase_4": {
+      "completion_date": "Week 8",
+      "key_results": ["Gate system working", "ML pipeline operational", "Live trading started"]
+    },
+    "overall": {
+      "timeline": "8 weeks on schedule",
+      "budget": "Within $900 budget",
+      "quality": "Zero critical bugs",
+      "performance": "Meeting all NFRs"
+    }
+  }
+}

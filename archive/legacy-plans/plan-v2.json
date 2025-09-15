@@ -1,0 +1,363 @@
+{
+  "project": "Trader AI - Pragmatic Automated Trading System",
+  "version": "2.0.0",
+  "goals": [
+    "Build simple, robust automated trading system with technical indicators",
+    "Start with $1000 minimum capital, scale through 5 capability gates",
+    "Implement monthly profit split (50% reinvest, 50% withdraw)",
+    "Collect data for future ML enhancements (after 500+ trades)",
+    "Maintain strict risk limits with P(ruin) < 10^-6 annually"
+  ],
+  "constraints": {
+    "initial_capital": 1000,
+    "regulatory": "PDT rules - swing trading only until $25k",
+    "technical": "Start simple, add complexity after proven success",
+    "risk": "Position limits, stop-losses, cash floor 70%+",
+    "validation": "100+ paper trades before live trading"
+  },
+  "architecture": {
+    "frontend": {
+      "framework": "Flask/FastAPI web interface",
+      "ui": "Bootstrap 5",
+      "charts": "Chart.js",
+      "complexity": "minimal"
+    },
+    "backend": {
+      "language": "Python 3.11+",
+      "database": "SQLite for simplicity",
+      "broker": "Alpaca API",
+      "indicators": "TA-Lib"
+    },
+    "infrastructure": {
+      "deployment": "Single Python process",
+      "monitoring": "Built-in logging",
+      "security": "API keys in env vars"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Minimum Viable Trader",
+      "duration_weeks": 2,
+      "goals": [
+        "Setup Python trading engine",
+        "Implement technical indicators (RSI, MACD, Bollinger)",
+        "Connect to Alpaca paper trading",
+        "Create basic position management",
+        "Build simple logging system"
+      ],
+      "deliverables": [
+        "Working Python script",
+        "Paper trading connectivity",
+        "Trade logging to SQLite",
+        "Basic technical signals"
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Risk & Validation",
+      "duration_weeks": 2,
+      "goals": [
+        "Add position sizing (Kelly criterion)",
+        "Implement stop-losses and limits",
+        "Create backtesting framework",
+        "Build P&L tracking",
+        "Execute 100+ paper trades"
+      ],
+      "deliverables": [
+        "Risk management system",
+        "Backtesting results",
+        "Performance metrics",
+        "Trade journal"
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Web Interface",
+      "duration_weeks": 2,
+      "goals": [
+        "Create Flask/FastAPI web UI",
+        "Add dashboard with positions",
+        "Build performance charts",
+        "Implement kill switch",
+        "Add configuration panel"
+      ],
+      "deliverables": [
+        "Web interface",
+        "Real-time dashboard",
+        "Emergency controls",
+        "Settings management"
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Live Trading",
+      "duration_weeks": 2,
+      "goals": [
+        "Activate live trading with $1000",
+        "Implement monthly profit siphon",
+        "Add email/SMS alerts",
+        "Create backup systems",
+        "Monitor performance"
+      ],
+      "deliverables": [
+        "Live trading system",
+        "Profit distribution",
+        "Alert system",
+        "Disaster recovery"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Create Python trading engine",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Core trading logic with technical indicators",
+      "dependencies": [],
+      "verify_cmds": ["python trader.py --test"],
+      "budget_loc": 300,
+      "budget_files": 3,
+      "estimated_hours": 8
+    },
+    {
+      "id": "task-002",
+      "title": "Implement technical indicators",
+      "type": "small",
+      "priority": "critical",
+      "scope": "RSI, MACD, Bollinger Bands, SMA",
+      "dependencies": ["task-001"],
+      "verify_cmds": ["python test_indicators.py"],
+      "budget_loc": 200,
+      "budget_files": 2,
+      "estimated_hours": 6
+    },
+    {
+      "id": "task-003",
+      "title": "Connect Alpaca API",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Paper trading connection, order management",
+      "dependencies": ["task-001"],
+      "verify_cmds": ["python test_alpaca.py"],
+      "budget_loc": 150,
+      "budget_files": 2,
+      "estimated_hours": 4
+    },
+    {
+      "id": "task-004",
+      "title": "Build position management",
+      "type": "small",
+      "priority": "high",
+      "scope": "Track positions, calculate P&L, manage state",
+      "dependencies": ["task-003"],
+      "verify_cmds": ["python test_positions.py"],
+      "budget_loc": 200,
+      "budget_files": 2,
+      "estimated_hours": 6
+    },
+    {
+      "id": "task-005",
+      "title": "Implement risk management",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Position sizing, stop-losses, cash floor",
+      "dependencies": ["task-004"],
+      "verify_cmds": ["python test_risk.py"],
+      "budget_loc": 250,
+      "budget_files": 2,
+      "estimated_hours": 8
+    },
+    {
+      "id": "task-006",
+      "title": "Create backtesting framework",
+      "type": "multi",
+      "priority": "high",
+      "scope": "Historical data, strategy testing, metrics",
+      "dependencies": ["task-002"],
+      "verify_cmds": ["python backtest.py"],
+      "budget_loc": 400,
+      "budget_files": 3,
+      "estimated_hours": 12
+    },
+    {
+      "id": "task-007",
+      "title": "Build web interface",
+      "type": "multi",
+      "priority": "medium",
+      "scope": "Flask API, dashboard, charts",
+      "dependencies": ["task-005"],
+      "verify_cmds": ["python app.py", "curl http://localhost:5000"],
+      "budget_loc": 500,
+      "budget_files": 5,
+      "estimated_hours": 16
+    },
+    {
+      "id": "task-008",
+      "title": "Add kill switch",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Emergency stop, position flattening",
+      "dependencies": ["task-007"],
+      "verify_cmds": ["python test_killswitch.py"],
+      "budget_loc": 100,
+      "budget_files": 1,
+      "estimated_hours": 3
+    },
+    {
+      "id": "task-009",
+      "title": "Implement profit siphon",
+      "type": "small",
+      "priority": "medium",
+      "scope": "Monthly calculation, 50/50 split logic",
+      "dependencies": ["task-004"],
+      "verify_cmds": ["python test_siphon.py"],
+      "budget_loc": 150,
+      "budget_files": 1,
+      "estimated_hours": 4
+    },
+    {
+      "id": "task-010",
+      "title": "Setup alerts",
+      "type": "small",
+      "priority": "medium",
+      "scope": "Email/SMS for trades and errors",
+      "dependencies": ["task-007"],
+      "verify_cmds": ["python test_alerts.py"],
+      "budget_loc": 100,
+      "budget_files": 1,
+      "estimated_hours": 3
+    }
+  ],
+  "risk_analysis": {
+    "technical_risks": [
+      {
+        "risk": "Alpaca API downtime",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Graceful degradation, cached data, manual override"
+      },
+      {
+        "risk": "Strategy underperformance",
+        "probability": "high",
+        "impact": "medium",
+        "mitigation": "Start with proven indicators, paper trade extensively"
+      }
+    ],
+    "financial_risks": [
+      {
+        "risk": "Account depletion",
+        "probability": "medium",
+        "impact": "critical",
+        "mitigation": "$1000 minimum, 70% cash floor, position limits"
+      },
+      {
+        "risk": "PDT violation",
+        "probability": "low",
+        "impact": "high",
+        "mitigation": "Swing trading only, trade counter, automatic prevention"
+      }
+    ],
+    "operational_risks": [
+      {
+        "risk": "System failure during market hours",
+        "probability": "low",
+        "impact": "medium",
+        "mitigation": "Stop-losses on all positions, monitoring, alerts"
+      }
+    ]
+  },
+  "success_metrics": {
+    "phase_1": {
+      "code_complete": true,
+      "paper_connection": true,
+      "signals_generating": true
+    },
+    "phase_2": {
+      "paper_trades": 100,
+      "backtest_sharpe": ">0.5",
+      "risk_violations": 0
+    },
+    "phase_3": {
+      "ui_functional": true,
+      "kill_switch_tested": true,
+      "uptime": ">99%"
+    },
+    "phase_4": {
+      "live_trades": 20,
+      "monthly_profit": "positive",
+      "system_errors": 0
+    }
+  },
+  "resource_requirements": {
+    "development": {
+      "team_size": 1,
+      "estimated_hours": 80,
+      "estimated_weeks": 8
+    },
+    "infrastructure": {
+      "local_compute": "4GB RAM, 2 cores",
+      "storage": "10GB",
+      "network": "Broadband internet"
+    },
+    "capital": {
+      "minimum_trading": 1000,
+      "recommended": 2500,
+      "development_costs": 0
+    }
+  },
+  "dependencies": {
+    "python_libraries": [
+      "alpaca-py",
+      "pandas",
+      "numpy",
+      "ta-lib",
+      "flask",
+      "sqlalchemy",
+      "yfinance"
+    ],
+    "data_sources": [
+      "Alpaca market data (free)",
+      "Yahoo Finance (free)",
+      "FRED (optional)"
+    ],
+    "services": [
+      "Alpaca brokerage",
+      "Email service (Gmail)",
+      "SMS (Twilio optional)"
+    ]
+  },
+  "gate_progression": {
+    "G0": {
+      "capital_range": "$1000-$2499",
+      "universe": ["SPY", "QQQ", "IWM"],
+      "max_position": 200,
+      "restrictions": "swing_trading_only"
+    },
+    "G1": {
+      "capital_range": "$2500-$4999",
+      "universe": ["SPY", "QQQ", "IWM", "XLF", "XLE", "XLK"],
+      "max_position": 500,
+      "features": "profit_siphon_enabled"
+    },
+    "G2": {
+      "capital_range": "$5000-$9999",
+      "universe": ["previous", "GLD", "TLT"],
+      "max_position": 1000,
+      "features": "pairs_trading"
+    },
+    "G3": {
+      "capital_range": "$10000-$24999",
+      "universe": ["previous", "international"],
+      "max_position": 2000,
+      "features": "ml_data_collection"
+    },
+    "G4": {
+      "capital_range": "$25000+",
+      "universe": "unrestricted",
+      "max_position": "5%_nav",
+      "features": "day_trading_enabled"
+    }
+  }
+}

@@ -1,0 +1,433 @@
+{
+  "project": "Trader AI - Gary/Taleb Automated Trading System",
+  "version": "1.0.0",
+  "goals": [
+    "Build autonomous trading system combining distributional analysis with antifragility",
+    "Start with $200 seed capital, scale through 13 capability gates",
+    "Implement 50/50 weekly profit split (reinvest/withdraw)",
+    "Create self-improving AI through outcome-based learning",
+    "Maintain P(ruin) < 10^-6 annually via hard risk limits"
+  ],
+  "constraints": {
+    "initial_capital": 200,
+    "regulatory": "PDT rules limit day trading under $25k",
+    "technical": "Local-first with optional broker connection",
+    "risk": "Must maintain barbell allocation (80% safe, 20% convex)",
+    "learning": "Requires 50+ trades for statistical significance"
+  },
+  "architecture": {
+    "frontend": {
+      "framework": "Tauri + Next.js",
+      "ui": "Tailwind CSS",
+      "charts": "Recharts/Victory",
+      "state": "Zustand"
+    },
+    "backend": {
+      "languages": ["Python 3.11+", "Rust for performance"],
+      "database": "TimescaleDB",
+      "event_store": "Kafka/Redpanda",
+      "ml": "PyTorch with LoRA adapters"
+    },
+    "infrastructure": {
+      "deployment": "Docker Compose",
+      "monitoring": "Prometheus/Grafana",
+      "security": "Hardware key + OS keychain"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Foundation",
+      "duration_weeks": 4,
+      "goals": [
+        "Setup project structure with Tauri/Next.js",
+        "Integrate Freqtrade as execution engine",
+        "Implement G0 gate ($200-$499) logic",
+        "Create basic UI with 4 core screens",
+        "Setup paper trading with Alpaca"
+      ],
+      "deliverables": [
+        "Working desktop app with basic UI",
+        "Paper trading connectivity",
+        "WORM audit logging",
+        "Basic DPI/NG signal calculations"
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Risk Framework",
+      "duration_weeks": 4,
+      "goals": [
+        "Implement EVT tail modeling",
+        "Build barbell allocator",
+        "Create pre-trade risk checks",
+        "Add kill switch functionality",
+        "Implement weekly siphon logic"
+      ],
+      "deliverables": [
+        "Complete risk management system",
+        "CVaR and ruin probability calculations",
+        "Automated position sizing",
+        "Emergency stop mechanisms"
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Intelligence Layer",
+      "duration_weeks": 6,
+      "goals": [
+        "Build Distributional Flow Ledger (DFL)",
+        "Implement Narrative Gap detection",
+        "Create regime detection (HMM)",
+        "Add causal modeling framework",
+        "Integrate local LLM for analysis"
+      ],
+      "deliverables": [
+        "Complete signal generation pipeline",
+        "Regime switchboard with 5 states",
+        "Forecast card system",
+        "Training data collection"
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Learning System",
+      "duration_weeks": 4,
+      "goals": [
+        "Setup supervised fine-tuning pipeline",
+        "Implement preference learning (DPO)",
+        "Create offline RL rewards",
+        "Build calibration scoring",
+        "Add causal refutation tests"
+      ],
+      "deliverables": [
+        "Self-improving AI system",
+        "Performance attribution",
+        "Automated model updates",
+        "Evaluation gates"
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Production Readiness",
+      "duration_weeks": 4,
+      "goals": [
+        "Implement live trading with safeguards",
+        "Add multi-broker support",
+        "Create gate progression logic",
+        "Build compliance reporting",
+        "Setup disaster recovery"
+      ],
+      "deliverables": [
+        "Production-ready system",
+        "Complete documentation",
+        "Deployment scripts",
+        "User manual"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Setup project infrastructure",
+      "type": "multi",
+      "priority": "critical",
+      "scope": "Create Tauri app, setup Docker, configure databases",
+      "dependencies": [],
+      "verify_cmds": ["docker-compose up -d", "npm run tauri dev"],
+      "budget_loc": 500,
+      "budget_files": 15,
+      "estimated_hours": 16
+    },
+    {
+      "id": "task-002",
+      "title": "Integrate Freqtrade framework",
+      "type": "multi",
+      "priority": "critical",
+      "scope": "Fork Freqtrade, adapt for traditional markets, create abstraction layer",
+      "dependencies": ["task-001"],
+      "verify_cmds": ["python -m pytest tests/", "python freqtrade backtesting"],
+      "budget_loc": 1000,
+      "budget_files": 20,
+      "estimated_hours": 24
+    },
+    {
+      "id": "task-003",
+      "title": "Build core UI screens",
+      "type": "multi",
+      "priority": "high",
+      "scope": "Dashboard, Trade Composer, Risk HUD, Settings",
+      "dependencies": ["task-001"],
+      "verify_cmds": ["npm run test", "npm run build"],
+      "budget_loc": 2000,
+      "budget_files": 30,
+      "estimated_hours": 40
+    },
+    {
+      "id": "task-004",
+      "title": "Implement Alpaca broker adapter",
+      "type": "small",
+      "priority": "high",
+      "scope": "Paper and live trading connections, order management",
+      "dependencies": ["task-002"],
+      "verify_cmds": ["python test_alpaca.py", "python paper_trade.py"],
+      "budget_loc": 500,
+      "budget_files": 5,
+      "estimated_hours": 12
+    },
+    {
+      "id": "task-005",
+      "title": "Create EVT tail modeling",
+      "type": "multi",
+      "priority": "critical",
+      "scope": "Peaks-over-threshold, GPD fitting, CVaR calculations",
+      "dependencies": ["task-002"],
+      "verify_cmds": ["python test_evt.py", "python validate_tails.py"],
+      "budget_loc": 750,
+      "budget_files": 8,
+      "estimated_hours": 20
+    },
+    {
+      "id": "task-006",
+      "title": "Build barbell allocator",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Safe/convex split logic, rebalancing rules",
+      "dependencies": ["task-005"],
+      "verify_cmds": ["python test_barbell.py"],
+      "budget_loc": 400,
+      "budget_files": 4,
+      "estimated_hours": 10
+    },
+    {
+      "id": "task-007",
+      "title": "Implement DPI signal generation",
+      "type": "multi",
+      "priority": "high",
+      "scope": "Distributional flow calculations, cohort analysis",
+      "dependencies": ["task-002"],
+      "verify_cmds": ["python test_dpi.py", "python backtest_signals.py"],
+      "budget_loc": 800,
+      "budget_files": 10,
+      "estimated_hours": 20
+    },
+    {
+      "id": "task-008",
+      "title": "Create Narrative Gap detector",
+      "type": "multi",
+      "priority": "high",
+      "scope": "NLP for consensus extraction, gap calculations",
+      "dependencies": ["task-007"],
+      "verify_cmds": ["python test_ng.py", "python validate_nlp.py"],
+      "budget_loc": 1000,
+      "budget_files": 12,
+      "estimated_hours": 24
+    },
+    {
+      "id": "task-009",
+      "title": "Build regime detection (HMM)",
+      "type": "multi",
+      "priority": "medium",
+      "scope": "Hidden Markov Model, changepoint detection",
+      "dependencies": ["task-007", "task-008"],
+      "verify_cmds": ["python test_regime.py", "python validate_states.py"],
+      "budget_loc": 600,
+      "budget_files": 6,
+      "estimated_hours": 16
+    },
+    {
+      "id": "task-010",
+      "title": "Implement gate progression system",
+      "type": "multi",
+      "priority": "high",
+      "scope": "13 capability gates, unlock logic, compliance checks",
+      "dependencies": ["task-006"],
+      "verify_cmds": ["python test_gates.py", "python simulate_progression.py"],
+      "budget_loc": 700,
+      "budget_files": 8,
+      "estimated_hours": 16
+    },
+    {
+      "id": "task-011",
+      "title": "Create weekly siphon mechanism",
+      "type": "small",
+      "priority": "medium",
+      "scope": "50/50 profit split, internal journaling",
+      "dependencies": ["task-004"],
+      "verify_cmds": ["python test_siphon.py"],
+      "budget_loc": 300,
+      "budget_files": 3,
+      "estimated_hours": 8
+    },
+    {
+      "id": "task-012",
+      "title": "Build local LLM integration",
+      "type": "multi",
+      "priority": "medium",
+      "scope": "LoRA adapters, fine-tuning pipeline, inference",
+      "dependencies": ["task-008"],
+      "verify_cmds": ["python test_llm.py", "python benchmark_inference.py"],
+      "budget_loc": 1200,
+      "budget_files": 15,
+      "estimated_hours": 30
+    },
+    {
+      "id": "task-013",
+      "title": "Implement kill switch and safeguards",
+      "type": "small",
+      "priority": "critical",
+      "scope": "Emergency stops, one-click flatten, hardware key",
+      "dependencies": ["task-004"],
+      "verify_cmds": ["python test_killswitch.py", "python simulate_emergency.py"],
+      "budget_loc": 400,
+      "budget_files": 4,
+      "estimated_hours": 10
+    },
+    {
+      "id": "task-014",
+      "title": "Create audit and compliance system",
+      "type": "multi",
+      "priority": "high",
+      "scope": "WORM logs, decision artifacts, compliance reports",
+      "dependencies": ["task-001"],
+      "verify_cmds": ["python test_audit.py", "python generate_report.py"],
+      "budget_loc": 600,
+      "budget_files": 8,
+      "estimated_hours": 16
+    },
+    {
+      "id": "task-015",
+      "title": "Build learning and calibration system",
+      "type": "multi",
+      "priority": "medium",
+      "scope": "SFT, DPO, offline RL, calibration scoring",
+      "dependencies": ["task-012"],
+      "verify_cmds": ["python test_learning.py", "python validate_calibration.py"],
+      "budget_loc": 1500,
+      "budget_files": 18,
+      "estimated_hours": 36
+    }
+  ],
+  "risk_analysis": {
+    "technical_risks": [
+      {
+        "risk": "Freqtrade integration complexity",
+        "probability": "high",
+        "impact": "high",
+        "mitigation": "Start with minimal integration, expand gradually"
+      },
+      {
+        "risk": "Real-time data feed reliability",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Multiple data sources, graceful degradation"
+      },
+      {
+        "risk": "Model overfitting to recent data",
+        "probability": "high",
+        "impact": "medium",
+        "mitigation": "Out-of-sample validation, regime variety in training"
+      }
+    ],
+    "financial_risks": [
+      {
+        "risk": "ULTY/AMDY NAV decay",
+        "probability": "high",
+        "impact": "high",
+        "mitigation": "Diversify early (G1), monitor distributions closely"
+      },
+      {
+        "risk": "Insufficient capital for viable trading",
+        "probability": "high",
+        "impact": "medium",
+        "mitigation": "Consider adding capital, focus on percentage gains"
+      },
+      {
+        "risk": "PDT rule violations",
+        "probability": "low",
+        "impact": "high",
+        "mitigation": "Cash account usage, swing trading focus"
+      }
+    ],
+    "operational_risks": [
+      {
+        "risk": "Broker API failures",
+        "probability": "medium",
+        "impact": "medium",
+        "mitigation": "Multi-broker support, manual override capability"
+      },
+      {
+        "risk": "System downtime during critical events",
+        "probability": "low",
+        "impact": "high",
+        "mitigation": "Redundant systems, mobile alerts, kill switch"
+      }
+    ]
+  },
+  "success_metrics": {
+    "phase_1": {
+      "paper_trades_executed": 50,
+      "system_uptime": "99%",
+      "ui_responsiveness": "<100ms"
+    },
+    "phase_2": {
+      "risk_checks_passed": "100%",
+      "cvar_accuracy": "±5%",
+      "kill_switch_response": "<500ms"
+    },
+    "phase_3": {
+      "signal_generation_latency": "<1s",
+      "regime_detection_accuracy": ">70%",
+      "forecast_calibration": ">0.5"
+    },
+    "phase_4": {
+      "model_improvement": ">10%",
+      "calibration_score": ">0.6",
+      "causal_tests_passed": "100%"
+    },
+    "phase_5": {
+      "live_trades_successful": ">95%",
+      "compliance_violations": 0,
+      "disaster_recovery_time": "<15min"
+    }
+  },
+  "resource_requirements": {
+    "development": {
+      "team_size": 1,
+      "estimated_hours": 380,
+      "estimated_weeks": 22
+    },
+    "infrastructure": {
+      "local_compute": "16GB RAM, 4 cores minimum",
+      "storage": "100GB SSD",
+      "network": "Stable broadband, <50ms to broker"
+    },
+    "capital": {
+      "initial_trading": 200,
+      "recommended_minimum": 1000,
+      "development_costs": 0
+    }
+  },
+  "dependencies": {
+    "external_libraries": [
+      "freqtrade",
+      "alpaca-py",
+      "pytorch",
+      "scipy (EVT)",
+      "hmmlearn",
+      "transformers"
+    ],
+    "data_sources": [
+      "Alpaca market data",
+      "FRED economic data",
+      "Yahoo Finance",
+      "News APIs"
+    ],
+    "services": [
+      "Alpaca brokerage",
+      "Alternative: IBKR",
+      "Time series database",
+      "Event streaming"
+    ]
+  }
+}

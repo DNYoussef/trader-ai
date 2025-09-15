@@ -1,0 +1,65 @@
+{
+  "configuration": {
+    "targetUrl": "http://localhost:3000",
+    "concurrency": 5,
+    "expectedRps": 50,
+    "duration": 30000,
+    "timeout": 5000
+  },
+  "performance": {
+    "totalRequests": 1392,
+    "successfulRequests": 0,
+    "failedRequests": 1392,
+    "successRate": 0,
+    "actualRps": 46.12,
+    "rpsVariance": -7.76
+  },
+  "latency": {
+    "average": 0,
+    "min": null,
+    "max": 0,
+    "p50": 0,
+    "p95": 0,
+    "p99": 0
+  },
+  "resources": {
+    "memoryOverheadPercent": -0.36,
+    "cpuUsageMilliseconds": 0.03,
+    "peakMemoryMB": 41.59765625,
+    "averageMemoryMB": 39.93547952586207
+  },
+  "compliance": {
+    "overheadCompliant": true,
+    "latencyCompliant": true,
+    "throughputCompliant": true,
+    "successRateCompliant": false
+  },
+  "errors": {
+    "totalErrors": 1392,
+    "errorRate": 100,
+    "errorTypes": {
+      "unknown": 1392
+    }
+  },
+  "execution": {
+    "startTime": "2025-09-15T01:31:14.360Z",
+    "endTime": "2025-09-15T01:31:44.543Z",
+    "actualDuration": 30183,
+    "executionEnvironment": {
+      "nodeVersion": "v20.17.0",
+      "platform": "win32",
+      "cpuArchitecture": "x64",
+      "totalMemory": 17063505920,
+      "freeMemory": 2736713728,
+      "cpuCores": 12
+    }
+  },
+  "assessment": {
+    "grade": "A",
+    "complianceScore": 75,
+    "passedChecks": 3,
+    "totalChecks": 4,
+    "recommendation": "GOOD - System meets most performance requirements",
+    "productionReady": true
+  }
+}
