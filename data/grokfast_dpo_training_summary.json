@@ -1,0 +1,25 @@
+{
+  "total_scenarios": 79,
+  "total_strategy_tests": 632,
+  "strategy_performance": {
+    "tail_hedge": -0.005,
+    "volatility_harvest": -0.005,
+    "crisis_alpha": -0.003933005022841979,
+    "momentum_explosion": -0.005,
+    "mean_reversion": -0.005,
+    "correlation_breakdown": -0.005,
+    "inequality_arbitrage": -0.005,
+    "event_catalyst": -0.0036926842053825256
+  },
+  "best_strategy": "event_catalyst",
+  "training_metrics": {},
+  "noise_analysis": {
+    "noise_injection_rate": 0,
+    "total_preference_pairs": 0,
+    "memorization_analysis": {
+      "status": "no_data"
+    }
+  },
+  "grokfast_enabled": true,
+  "anti_memorization_validated": false
+}

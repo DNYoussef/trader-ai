@@ -1,0 +1,83 @@
+{
+  "total_scenarios": 48,
+  "total_strategy_tests": 384,
+  "average_performance_by_strategy": {
+    "tail_hedge": -0.005,
+    "volatility_harvest": -0.005,
+    "crisis_alpha": -0.003966960171472272,
+    "momentum_explosion": -0.005,
+    "mean_reversion": -0.005,
+    "correlation_breakdown": -0.005,
+    "inequality_arbitrage": -0.005,
+    "event_catalyst": -0.003722660079881763
+  },
+  "strategy_rankings": {
+    "tail_hedge": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "volatility_harvest": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "crisis_alpha": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.003966960171472272,
+      "performance_std": 0.0022081789134292132
+    },
+    "momentum_explosion": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "mean_reversion": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "correlation_breakdown": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "inequality_arbitrage": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.005,
+      "performance_std": 0.0
+    },
+    "event_catalyst": {
+      "win_rate": 0,
+      "chosen_count": 0,
+      "rejected_count": 0,
+      "avg_performance": -0.003722660079881763,
+      "performance_std": 0.0022169893218966156
+    }
+  },
+  "preference_pair_stats": {
+    "total_pairs": 0,
+    "avg_performance_gap": 0.0,
+    "avg_confidence": 0.0,
+    "noise_injection_rate": 0.0
+  },
+  "memorization_analysis": {
+    "status": "insufficient_data"
+  },
+  "best_strategy_overall": "event_catalyst",
+  "most_consistent_strategy": "tail_hedge"
+}

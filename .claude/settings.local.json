@@ -26,7 +26,12 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(taskkill:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:arxiv.org)",
+      "Bash(chcp 65001)",
+      "Bash(nvidia-smi:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

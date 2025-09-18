@@ -1,0 +1,46 @@
+{
+  "training_config": {
+    "max_iterations": 1000,
+    "batch_size": 32,
+    "validation_every": 10,
+    "grokking_threshold": 0.85,
+    "noise_tolerance": 0.1,
+    "early_stopping_patience": 50
+  },
+  "model_config": {
+    "input_size": 24,
+    "hidden_size": 128,
+    "num_strategies": 8,
+    "learning_rate": 0.0003,
+    "grokfast_alpha": 0.98,
+    "grokfast_lambda": 2.0
+  },
+  "training_history": {
+    "iteration": [
+      0,
+      10
+    ],
+    "clean_accuracy": [
+      0.0,
+      0.6000000238418579
+    ],
+    "noisy_accuracy": [
+      0.0,
+      0.84375
+    ],
+    "generalization_gap": [
+      0.0,
+      -0.2437499761581421
+    ],
+    "grokking_score": [
+      0.0,
+      1.4062499441206477
+    ]
+  },
+  "data_generation_stats": {
+    "total_generated": 416,
+    "base_scenarios": 5,
+    "noise_features": 9
+  },
+  "final_grokking_score": 1.4062499441206477
+}
