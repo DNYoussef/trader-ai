@@ -44,89 +44,8 @@ except ImportError as e:
     logger.warning(f"MOCK MODE: Alpaca-py not available - {e}")
 
 
-class MockAlpacaClient:
-    """Mock Alpaca client for development without Alpaca library."""
-    
-    def __init__(self, api_key: str, secret_key: str, paper: bool = True):
-        self.paper = paper
-        self._account_value = Decimal("100000.00")
-        self._cash_balance = Decimal("50000.00")
-        self._positions = {}
-        self._orders = {}
-        
-    async def get_account(self):
-        """Mock account data."""
-        return type('MockAccount', (), {
-            'portfolio_value': str(self._account_value),
-            'cash': str(self._cash_balance),
-            'buying_power': str(self._cash_balance * 2),  # Simulate 2:1 margin
-            'regt_buying_power': str(self._cash_balance * 2),
-            'daytrading_buying_power': str(self._cash_balance * 4),
-            'non_marginable_buying_power': str(self._cash_balance),
-        })()
-    
-    async def get_all_positions(self):
-        """Mock positions data."""
-        return []
-    
-    async def get_open_position(self, symbol: str):
-        """Mock single position data."""
-        return None
-    
-    async def submit_order(self, order_data):
-        """Mock order submission."""
-        order_id = str(uuid.uuid4())
-        mock_order = type('MockOrder', (), {
-            'id': order_id,
-            'client_order_id': getattr(order_data, 'client_order_id', None),
-            'symbol': order_data.symbol,
-            'qty': str(getattr(order_data, 'qty', 0)) if hasattr(order_data, 'qty') else None,
-            'notional': str(getattr(order_data, 'notional', 0)) if hasattr(order_data, 'notional') and order_data.notional else None,
-            'side': order_data.side.value,
-            'order_type': order_data.type.value if hasattr(order_data, 'type') else 'market',
-            'time_in_force': order_data.time_in_force.value,
-            'limit_price': str(getattr(order_data, 'limit_price', 0)) if hasattr(order_data, 'limit_price') and order_data.limit_price else None,
-            'stop_price': str(getattr(order_data, 'stop_price', 0)) if hasattr(order_data, 'stop_price') and order_data.stop_price else None,
-            'trail_price': str(getattr(order_data, 'trail_price', 0)) if hasattr(order_data, 'trail_price') and order_data.trail_price else None,
-            'trail_percent': str(getattr(order_data, 'trail_percent', 0)) if hasattr(order_data, 'trail_percent') and order_data.trail_percent else None,
-            'extended_hours': getattr(order_data, 'extended_hours', False),
-            'status': 'filled',
-            'filled_qty': str(getattr(order_data, 'qty', 0)),
-            'filled_avg_price': '100.00',  # Mock price
-            'created_at': datetime.now(timezone.utc),
-            'updated_at': datetime.now(timezone.utc),
-            'submitted_at': datetime.now(timezone.utc),
-            'filled_at': datetime.now(timezone.utc),
-            'asset_id': str(uuid.uuid4()),
-            'asset_class': 'us_equity',
-        })()
-        
-        self._orders[order_id] = mock_order
-        return mock_order
-    
-    async def get_order_by_id(self, order_id: str):
-        """Mock get order by ID."""
-        return self._orders.get(order_id)
-    
-    async def get_orders(self, **kwargs):
-        """Mock get orders."""
-        return list(self._orders.values())
-    
-    async def cancel_order_by_id(self, order_id: str):
-        """Mock cancel order."""
-        if order_id in self._orders:
-            self._orders[order_id].status = 'canceled'
-            return True
-        return False
-    
-    async def cancel_all_orders(self):
-        """Mock cancel all orders."""
-        canceled = 0
-        for order in self._orders.values():
-            if order.status in ['new', 'partially_filled', 'pending_new']:
-                order.status = 'canceled'
-                canceled += 1
-        return canceled
+# NO MOCK CLIENT - REAL ALPACA ONLY
+# Use real_alpaca_adapter.py for production
 
 
 class AlpacaAdapter(BrokerInterface):
@@ -142,14 +61,16 @@ class AlpacaAdapter(BrokerInterface):
                 - secret_key: Alpaca secret key
                 - paper_trading: Whether to use paper trading (default: True)
                 - base_url: Optional custom base URL
-                - mock_mode: Force mock mode even if alpaca-py is available (default: False)
+                - mock_mode: Not supported in production (will raise error)
         """
         super().__init__(config)
 
         self.api_key = config.get('api_key', '')
         self.secret_key = config.get('secret_key', '')
         self.base_url = config.get('base_url')
-        self.mock_mode = config.get('mock_mode', False)
+        # Mock mode not supported in production
+        if config.get('mock_mode', False):
+            raise ValueError("Mock mode not supported in production environment")
 
         # Initialize clients
         self.trading_client = None
@@ -159,34 +80,25 @@ class AlpacaAdapter(BrokerInterface):
         # Alpaca supports up to 6 decimal places for fractional shares
         self.qty_precision = 6
 
-        # Validate credentials for production mode (unless in mock mode)
-        if ALPACA_AVAILABLE and not self.mock_mode and not (self.api_key and self.secret_key):
-            raise ValueError("PRODUCTION ERROR: API credentials required when alpaca-py is available")
+        # Validate credentials for production mode
+        if not (self.api_key and self.secret_key):
+            raise ValueError("PRODUCTION ERROR: API credentials required for trading")
 
-        # Determine operating mode
-        if self.mock_mode or not ALPACA_AVAILABLE:
-            mode = "MOCK"
+        # Determine operating mode - no mock mode in production
+        if not ALPACA_AVAILABLE:
+            raise ImportError("alpaca-py library required for production trading")
         elif self.is_paper_trading:
             mode = "PAPER"
         else:
             mode = "LIVE"
 
-        logger.info(f"Initialized Alpaca adapter - Mode: {mode}, Library Available: {ALPACA_AVAILABLE}, Mock Mode: {self.mock_mode}")
+        logger.info(f"Initialized Alpaca adapter - Mode: {mode}, Library Available: {ALPACA_AVAILABLE}")
 
     async def connect(self) -> bool:
         """Connect to Alpaca API."""
         try:
-            if self.mock_mode or not ALPACA_AVAILABLE:
-                if not ALPACA_AVAILABLE:
-                    logger.warning("Alpaca library not available. Install with: pip install alpaca-py")
-                logger.info("Using mock mode for development/testing")
-                self.trading_client = MockAlpacaClient(
-                    api_key=self.api_key or "mock_key",
-                    secret_key=self.secret_key or "mock_secret",
-                    paper=self.is_paper_trading
-                )
-                self.is_connected = True
-                return True
+            if not ALPACA_AVAILABLE:
+                raise ConnectionError("PRODUCTION ERROR: alpaca-py library required for trading. Install with: pip install alpaca-py")
             
             # Initialize real Alpaca clients
             client_config = {
@@ -208,7 +120,7 @@ class AlpacaAdapter(BrokerInterface):
             account = await self._safe_api_call(self.trading_client.get_account)
             if account:
                 self.is_connected = True
-                logger.info(f"Connected to Alpaca (Account: {account.account_number if hasattr(account, 'account_number') else 'Mock'})")
+                logger.info(f"Connected to Alpaca (Account: {account.account_number})")
                 return True
             
             return False
@@ -238,9 +150,7 @@ class AlpacaAdapter(BrokerInterface):
         
         try:
             if not ALPACA_AVAILABLE:
-                # Mock: assume market is open during business hours
-                now = datetime.now()
-                return 9 <= now.hour < 16  # Simplified market hours
+                raise ConnectionError("Alpaca library required for market status")
             
             clock = await self._safe_api_call(self.trading_client.get_clock)
             return clock.is_open if clock else False
@@ -465,8 +375,7 @@ class AlpacaAdapter(BrokerInterface):
         
         try:
             if not ALPACA_AVAILABLE:
-                # Mock price
-                return Decimal("100.00")
+                raise ConnectionError("Alpaca library required for price data")
             
             # Try to get latest trade first
             trade_request = StockLatestTradeRequest(symbol_or_symbols=[symbol])
@@ -495,13 +404,7 @@ class AlpacaAdapter(BrokerInterface):
         
         try:
             if not ALPACA_AVAILABLE:
-                # Mock trade data
-                return {
-                    'symbol': symbol,
-                    'price': 100.00,
-                    'size': 100,
-                    'timestamp': datetime.now(timezone.utc)
-                }
+                raise ConnectionError("Alpaca library required for trade data")
             
             trade_request = StockLatestTradeRequest(symbol_or_symbols=[symbol])
             trades = await self._safe_api_call(
@@ -532,16 +435,7 @@ class AlpacaAdapter(BrokerInterface):
         
         try:
             if not ALPACA_AVAILABLE:
-                # Mock quote data
-                return {
-                    'symbol': symbol,
-                    'bid': 99.50,
-                    'ask': 100.50,
-                    'bid_size': 100,
-                    'ask_size': 100,
-                    'midpoint': 100.00,
-                    'timestamp': datetime.now(timezone.utc)
-                }
+                raise ConnectionError("Alpaca library required for quote data")
             
             quote_request = StockLatestQuoteRequest(symbol_or_symbols=[symbol])
             quotes = await self._safe_api_call(
@@ -615,21 +509,7 @@ class AlpacaAdapter(BrokerInterface):
     async def _convert_to_alpaca_order(self, order: Order):
         """Convert our Order to Alpaca order request."""
         if not ALPACA_AVAILABLE:
-            # Return mock request object
-            return type('MockOrderRequest', (), {
-                'symbol': order.symbol,
-                'qty': order.qty,
-                'notional': order.notional,
-                'side': type('Side', (), {'value': order.side})(),
-                'type': type('Type', (), {'value': order.order_type.value})(),
-                'time_in_force': type('TIF', (), {'value': order.time_in_force.value})(),
-                'limit_price': order.limit_price,
-                'stop_price': order.stop_price,
-                'trail_price': order.trail_price,
-                'trail_percent': order.trail_percent,
-                'extended_hours': order.extended_hours,
-                'client_order_id': order.client_order_id
-            })()
+            raise ImportError("alpaca-py library required for order conversion")
         
         # Convert side
         side = OrderSide.BUY if order.side.lower() == 'buy' else OrderSide.SELL

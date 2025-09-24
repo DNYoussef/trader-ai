@@ -81,4 +81,6 @@ tmp/
 # archive/
 
 # Performance test results
-performance_results/
+performance_results/# Large model files
+*.pth
+models/*.pth

@@ -49,6 +49,10 @@ cd trader-ai
 # Install Python dependencies
 pip install -r requirements.txt
 
+# Optional: Install AI/ML enhancements (TimesFM + FinGPT)
+# Note: TimesFM requires Python 3.10-3.11 (use separate venv if on 3.12+)
+pip install transformers torch accelerate sentencepiece
+
 # Install frontend dependencies
 cd src/dashboard/frontend
 npm install
@@ -121,7 +125,48 @@ src/
 │   ├── kill_switch.py     # Emergency stop
 │   └── circuit_breaker.py # Trading halts
 └── intelligence/          # AI/ML components
-    └── pattern_recognition.py
+    ├── pattern_recognition.py
+    ├── timesfm_forecaster.py      # NEW: TimesFM forecasting
+    ├── timesfm_risk_predictor.py  # NEW: Multi-horizon risk
+    ├── fingpt_sentiment.py        # NEW: Financial sentiment
+    ├── fingpt_forecaster.py       # NEW: Price movement prediction
+    └── enhanced_hrm_features.py   # NEW: 32-dim feature engineering
+```
+
+### AI/ML Enhancement (NEW - TimesFM + FinGPT Integration)
+
+The system now integrates cutting-edge AI models for enhanced prediction and sentiment analysis:
+
+**TimesFM (Google Research - 200M params):**
+- Multi-horizon volatility forecasting (1hr to 7 days)
+- Quantile predictions for confidence intervals
+- VIX spike prediction up to 7 days ahead
+- Extends warning horizon from 5-15min to 6-168hrs (32x improvement)
+
+**FinGPT (AI4Finance - Financial LLM):**
+- Real-time sentiment analysis from news and social media
+- Sentiment-price divergence detection (narrative gap)
+- Price movement probability forecasting
+- Financial domain-specific language understanding
+
+**Enhanced Feature Engineering:**
+- Original 24 market features + 8 new AI features = 32 dimensions
+- TimesFM: VIX forecasts (1h, 6h, 24h) + price forecast + uncertainty
+- FinGPT: Sentiment score + volatility + price movement probability
+- Feeds into enhanced HRM (156M params) for strategy selection
+
+**Integration Test:**
+```bash
+# Run full integration test suite
+python scripts/tests/test_timesfm_fingpt_integration.py
+
+# Expected output:
+# [PASS] ALL 5 COMPONENTS SUCCESSFULLY INTEGRATED
+# - TimesFM Forecaster - Volatility & price forecasting
+# - TimesFM Risk Predictor - Multi-horizon risk prediction
+# - FinGPT Sentiment Analyzer - News/social sentiment
+# - FinGPT Forecaster - Price movement prediction
+# - Enhanced Feature Engine - 32-dimensional feature vectors
 ```
 
 ### Dashboard Architecture

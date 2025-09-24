@@ -31,7 +31,14 @@
       "WebFetch(domain:arxiv.org)",
       "Bash(chcp 65001)",
       "Bash(nvidia-smi:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Read(//c/Users/17175/Desktop/**)",
+      "Bash(claude mcp:*)",
+      "Read(//c/**)",
+      "Bash(findstr:*)",
+      "Bash(more:*)",
+      "Bash(tasklist)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
