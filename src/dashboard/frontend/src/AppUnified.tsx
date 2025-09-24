@@ -43,34 +43,7 @@ interface AppMode {
   features: string[];
 }
 
-interface Metrics {
-  portfolio_value: number;
-  p_ruin: number;
-  var_95: number;
-  var_99: number;
-  sharpe_ratio: number;
-  max_drawdown: number;
-  daily_pnl: number;
-  unrealized_pnl: number;
-  positions_count: number;
-}
-
-interface Position {
-  symbol: string;
-  quantity: number;
-  entry_price: number;
-  current_price: number;
-  pnl: number;
-  pnl_percent: number;
-}
-
-interface Alert {
-  id: string;
-  severity: 'info' | 'warning' | 'success' | 'error';
-  title: string;
-  message: string;
-  timestamp: Date;
-}
+// Types are imported from hooks - no need to duplicate
 
 // App modes for different use cases
 const APP_MODES: AppMode[] = [
@@ -100,42 +73,9 @@ const APP_MODES: AppMode[] = [
   }
 ];
 
-// Mock data
-const mockMetrics: Metrics = {
-  portfolio_value: 25432.18,
-  p_ruin: 0.12,
-  var_95: 1287.50,
-  var_99: 2103.25,
-  sharpe_ratio: 1.85,
-  max_drawdown: 0.08,
-  daily_pnl: 342.50,
-  unrealized_pnl: 1205.30,
-  positions_count: 5
-};
-
-const mockPositions: Position[] = [
-  { symbol: 'SPY', quantity: 50, entry_price: 445.20, current_price: 448.75, pnl: 177.50, pnl_percent: 0.80 },
-  { symbol: 'ULTY', quantity: 100, entry_price: 32.15, current_price: 33.20, pnl: 105.00, pnl_percent: 3.27 },
-  { symbol: 'AMDY', quantity: 75, entry_price: 28.90, current_price: 29.15, pnl: 18.75, pnl_percent: 0.87 },
-  { symbol: 'VTIP', quantity: 30, entry_price: 49.80, current_price: 49.95, pnl: 4.50, pnl_percent: 0.30 },
-  { symbol: 'IAU', quantity: 200, entry_price: 41.25, current_price: 41.90, pnl: 130.00, pnl_percent: 1.58 }
-];
-
-const mockAlerts: Alert[] = [
-  { id: '1', severity: 'warning', title: 'High P(ruin)', message: 'P(ruin) approaching threshold at 12%', timestamp: new Date() },
-  { id: '2', severity: 'info', title: 'Market Update', message: 'SPY showing bullish momentum', timestamp: new Date() },
-  { id: '3', severity: 'success', title: 'Trade Executed', message: 'Successfully bought 50 shares of SPY', timestamp: new Date() }
-];
-
-const generateChartData = () => {
-  return Array.from({ length: 20 }, (_, i) => ({
-    timestamp: Date.now() - (19 - i) * 3600000,
-    portfolio_value: 25000 + Math.random() * 1000 + i * 50,
-    p_ruin: 0.08 + Math.random() * 0.08,
-    sharpe_ratio: 1.5 + Math.random() * 0.7,
-    var_95: 1200 + Math.random() * 200
-  }));
-};
+// Import data hooks for real data
+import { useTradingData } from './hooks/useTradingData';
+import { useAIData } from './hooks/useAIData';
 
 /**
  * Unified App Component - Consolidates all implementations
@@ -145,127 +85,58 @@ const AppUnified: React.FC = () => {
   // Core state
   const [appMode, setAppMode] = useState<string>('enhanced');
   const [activeTab, setActiveTab] = useState<'overview' | 'terminal' | 'analysis' | 'learn' | 'progress'>('overview');
-  const [metrics, setMetrics] = useState<Metrics>(mockMetrics);
-  const [positions, setPositions] = useState<Position[]>(mockPositions);
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
-  const [chartData, setChartData] = useState(generateChartData());
 
-  // Connection states
-  const [apiConnected, setApiConnected] = useState(false);
+  // Use real data hooks instead of mock data
+  const {
+    metrics,
+    positions,
+    alerts,
+    gateStatus,
+    isConnected: apiConnected,
+    loading: tradingLoading,
+    error: tradingError
+  } = useTradingData();
+
+  const {
+    timesfmVolatility,
+    fingptSentiment,
+    enhanced32D,
+    loading: aiLoading,
+    error: aiError
+  } = useAIData();
+
+  // WebSocket connection state
   const [wsConnected, setWsConnected] = useState(false);
+
+  // Generate chart data from real metrics
+  const [chartData, setChartData] = useState<any[]>([]);
 
   const currentMode = APP_MODES.find(mode => mode.id === appMode) || APP_MODES[1];
 
-  // API connection test
+  // Update chart data when metrics change
   useEffect(() => {
-    const testConnection = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/health');
-        if (response.ok) {
-          setApiConnected(true);
-          // Fetch real data
-          const metricsResponse = await fetch('http://localhost:8000/api/metrics/current');
-          if (metricsResponse.ok) {
-            const data = await metricsResponse.json();
-            setMetrics(prev => ({ ...prev, ...data }));
-          }
-        }
-      } catch (error) {
-        console.log('Backend not available, using mock data');
-        setApiConnected(false);
-      }
-    };
-
-    testConnection();
-    const interval = setInterval(testConnection, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // WebSocket connection for real-time updates
-  useEffect(() => {
-    if (!apiConnected) return;
-
-    const connectWebSocket = () => {
-      try {
-        const ws = new WebSocket(`ws://localhost:8000/ws/${appMode}_dashboard`);
-
-        ws.onopen = () => {
-          console.log('WebSocket connected');
-          setWsConnected(true);
+    if (metrics) {
+      setChartData(prev => {
+        const newPoint = {
+          timestamp: Date.now(),
+          portfolio_value: metrics.portfolio_value,
+          p_ruin: metrics.p_ruin,
+          sharpe_ratio: metrics.sharpe_ratio,
+          var_95: metrics.var_95
         };
 
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'metrics_update') {
-              setMetrics(prev => ({ ...prev, ...data.metrics }));
-            } else if (data.type === 'position_update') {
-              setPositions(data.positions || mockPositions);
-            } else if (data.type === 'alert') {
-              setAlerts(prev => [data.alert, ...prev].slice(0, 10));
-            } else if (data.type === 'chart_update') {
-              setChartData(prev => [...prev.slice(1), data.point]);
-            }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-          }
-        };
-
-        ws.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          setWsConnected(false);
-        };
-
-        ws.onclose = () => {
-          console.log('WebSocket disconnected');
-          setWsConnected(false);
-          // Reconnect after 3 seconds
-          setTimeout(connectWebSocket, 3000);
-        };
-
-        return ws;
-      } catch (error) {
-        console.error('Failed to connect WebSocket:', error);
-        return null;
-      }
-    };
-
-    const ws = connectWebSocket();
-
-    return () => {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
-    };
-  }, [apiConnected, appMode]);
-
-  // Simulate real-time updates when no WebSocket
-  useEffect(() => {
-    if (!wsConnected) {
-      const interval = setInterval(() => {
-        setMetrics(prev => ({
-          ...prev,
-          portfolio_value: prev.portfolio_value + (Math.random() - 0.5) * 100,
-          daily_pnl: prev.daily_pnl + (Math.random() - 0.5) * 20,
-          p_ruin: Math.max(0, Math.min(1, prev.p_ruin + (Math.random() - 0.5) * 0.005))
-        }));
-
-        setChartData(prev => [
-          ...prev.slice(1),
-          {
-            timestamp: Date.now(),
-            portfolio_value: metrics.portfolio_value + (Math.random() - 0.5) * 100,
-            p_ruin: metrics.p_ruin,
-            sharpe_ratio: metrics.sharpe_ratio + (Math.random() - 0.5) * 0.1,
-            var_95: metrics.var_95 + (Math.random() - 0.5) * 50
-          }
-        ]);
-      }, 5000);
-
-      return () => clearInterval(interval);
+        // Keep last 20 points
+        const updated = [...prev.slice(-19), newPoint];
+        return updated.length > 0 ? updated : Array(20).fill(newPoint);
+      });
     }
-  }, [wsConnected, metrics]);
+  }, [metrics]);
+
+  // WebSocket connection status is handled by useTradingData hook
+  useEffect(() => {
+    // The useTradingData hook manages WebSocket connection
+    setWsConnected(apiConnected);
+  }, [apiConnected]);
 
   const getAvailableTabs = () => {
     const features = currentMode.features;
@@ -434,13 +305,13 @@ const AppUnified: React.FC = () => {
             {/* Enhanced Tables with Recent Alerts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {currentMode.features.includes('positions') && <PositionTable positions={positions} />}
-              <RecentAlerts alerts={alerts.map(alert => ({
-                id: alert.id,
-                type: alert.severity as 'warning' | 'info' | 'success' | 'error',
-                title: alert.title,
-                message: alert.message,
-                timestamp: alert.timestamp.toLocaleTimeString()
-              }))} />
+              <RecentAlerts alerts={alerts?.map(alert => ({
+                id: alert?.id || `alert-${Math.random()}`,
+                type: (alert?.severity || 'info') as 'warning' | 'info' | 'success' | 'error',
+                title: alert?.title || 'Alert',
+                message: alert?.message || '',
+                timestamp: alert?.timestamp ? alert.timestamp.toLocaleTimeString() : new Date().toLocaleTimeString()
+              })) || []} />
             </div>
           </div>
         )}

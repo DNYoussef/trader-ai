@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
+import { useAIData } from '../hooks/useAIData';
 
 interface AISignalsProps {
-  dpiScore?: number;
-  signal?: 'BUY' | 'SELL' | 'HOLD';
-  confidence?: number;
+  // Props are now optional as we fetch data
 }
 
-export const AISignals: React.FC<AISignalsProps> = ({
-  dpiScore = 85,
-  signal = 'BUY',
-  confidence = 92
-}) => {
+export const AISignals: React.FC<AISignalsProps> = () => {
+  const { enhanced32D, getAggregateSignals, loading, error } = useAIData(5000); // 5 second refresh
+  const [dpiScore, setDpiScore] = useState<number>(0);
+  const [signal, setSignal] = useState<'BUY' | 'SELL' | 'HOLD'>('HOLD');
+  const [confidence, setConfidence] = useState<number>(0);
+
+  useEffect(() => {
+    // Get aggregate signals from all AI components
+    const aggregateSignals = getAggregateSignals();
+
+    // Update state with real AI data
+    setDpiScore(aggregateSignals.dpi_score || enhanced32D?.dpi_score || 75);
+    setSignal(aggregateSignals.signal);
+    setConfidence(aggregateSignals.confidence);
+  }, [enhanced32D, getAggregateSignals]);
   const getSignalColor = (signal: string) => {
     switch (signal) {
       case 'BUY': return 'bg-green-100 text-green-700';
@@ -59,8 +68,20 @@ export const AISignals: React.FC<AISignalsProps> = ({
           </div>
         </div>
 
+        {loading && (
+          <div className="text-center text-sm text-gray-500">
+            Loading AI signals...
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center text-xs text-red-500">
+            {error}
+          </div>
+        )}
+
         <div className="pt-2 text-xs text-gray-500 text-center">
-          Based on Gary's DPI methodology and Taleb's antifragility principles
+          Based on 5 AI Components: TimesFM, FinGPT & 32D Features
         </div>
       </CardContent>
     </Card>
