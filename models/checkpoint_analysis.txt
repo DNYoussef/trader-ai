@@ -1,0 +1,21 @@
+================================================================================
+ENHANCED HRM 32D TRAINING CHECKPOINT ANALYSIS
+================================================================================
+Generated: 2025-09-25 08:38:04
+
+Total Checkpoints Found: 1
+
+Checkpoint Details:
+----------------------------------------
+
+Checkpoint: enhanced_hrm_32d_checkpoint_5000.pth
+  Iteration: 5000
+  File Size: 81.75 MB
+  Modified: 2025-09-25 08:09:26.491012
+  Clean Accuracy: 0.625
+  Noisy Accuracy: 0.500
+  Grokking Score: 0.800
+  Generalization Gap: 0.125
+  Loss: 1.6268
+
+================================================================================

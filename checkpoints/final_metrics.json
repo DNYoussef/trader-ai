@@ -1,0 +1,8 @@
+{
+  "val_loss": 1.7636140584945679,
+  "val_accuracy": 0.0,
+  "top3_accuracy": 42.45810055865922,
+  "best_val_acc": 56.98324022346369,
+  "total_epochs": 30,
+  "date_trained": "2025-11-07T19:54:59.708578"
+}

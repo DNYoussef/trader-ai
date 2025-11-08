@@ -26,10 +26,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
+# Import constants
+sys.path.insert(0, str(Path(__file__).parent))
+import constants as C
+
 # Import AI dashboard integration
 try:
-    # Add current directory to path for direct imports
-    sys.path.insert(0, str(Path(__file__).parent))
     import ai_dashboard_integration
 
     # Import functions
@@ -98,7 +100,7 @@ class SimpleDashboardServer:
         """Configure CORS for frontend access."""
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["http://localhost:3000", "http://localhost:5173"],
+            allow_origins=C.CORS_ORIGINS,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -107,11 +109,11 @@ class SimpleDashboardServer:
     def setup_routes(self):
         """Setup API routes."""
 
-        @self.app.get("/")
+        @self.app.get(C.API_ROOT)
         async def root():
             return {"message": "Gary×Taleb Risk Dashboard API", "status": "running", "ai_enabled": AI_AVAILABLE}
 
-        @self.app.get("/api/health")
+        @self.app.get(C.API_HEALTH)
         async def health_check():
             return {
                 "status": "healthy",
@@ -120,23 +122,23 @@ class SimpleDashboardServer:
                 "ai_available": AI_AVAILABLE
             }
 
-        @self.app.get("/api/metrics/current")
+        @self.app.get(C.API_METRICS_CURRENT)
         async def get_current_metrics():
             """Get current risk metrics."""
             return self.data_provider.generate_metrics()
 
-        @self.app.get("/api/positions")
+        @self.app.get(C.API_POSITIONS)
         async def get_positions():
             """Get current positions."""
             return self.data_provider.generate_positions()
 
-        @self.app.get("/api/alerts")
+        @self.app.get(C.API_ALERTS)
         async def get_alerts():
             """Get active alerts."""
             return self.data_provider.generate_alerts()
 
         # AI-Enhanced endpoints
-        @self.app.get("/api/inequality/data")
+        @self.app.get(C.API_INEQUALITY_DATA)
         async def get_inequality_data():
             """Get AI-enhanced inequality panel data."""
             if AI_AVAILABLE:
@@ -144,7 +146,7 @@ class SimpleDashboardServer:
             else:
                 return self.data_provider.generate_inequality_data()
 
-        @self.app.get("/api/contrarian/opportunities")
+        @self.app.get(C.API_CONTRARIAN_OPPORTUNITIES)
         async def get_contrarian_opportunities():
             """Get AI-detected contrarian opportunities."""
             if AI_AVAILABLE:
@@ -152,7 +154,7 @@ class SimpleDashboardServer:
             else:
                 return self.data_provider.generate_contrarian_data()
 
-        @self.app.get("/api/ai/status")
+        @self.app.get(C.API_AI_STATUS)
         async def get_ai_status():
             """Get AI calibration and status data."""
             if AI_AVAILABLE:
@@ -160,7 +162,7 @@ class SimpleDashboardServer:
             else:
                 return self.data_provider.generate_ai_status()
 
-        @self.app.post("/api/trade/execute/{asset}")
+        @self.app.post(C.API_TRADE_EXECUTE)
         async def execute_ai_trade(asset: str):
             """Execute AI-recommended trade."""
             if AI_AVAILABLE:
@@ -168,7 +170,7 @@ class SimpleDashboardServer:
             else:
                 return {"success": False, "error": "AI not available in mock mode"}
 
-        @self.app.get("/api/barbell/allocation")
+        @self.app.get(C.API_BARBELL_ALLOCATION)
         async def get_barbell_allocation():
             """Get current barbell allocation status."""
             if AI_AVAILABLE:
@@ -178,7 +180,7 @@ class SimpleDashboardServer:
                 return self.data_provider.generate_barbell_allocation()
 
         # New AI Component Endpoints for 5 critical systems
-        @self.app.get("/api/ai/timesfm/volatility")
+        @self.app.get(C.API_AI_TIMESFM_VOLATILITY)
         async def get_timesfm_volatility():
             """Get TimesFM volatility and price forecasting data."""
             if AI_AVAILABLE and hasattr(ai_dashboard_integrator, 'get_timesfm_volatility_forecast'):
@@ -186,7 +188,7 @@ class SimpleDashboardServer:
             else:
                 return {"error": "TimesFM Forecaster not available", "fallback": True}
 
-        @self.app.get("/api/ai/timesfm/risk")
+        @self.app.get(C.API_AI_TIMESFM_RISK)
         async def get_timesfm_risk():
             """Get TimesFM multi-horizon risk predictions."""
             if AI_AVAILABLE and hasattr(ai_dashboard_integrator, 'get_timesfm_risk_predictions'):
@@ -194,7 +196,7 @@ class SimpleDashboardServer:
             else:
                 return {"error": "TimesFM Risk Predictor not available", "fallback": True}
 
-        @self.app.get("/api/ai/fingpt/sentiment")
+        @self.app.get(C.API_AI_FINGPT_SENTIMENT)
         async def get_fingpt_sentiment():
             """Get FinGPT news and social sentiment analysis."""
             if AI_AVAILABLE and hasattr(ai_dashboard_integrator, 'get_fingpt_sentiment_analysis'):
@@ -202,7 +204,7 @@ class SimpleDashboardServer:
             else:
                 return {"error": "FinGPT Sentiment Analyzer not available", "fallback": True}
 
-        @self.app.get("/api/ai/fingpt/forecast")
+        @self.app.get(C.API_AI_FINGPT_FORECAST)
         async def get_fingpt_forecast():
             """Get FinGPT price movement predictions."""
             if AI_AVAILABLE and hasattr(ai_dashboard_integrator, 'get_fingpt_price_forecast'):
@@ -210,7 +212,7 @@ class SimpleDashboardServer:
             else:
                 return {"error": "FinGPT Forecaster not available", "fallback": True}
 
-        @self.app.get("/api/ai/features/32d")
+        @self.app.get(C.API_AI_FEATURES_32D)
         async def get_enhanced_features():
             """Get 32-dimensional enhanced feature vectors."""
             if AI_AVAILABLE and hasattr(ai_dashboard_integrator, 'get_enhanced_32d_features'):
@@ -219,7 +221,7 @@ class SimpleDashboardServer:
                 return {"error": "Enhanced Feature Engine not available", "fallback": True}
 
         # Trading integration endpoints
-        @self.app.get("/api/gates/status")
+        @self.app.get(C.API_GATES_STATUS)
         async def get_gate_status():
             """Get real gate progression status from trading engine."""
             try:
@@ -260,7 +262,7 @@ class SimpleDashboardServer:
                 logger.error(f"Error getting gate status: {e}")
                 return {"error": str(e), "fallback": True}
 
-        @self.app.post("/api/trading/execute")
+        @self.app.post(C.API_TRADING_EXECUTE)
         async def execute_trade(trade_request: dict):
             """Execute real trades through trading engine."""
             try:
@@ -292,7 +294,7 @@ class SimpleDashboardServer:
                 logger.error(f"Error executing trade: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.app.websocket("/ws/{client_id}")
+        @self.app.websocket(C.WS_ENDPOINT)
         async def websocket_endpoint(websocket: WebSocket, client_id: str):
             await self.connect(websocket)
 
@@ -413,7 +415,7 @@ class RealDataProvider:
 
     def __init__(self):
         self.db_path = project_root / 'data' / 'historical_market.db'
-        self.portfolio_value = 10000  # Initial capital
+        self.portfolio_value = C.DEFAULT_PORTFOLIO_VALUE
         self.positions = self._initialize_positions()
         self.last_market_data = self._fetch_latest_market_data()
 
@@ -470,8 +472,8 @@ class RealDataProvider:
                 'close': close,
                 'volume': volume,
                 'returns': returns,
-                'volatility': vol if vol else 0.2,
-                'rsi': rsi if rsi else 50
+                'volatility': vol if vol else C.DEFAULT_VOLATILITY,
+                'rsi': rsi if rsi else C.DEFAULT_RSI
             }
 
         conn.close()
@@ -548,7 +550,7 @@ class RealDataProvider:
                 pos['current_price'] = self.last_market_data[pos['symbol']]['close']
             total_value += pos['quantity'] * pos['current_price']
 
-        self.portfolio_value = total_value if total_value > 0 else 10000
+        self.portfolio_value = total_value if total_value > 0 else C.DEFAULT_PORTFOLIO_VALUE
 
         # Calculate real risk metrics
         risk_metrics = self._calculate_real_risk_metrics(self.positions)
@@ -573,8 +575,8 @@ class RealDataProvider:
             "volatility": round(risk_metrics.get('volatility', 0.15), 4),
             "beta": round(1.0, 2),  # Calculate vs SPY if needed
             "positions_count": len(self.positions),
-            "cash_available": round(self.portfolio_value * 0.3, 2),
-            "margin_used": round(self.portfolio_value * 0.7, 2),
+            "cash_available": round(self.portfolio_value * C.DEFAULT_CASH_RATIO, 2),
+            "margin_used": round(self.portfolio_value * C.DEFAULT_MARGIN_RATIO, 2),
             "unrealized_pnl": round(unrealized_pnl, 2),
             "daily_pnl": round(daily_pnl, 2)
         }
@@ -610,38 +612,38 @@ class RealDataProvider:
         metrics = self.generate_metrics()
 
         # Check P(ruin) threshold
-        if metrics['p_ruin'] > 0.10:
+        if metrics['p_ruin'] > C.RISK_P_RUIN_THRESHOLD:
             alerts.append({
                 "id": f"alert_{int(time.time())}_pruin",
-                "severity": "high" if metrics['p_ruin'] > 0.15 else "medium",
+                "severity": "high" if metrics['p_ruin'] > C.RISK_P_RUIN_HIGH else "medium",
                 "type": "risk_threshold",
                 "message": "P(ruin) exceeding safe threshold",
                 "value": metrics['p_ruin'],
-                "threshold": 0.10,
+                "threshold": C.RISK_P_RUIN_THRESHOLD,
                 "timestamp": time.time()
             })
 
         # Check drawdown
-        if metrics['max_drawdown'] > 0.20:
+        if metrics['max_drawdown'] > C.RISK_DRAWDOWN_THRESHOLD:
             alerts.append({
                 "id": f"alert_{int(time.time())}_dd",
-                "severity": "critical" if metrics['max_drawdown'] > 0.30 else "high",
+                "severity": "critical" if metrics['max_drawdown'] > C.RISK_DRAWDOWN_CRITICAL else "high",
                 "type": "drawdown",
                 "message": "Maximum drawdown exceeding limit",
                 "value": metrics['max_drawdown'],
-                "threshold": 0.20,
+                "threshold": C.RISK_DRAWDOWN_THRESHOLD,
                 "timestamp": time.time()
             })
 
         # Check volatility
-        if metrics['volatility'] > 0.30:
+        if metrics['volatility'] > C.RISK_VOLATILITY_THRESHOLD:
             alerts.append({
                 "id": f"alert_{int(time.time())}_vol",
                 "severity": "medium",
                 "type": "volatility",
                 "message": "High volatility detected",
                 "value": metrics['volatility'],
-                "threshold": 0.30,
+                "threshold": C.RISK_VOLATILITY_THRESHOLD,
                 "timestamp": time.time()
             })
 
@@ -694,18 +696,18 @@ class RealDataProvider:
         # Real metrics based on market data
         return {
             'metrics': {
-                'giniCoefficient': 0.475 + concentration_ratio * 0.1,  # Based on market concentration
-                'top1PercentWealth': 32.0 + concentration_ratio * 10,
-                'top10PercentWealth': 58.0 + concentration_ratio * 15,
-                'wageGrowthReal': -0.5,  # Real wage growth is negative
-                'corporateProfitsToGdp': 12.5,  # Historical high
-                'householdDebtToIncome': 105.0,  # Real debt levels
-                'luxuryVsDiscountSpend': 1.8 + concentration_ratio,
-                'wealthVelocity': 0.18 - concentration_ratio * 0.05,  # Slower when concentrated
-                'consensusWrongScore': 0.7 + concentration_ratio * 0.2,
-                'ai_confidence_level': 0.75,
+                'giniCoefficient': C.GINI_BASE + concentration_ratio * C.GINI_FACTOR,
+                'top1PercentWealth': C.TOP1_BASE + concentration_ratio * C.TOP1_FACTOR,
+                'top10PercentWealth': C.TOP10_BASE + concentration_ratio * C.TOP10_FACTOR,
+                'wageGrowthReal': C.WAGE_GROWTH_REAL,
+                'corporateProfitsToGdp': C.CORPORATE_PROFITS_TO_GDP,
+                'householdDebtToIncome': C.HOUSEHOLD_DEBT_TO_INCOME,
+                'luxuryVsDiscountSpend': C.LUXURY_DISCOUNT_BASE + concentration_ratio,
+                'wealthVelocity': C.WEALTH_VELOCITY_BASE - concentration_ratio * C.WEALTH_VELOCITY_FACTOR,
+                'consensusWrongScore': C.CONSENSUS_WRONG_BASE + concentration_ratio * C.CONSENSUS_WRONG_FACTOR,
+                'ai_confidence_level': C.AI_CONFIDENCE_LEVEL,
                 'mathematical_signal_strength': concentration_ratio,
-                'ai_prediction_accuracy': 0.65 + concentration_ratio * 0.1
+                'ai_prediction_accuracy': C.AI_PREDICTION_BASE + concentration_ratio * C.AI_PREDICTION_FACTOR
             },
             'historicalData': self._generate_historical_inequality(),
             'wealthFlows': self._generate_wealth_flows(),
@@ -718,9 +720,9 @@ class RealDataProvider:
         cursor = conn.cursor()
 
         # Get historical concentration data
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT date,
-                   AVG(CASE WHEN symbol IN ('AAPL', 'MSFT', 'GOOGL', 'AMZN') THEN returns ELSE 0 END) as mega_cap_returns,
+                   AVG(CASE WHEN symbol IN ({','.join([f"'{s}'" for s in C.MEGA_CAP_SYMBOLS])}) THEN returns ELSE 0 END) as mega_cap_returns,
                    AVG(returns) as market_returns,
                    AVG(volatility_20d) as market_vol
             FROM market_data
@@ -736,13 +738,13 @@ class RealDataProvider:
 
             data.append({
                 'date': date_str,
-                'gini': 0.47 + concentration * 0.01,
-                'top1': 31.0 + concentration * 2.0,
-                'wageGrowth': -0.2 - vol * 2.0 if vol else -0.5
+                'gini': C.HIST_GINI_BASE + concentration * C.HIST_GINI_FACTOR,
+                'top1': C.HIST_TOP1_BASE + concentration * C.HIST_TOP1_FACTOR,
+                'wageGrowth': C.HIST_WAGE_BASE - vol * C.HIST_WAGE_FACTOR if vol else C.WAGE_GROWTH_REAL
             })
 
         conn.close()
-        return data if data else [{'date': datetime.now().strftime('%Y-%m-%d'), 'gini': 0.475, 'top1': 32.0, 'wageGrowth': -0.5}]
+        return data if data else [{'date': datetime.now().strftime('%Y-%m-%d'), 'gini': C.GINI_BASE, 'top1': C.TOP1_BASE, 'wageGrowth': C.WAGE_GROWTH_REAL}]
 
     def _generate_wealth_flows(self) -> List[Dict]:
         """Generate wealth flow data based on real market flows."""
@@ -752,10 +754,10 @@ class RealDataProvider:
         cash_value = total_value * 0.3
 
         return [
-            {'source': 'Working Class Wages', 'target': 'Corporate Profits', 'value': 25.0, 'color': '#ef4444'},
-            {'source': 'Middle Class Savings', 'target': 'Asset Prices', 'value': equity_value / total_value * 100 if total_value > 0 else 35.0, 'color': '#f59e0b'},
-            {'source': 'Government Debt', 'target': 'Bond Holders', 'value': 18.0, 'color': '#8b5cf6'},
-            {'source': 'Rent Payments', 'target': 'Property Owners', 'value': 22.0, 'color': '#10b981'}
+            {'source': 'Working Class Wages', 'target': 'Corporate Profits', 'value': C.FLOW_WAGES_VALUE, 'color': C.COLOR_RED},
+            {'source': 'Middle Class Savings', 'target': 'Asset Prices', 'value': equity_value / total_value * 100 if total_value > 0 else C.FLOW_SAVINGS_VALUE_DEFAULT, 'color': C.COLOR_AMBER},
+            {'source': 'Government Debt', 'target': 'Bond Holders', 'value': C.FLOW_DEBT_VALUE, 'color': C.COLOR_VIOLET},
+            {'source': 'Rent Payments', 'target': 'Property Owners', 'value': C.FLOW_RENT_VALUE, 'color': C.COLOR_EMERALD}
         ]
 
     def _generate_contrarian_signals(self) -> List[Dict]:
@@ -763,7 +765,7 @@ class RealDataProvider:
         signals = []
 
         # Analyze real market conditions
-        for symbol in ['SPY', 'QQQ', 'TLT']:
+        for symbol in C.KEY_SYMBOLS:
             if symbol in self.last_market_data:
                 market_data = self.last_market_data[symbol]
                 rsi = market_data.get('rsi', 50)
@@ -804,7 +806,7 @@ class RealDataProvider:
     def generate_contrarian_data(self) -> Dict:
         """Generate real contrarian opportunities from market data."""
         opportunities = []
-        symbols = ['SPY', 'QQQ', 'TLT', 'GLD', 'VIX', 'IWM']
+        symbols = C.CONTRARIAN_SYMBOLS
 
         for i, symbol in enumerate(symbols):
             if symbol in self.last_market_data:
@@ -862,14 +864,14 @@ class RealDataProvider:
         # Check if HRM model files exist
         model_path = project_root / 'models' / 'hrm_grokfast_results.json'
         training_accuracy = 0.0
-        model_parameters = 156502027
+        model_parameters = C.DEFAULT_MODEL_PARAMS
 
         if model_path.exists():
             try:
                 with open(model_path, 'r') as f:
                     results = json.load(f)
                     training_accuracy = max(results.get('training_history', {}).get('clean_accuracy', [0]))
-                    model_parameters = results.get('model_parameters', 156502027)
+                    model_parameters = results.get('model_parameters', C.DEFAULT_MODEL_PARAMS)
             except:
                 pass
 
@@ -911,8 +913,8 @@ class RealDataProvider:
         total_value = self.portfolio_value
 
         # Define risky and safe assets
-        risky_symbols = ['SPY', 'QQQ', 'ARKK', 'TSLA']
-        safe_symbols = ['TLT', 'IEF', 'SHY']
+        risky_symbols = C.RISKY_ASSETS
+        safe_symbols = C.SAFE_ASSETS
 
         # Calculate actual allocations from positions
         risky_value = sum(pos['quantity'] * pos['current_price']
@@ -943,7 +945,7 @@ class RealDataProvider:
             },
             'safe_assets': [pos['symbol'] for pos in self.positions if pos['symbol'] in safe_symbols],
             'risky_assets': [pos['symbol'] for pos in self.positions if pos['symbol'] in risky_symbols],
-            'transition_assets': ['GLD'],
+            'transition_assets': [C.SYMBOL_GLD],
             'last_rebalance': datetime.now().isoformat(),
             'rebalance_reason': 'Risk threshold triggered' if rebalance_needed else 'Within target range',
             'total_mispricings': len([pos for pos in self.positions if pos['symbol'] in self.last_market_data]),

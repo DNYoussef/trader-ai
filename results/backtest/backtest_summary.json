@@ -1,0 +1,25 @@
+{
+  "total_days": 7535,
+  "date_range": {
+    "start": "1995-01-03",
+    "end": "2024-12-31"
+  },
+  "strategy_distribution": {
+    "tactical_opportunity": 7535
+  },
+  "avg_confidence": 0.33116289524740944,
+  "regime_analysis": {
+    "Low Volatility": {
+      "days": 2370,
+      "top_strategy": "tactical_opportunity"
+    },
+    "Normal": {
+      "days": 3695,
+      "top_strategy": "tactical_opportunity"
+    },
+    "High Volatility": {
+      "days": 1470,
+      "top_strategy": "tactical_opportunity"
+    }
+  }
+}

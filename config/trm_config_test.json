@@ -1,0 +1,122 @@
+{
+  "model": {
+    "input_dim": 10,
+    "hidden_dim": 512,
+    "output_dim": 8,
+    "num_latent_steps": 6,
+    "num_recursion_cycles": 3,
+    "dropout": 0.1,
+    "use_layer_norm": true,
+    "use_residual": true,
+    "use_halt_signal": true
+  },
+  "training": {
+    "optimizer": "adamw",
+    "learning_rate": 0.001,
+    "beta1": 0.9,
+    "beta2": 0.95,
+    "weight_decay": 0.01,
+    "warmup_steps": 2000,
+    "max_steps": 100000,
+    "lr_scheduler": "cosine",
+    "batch_size": 768,
+    "gradient_accumulation_steps": 1,
+    "max_epochs": 10,
+    "validation_frequency": 1000,
+    "checkpoint_frequency": 5000,
+    "strategy_loss_weight": 1.0,
+    "halt_loss_weight": 0.5,
+    "profit_loss_weight": 0.3,
+    "use_grokfast": true,
+    "grokfast_filter_type": "ema",
+    "grokfast_alpha": 0.98,
+    "grokfast_lamb": 2.0,
+    "use_ema": true,
+    "ema_decay": 0.999,
+    "noise_injection_rate": 0.1,
+    "consistency_threshold": 0.7,
+    "patience": 10,
+    "min_delta": 0.0001,
+    "use_amp": true,
+    "gradient_clip_norm": 1.0
+  },
+  "features": {
+    "feature_names": [
+      "vix_level",
+      "spy_returns_5d",
+      "spy_returns_20d",
+      "volume_ratio",
+      "market_breadth",
+      "correlation",
+      "put_call_ratio",
+      "gini_coefficient",
+      "sector_dispersion",
+      "signal_quality_score"
+    ],
+    "normalize_features": true,
+    "normalization_method": "zscore",
+    "use_rolling_windows": true,
+    "window_sizes": [
+      5,
+      20,
+      60
+    ],
+    "fill_method": "forward_fill",
+    "max_missing_ratio": 0.1
+  },
+  "strategies": {
+    "strategy_names": [
+      "ultra_defensive",
+      "defensive",
+      "balanced_safe",
+      "balanced_growth",
+      "growth",
+      "aggressive_growth",
+      "contrarian_long",
+      "tactical_opportunity"
+    ],
+    "confidence_threshold": 0.7,
+    "halt_threshold": 0.5,
+    "strategy_params": {
+      "ultra_defensive": {
+        "max_equity": 0.2,
+        "cash_reserve": 0.5
+      },
+      "defensive": {
+        "max_equity": 0.4,
+        "cash_reserve": 0.3
+      },
+      "balanced_safe": {
+        "max_equity": 0.6,
+        "cash_reserve": 0.2
+      },
+      "balanced_growth": {
+        "max_equity": 0.7,
+        "cash_reserve": 0.1
+      },
+      "growth": {
+        "max_equity": 0.8,
+        "cash_reserve": 0.05
+      },
+      "aggressive_growth": {
+        "max_equity": 0.9,
+        "cash_reserve": 0.0
+      },
+      "contrarian_long": {
+        "max_equity": 0.85,
+        "cash_reserve": 0.0
+      },
+      "tactical_opportunity": {
+        "max_equity": 0.75,
+        "cash_reserve": 0.1
+      }
+    }
+  },
+  "model_save_dir": "models/trm",
+  "checkpoint_dir": "checkpoints/trm",
+  "log_dir": "logs/trm",
+  "data_dir": "data/historical",
+  "experiment_name": "trm_trader_ai",
+  "wandb_project": null,
+  "seed": 42
+}

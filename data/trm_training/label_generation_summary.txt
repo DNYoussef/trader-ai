@@ -1,0 +1,21 @@
+TRM BLACK SWAN LABEL GENERATION SUMMARY
+================================================================================
+
+Generated: 2025-11-07 16:06:35
+
+Total labels: 1,201
+Date range: 1997-07-02 00:00:00 to 2023-03-17 00:00:00
+
+Strategy Distribution:
+  0 (ultra_defensive): 652 (54.3%)
+  1 (defensive): 5 (0.4%)
+  2 (balanced_safe): 4 (0.3%)
+  5 (aggressive_growth): 525 (43.7%)
+  7 (tactical_opportunity): 15 (1.2%)
+
+PnL Statistics:
+  Mean: 0.0077
+  Median: 0.0030
+  Std Dev: 0.0171
+  Min: -0.0529
+  Max: 0.1372

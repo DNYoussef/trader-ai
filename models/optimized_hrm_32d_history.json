@@ -1,0 +1,32 @@
+{
+  "training_config": {
+    "max_iterations": 100000,
+    "batch_size": 64,
+    "gradient_accumulation_steps": 2,
+    "validation_every": 1000,
+    "grokking_threshold": 0.9,
+    "noise_tolerance": 0.05,
+    "early_stopping_patience": 20000,
+    "learning_rate": 0.0001,
+    "gradient_clip": 0.5,
+    "min_clean_accuracy": 0.85,
+    "consecutive_validations_needed": 3
+  },
+  "training_history": {
+    "iteration": [],
+    "clean_accuracy": [],
+    "noisy_accuracy": [],
+    "generalization_gap": [],
+    "grokking_score": [],
+    "losses": []
+  },
+  "final_grokking_score": 0.0,
+  "model_parameters": 1776904,
+  "feature_dimensions": 32,
+  "optimizations": [
+    "torch.compile",
+    "mixed_precision",
+    "larger_batches",
+    "smaller_model"
+  ]
+}

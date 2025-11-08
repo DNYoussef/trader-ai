@@ -16,6 +16,7 @@ import os
 
 from .brokers.broker_interface import BrokerInterface
 from .brokers.alpaca_adapter import AlpacaAdapter
+from .integration.memory_client import MemoryClient
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ class TradingEngine:
         self.market_data = None
         self.portfolio_manager = None
         self.trade_executor = None
+        self.memory_client = None
 
         # Audit log
         self.audit_log_path = '.claude/.artifacts/audit_log.jsonl'
@@ -64,6 +66,13 @@ class TradingEngine:
     def initialize(self) -> bool:
         """Initialize all trading engine components."""
         try:
+            # Initialize Memory Client
+            try:
+                self.memory_client = MemoryClient()
+                logger.info("Memory Client initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Memory Client: {e}")
+
             # Initialize broker
             if self.config['broker'] == 'alpaca':
                 broker_config = {
@@ -112,6 +121,11 @@ class TradingEngine:
                 'initial_capital': self.config['initial_capital'],
                 'timestamp': datetime.now().isoformat()
             })
+            
+            self._log_memory_event(
+                f"Trading engine initialized in {self.mode} mode with ${self.config['initial_capital']} capital",
+                {'category': 'lifecycle', 'event': 'initialization'}
+            )
 
             logger.info(f"Trading engine initialized successfully in {self.mode} mode")
             return True
@@ -140,6 +154,11 @@ class TradingEngine:
             'mode': self.mode,
             'timestamp': datetime.now().isoformat()
         })
+        
+        self._log_memory_event(
+            "Trading engine started main loop",
+            {'category': 'lifecycle', 'event': 'start'}
+        )
 
         last_rebalance = 0
         rebalance_interval = self.config.get('rebalance_frequency_minutes', 60) * 60
@@ -178,11 +197,17 @@ class TradingEngine:
         """Execute production trading cycle."""
         try:
             logger.info("Executing trading cycle")
+            
+            self._log_memory_event(
+                "Starting trading cycle",
+                {'category': 'cycle', 'event': 'start'}
+            )
 
             # Check if market is open
             is_market_open = await self.market_data.get_market_status()
             if not is_market_open:
                 logger.info("Market is closed, skipping trading cycle")
+                self._log_memory_event("Market closed, skipping cycle", {'category': 'cycle', 'status': 'skipped'})
                 return
 
             # Sync portfolio with broker
@@ -213,6 +238,11 @@ class TradingEngine:
                 'cash_balance': str(cash_balance),
                 'timestamp': datetime.now().isoformat()
             })
+            
+            self._log_memory_event(
+                f"Trading cycle completed. Value: ${portfolio_value}",
+                {'category': 'cycle', 'event': 'complete', 'value': str(portfolio_value)}
+            )
 
         except Exception as e:
             logger.error(f"Error in trading cycle: {e}")
@@ -221,6 +251,7 @@ class TradingEngine:
                 'error': str(e),
                 'timestamp': datetime.now().isoformat()
             })
+            self._log_memory_event(f"Trading cycle error: {e}", {'category': 'cycle', 'status': 'error'})
 
     async def _execute_rebalancing(self, total_value: Decimal):
         """Execute Gary×Taleb strategy rebalancing."""
@@ -271,6 +302,11 @@ class TradingEngine:
                                 'status': result.status,
                                 'timestamp': datetime.now().isoformat()
                             })
+                            
+                            self._log_memory_event(
+                                f"Rebalance order: {result.side} {result.symbol} (${result.notional})",
+                                {'category': 'trade', 'gate': gate, 'symbol': result.symbol}
+                            )
 
             logger.info(f"Rebalancing completed: {total_orders} total orders executed")
 
@@ -325,6 +361,11 @@ class TradingEngine:
                 'order_id': result.order_id,
                 'timestamp': datetime.now().isoformat()
             })
+            
+            self._log_memory_event(
+                f"Manual trade: {action} {symbol} (${dollar_amount}) - {result.status}",
+                {'category': 'trade', 'type': 'manual', 'symbol': symbol}
+            )
 
             return result
 
@@ -374,6 +415,11 @@ class TradingEngine:
                 'positions_count': len(positions),
                 'canceled_orders': canceled_count
             })
+            
+            self._log_memory_event(
+                "KILL SWITCH ACTIVATED - TRADING HALTED",
+                {'category': 'safety', 'event': 'kill_switch', 'severity': 'critical'}
+            )
 
             # Stop the engine
             await self.stop()
@@ -401,6 +447,11 @@ class TradingEngine:
                 'timestamp': datetime.now().isoformat(),
                 'final_nav': str(final_nav)
             })
+            
+            self._log_memory_event(
+                "Trading engine stopped",
+                {'category': 'lifecycle', 'event': 'stop'}
+            )
 
             # Disconnect broker
             if self.broker:
@@ -451,6 +502,18 @@ class TradingEngine:
                 f.write(json.dumps(data) + '\n')
         except Exception as e:
             logger.error(f"Failed to write audit log: {e}")
+            
+    def _log_memory_event(self, content: str, metadata: Dict):
+        """Log event to memory system if client is available."""
+        if self.memory_client:
+            # Run as background task to not block trading
+            # For simplicity in this sync wrapper, we assume store_memory is fast or we fire-and-forget in a real async queue
+            # But store_memory is sync in the client, so we just call it.
+            # Ideally this should be async or threaded.
+            try:
+                self.memory_client.store_memory(content, metadata)
+            except Exception as e:
+                logger.warning(f"Failed to log to memory: {e}")
 
     async def test_production_flow(self):
         """Test the production trading flow with $200 seed capital."""
