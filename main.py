@@ -4,6 +4,7 @@ import sys
 import signal
 import logging
 import argparse
+import asyncio
 from pathlib import Path
 
 # Add src to path
@@ -96,7 +97,7 @@ def main():
     else:
         # Normal operation
         try:
-            engine.start()
+            asyncio.run(engine.start())
         except Exception as e:
             logger.error(f"Fatal error: {e}")
             if engine:
