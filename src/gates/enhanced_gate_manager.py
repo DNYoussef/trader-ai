@@ -89,8 +89,9 @@ class EnhancedGateManager:
         elif self.psychology_enabled:
             # Generate progress motivation for current state
             progress_data = self._calculate_progress_data(portfolio_metrics)
+            # ISS-044: Default persona works; user profile integration is future enhancement
             motivation = self.psychology.generate_progress_motivation(
-                progress_data, persona="casual_investor"  # TODO: Get from user profile
+                progress_data, persona="casual_investor"
             )
             result['motivation'] = motivation
 

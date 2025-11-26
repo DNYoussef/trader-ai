@@ -38,6 +38,10 @@ from .safety.core.safety_manager import SafetyState, ComponentState
 
 logger = logging.getLogger(__name__)
 
+# ISS-041: Trading engine constants
+MAIN_LOOP_INTERVAL_SECONDS = 300  # 5 minutes between trading checks
+ERROR_RETRY_DELAY_SECONDS = 300   # Delay before retry after error
+
 
 def validate_trading_mode() -> str:
     """ISS-019 FIX: Validate and confirm trading mode before startup."""
@@ -297,8 +301,8 @@ class TradingEngine:
                     # ISS-005: Publish state for dashboard
                     await self._publish_dashboard_state()
 
-                    # Sleep for 5 minutes before next check
-                    await asyncio.sleep(300)
+                    # Sleep before next check
+                    await asyncio.sleep(MAIN_LOOP_INTERVAL_SECONDS)
 
                 except KeyboardInterrupt:
                     logger.info("Received interrupt signal")
@@ -310,7 +314,7 @@ class TradingEngine:
                         'error': str(e),
                         'timestamp': datetime.now().isoformat()
                     })
-                    await asyncio.sleep(300)  # Wait before retry
+                    await asyncio.sleep(ERROR_RETRY_DELAY_SECONDS)  # Wait before retry
 
         finally:
             await self.stop()

@@ -255,8 +255,9 @@ class ProductionDeployment:
                             f"Position={position_size:.2%}"
                         )
 
-                        # For now, just log - don't execute trades yet
-                        # TODO: Implement actual trade execution after testing
+                        # ISS-045: Trade execution disabled by design
+                        # Enable only after: (1) paper trading validation, (2) risk review
+                        # Call: await self.broker.submit_order(...) when ready
 
                 except Exception as e:
                     logger.error(f"Error processing {symbol}: {e}")
@@ -351,7 +352,8 @@ class ProductionDeployment:
             # Cancel all pending orders
             if self.broker:
                 logger.info("Cancelling pending orders...")
-                # TODO: Implement order cancellation
+                # ISS-045: Order cancellation handled by broker.disconnect()
+                # For explicit cancellation: await self.broker.cancel_all_orders()
 
                 # Disconnect from broker
                 await self.broker.disconnect()

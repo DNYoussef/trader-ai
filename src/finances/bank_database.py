@@ -6,6 +6,15 @@ This module provides a complete database abstraction for storing and retrieving:
 - Bank account details (balances, types, metadata)
 - Transaction history (amounts, dates, merchants, categories)
 
+ISS-025: Database Choice - SQLite
+Rationale: SQLite is appropriate for this single-user trading application:
+- No concurrent write scaling needed (single trader)
+- Serverless deployment (no separate DB process)
+- ACID-compliant for financial data integrity
+- File-based portability for backup/restore
+PostgreSQL migration path: If multi-user or high-frequency trading is needed,
+migrate to PostgreSQL using SQLAlchemy ORM abstraction.
+
 Schema Design:
 - plaid_items: Root connection records
 - bank_accounts: Account-level data with foreign key to items
