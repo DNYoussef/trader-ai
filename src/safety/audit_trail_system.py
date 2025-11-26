@@ -109,8 +109,11 @@ class AuditEvent:
 class AuditStorage:
     """Secure storage for audit events"""
 
-    def __init__(self, storage_path: str = '.claude/.artifacts/audit'):
-        self.storage_path = Path(storage_path)
+    # ISS-021: Changed default path from .claude/.artifacts to logs/
+    DEFAULT_STORAGE_PATH = 'logs/audit'
+
+    def __init__(self, storage_path: str = None):
+        self.storage_path = Path(storage_path or self.DEFAULT_STORAGE_PATH)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         # Primary storage files
@@ -118,8 +121,15 @@ class AuditStorage:
         self.db_path = self.storage_path / 'audit.db'
         self.csv_path = self.storage_path / 'audit_export.csv'
 
+        # ISS-021: Log rotation configuration
+        self.max_log_size_mb = 10  # 10MB per log file
+        self.backup_count = 5  # Keep 5 backup files
+
         # Initialize database
         self._init_database()
+
+        # Initialize rotating file handler for JSON logs
+        self._init_rotating_handler()
 
         # Event queue for async processing
         self.event_queue = queue.Queue(maxsize=1000)
@@ -127,6 +137,19 @@ class AuditStorage:
         self.storage_active = False
 
         logger.info(f"Audit storage initialized at {self.storage_path}")
+
+    def _init_rotating_handler(self):
+        """ISS-021: Initialize rotating file handler for log management"""
+        from logging.handlers import RotatingFileHandler
+
+        # Create rotating handler for audit logs
+        self.rotating_handler = RotatingFileHandler(
+            self.json_log_path,
+            maxBytes=self.max_log_size_mb * 1024 * 1024,  # Convert MB to bytes
+            backupCount=self.backup_count,
+            encoding='utf-8'
+        )
+        logger.info(f"Rotating log handler configured: {self.max_log_size_mb}MB max, {self.backup_count} backups")
 
     def _init_database(self):
         """Initialize SQLite database for audit events"""
@@ -243,19 +266,37 @@ class AuditStorage:
             logger.error(f"Event storage failed: {e}")
 
     def _store_to_jsonl(self, event: AuditEvent):
-        """Store event to JSONL file"""
-        with open(self.json_log_path, 'a', encoding='utf-8') as f:
-            event_dict = asdict(event)
-            # Convert enums to strings
-            if event_dict['event_type']:
-                event_dict['event_type'] = event_dict['event_type'].value
-            if event_dict['severity']:
-                event_dict['severity'] = event_dict['severity'].value
-            if event_dict['auth_method']:
-                event_dict['auth_method'] = event_dict['auth_method'].value
+        """Store event to JSONL file with rotation support (ISS-021)"""
+        event_dict = asdict(event)
+        # Convert enums to strings
+        if event_dict['event_type']:
+            event_dict['event_type'] = event_dict['event_type'].value
+        if event_dict['severity']:
+            event_dict['severity'] = event_dict['severity'].value
+        if event_dict['auth_method']:
+            event_dict['auth_method'] = event_dict['auth_method'].value
 
-            json.dump(event_dict, f, ensure_ascii=False)
-            f.write('\n')
+        # Use rotating handler if available
+        if hasattr(self, 'rotating_handler') and self.rotating_handler:
+            try:
+                log_line = json.dumps(event_dict, ensure_ascii=False) + '\n'
+                self.rotating_handler.stream.write(log_line)
+                self.rotating_handler.stream.flush()
+
+                # Check if rotation is needed
+                if self.rotating_handler.shouldRollover(None):
+                    self.rotating_handler.doRollover()
+            except Exception as e:
+                # Fallback to direct file write
+                logger.warning(f"Rotating handler failed, using direct write: {e}")
+                with open(self.json_log_path, 'a', encoding='utf-8') as f:
+                    json.dump(event_dict, f, ensure_ascii=False)
+                    f.write('\n')
+        else:
+            # Direct file write (fallback)
+            with open(self.json_log_path, 'a', encoding='utf-8') as f:
+                json.dump(event_dict, f, ensure_ascii=False)
+                f.write('\n')
 
     def _store_to_database(self, event: AuditEvent):
         """Store event to SQLite database"""
@@ -449,8 +490,8 @@ class AuditTrailSystem:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
 
-        # Initialize storage
-        storage_path = config.get('storage_path', '.claude/.artifacts/audit')
+        # ISS-021: Initialize storage with logs/ default path
+        storage_path = config.get('storage_path', AuditStorage.DEFAULT_STORAGE_PATH)
         self.storage = AuditStorage(storage_path)
 
         # Session tracking

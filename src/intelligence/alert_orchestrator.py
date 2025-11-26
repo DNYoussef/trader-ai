@@ -148,6 +148,9 @@ class AlertOrchestrator:
             AlertSeverity.LOW: 1800         # 30 minutes
         }
 
+        # ISS-018: Auto-register default notification handlers
+        self._register_default_handlers()
+
         # System health monitoring
         self.health_checks = {
             'ai_system': True,
@@ -797,6 +800,38 @@ class AlertOrchestrator:
         """Register notification handler for a channel"""
         self.notification_handlers[channel] = handler
         logger.info(f"Notification handler registered for channel: {channel}")
+
+    def _register_default_handlers(self) -> None:
+        """
+        ISS-018: Register default notification handlers.
+
+        Registers log, email, and Slack handlers based on configuration/environment.
+        """
+        try:
+            from .notification_handlers import register_default_handlers
+
+            # Get notification config from main config
+            notification_config = self.config.get('notifications', {})
+            register_default_handlers(self, notification_config)
+
+        except ImportError as e:
+            logger.warning(f"Could not import notification handlers: {e}")
+            # Fallback: register basic log handler
+            self._register_basic_log_handler()
+        except Exception as e:
+            logger.error(f"Failed to register default handlers: {e}")
+            self._register_basic_log_handler()
+
+    def _register_basic_log_handler(self) -> None:
+        """Fallback: Register basic logging handler"""
+        def log_handler(alert):
+            severity = getattr(alert, 'severity', None)
+            severity_str = severity.value if severity and hasattr(severity, 'value') else 'INFO'
+            logger.info(f"ALERT [{severity_str}] {getattr(alert, 'symbol', 'Unknown')}: {getattr(alert, 'message', 'No message')}")
+            return True
+
+        self.notification_handlers['log'] = log_handler
+        logger.info("Basic log notification handler registered")
 
     def get_alert_history(self,
                          hours: int = 24,
