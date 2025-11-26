@@ -9,7 +9,7 @@ import os
 from datetime import datetime, timedelta
 from jose import jwt
 from fastapi import HTTPException
-from fastapi.security import HTTPAuthCredentials
+from fastapi.security import HTTPAuthorizationCredentials
 
 # Set required environment variable for testing
 os.environ['JWT_SECRET_KEY'] = 'test-secret-key-do-not-use-in-production-12345'
@@ -74,7 +74,7 @@ class TestJWTVerification:
         token = create_access_token(data)
 
         # Create mock credentials
-        credentials = HTTPAuthCredentials(scheme="Bearer", credentials=token)
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
 
         user_id = verify_token(credentials)
 
@@ -87,7 +87,7 @@ class TestJWTVerification:
         expires_delta = timedelta(hours=-1)
         token = create_access_token(data, expires_delta)
 
-        credentials = HTTPAuthCredentials(scheme="Bearer", credentials=token)
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
 
         with pytest.raises(HTTPException) as exc_info:
             verify_token(credentials)
@@ -96,7 +96,7 @@ class TestJWTVerification:
 
     def test_verify_invalid_token(self):
         """Test verifying a malformed token."""
-        credentials = HTTPAuthCredentials(scheme="Bearer", credentials="invalid.token.string")
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid.token.string")
 
         with pytest.raises(HTTPException) as exc_info:
             verify_token(credentials)
@@ -108,7 +108,7 @@ class TestJWTVerification:
         data = {"user": "user123"}  # Missing 'sub' claim
         token = create_access_token(data)
 
-        credentials = HTTPAuthCredentials(scheme="Bearer", credentials=token)
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
 
         with pytest.raises(HTTPException) as exc_info:
             verify_token(credentials)
@@ -121,7 +121,7 @@ class TestJWTVerification:
         # Sign with different secret
         wrong_token = jwt.encode(data, "wrong-secret", algorithm=ALGORITHM)
 
-        credentials = HTTPAuthCredentials(scheme="Bearer", credentials=wrong_token)
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=wrong_token)
 
         with pytest.raises(HTTPException) as exc_info:
             verify_token(credentials)
