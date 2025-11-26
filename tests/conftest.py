@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for Foundation phase test suite.
+ISS-008: Pytest configuration and shared fixtures for Gary x Taleb trading system.
 Provides common test infrastructure, fixtures, and utilities.
 """
 import pytest
@@ -10,6 +10,7 @@ import tempfile
 import os
 import sys
 from pathlib import Path
+from datetime import timedelta
 from typing import Dict, Any, Generator, Optional
 from unittest.mock import Mock, MagicMock
 
@@ -22,52 +23,87 @@ from mocks.mock_gate_manager import MockGateManager, create_mock_gate_manager
 from mocks.mock_weekly_cycle import MockWeeklyCycleManager, create_mock_weekly_cycle_manager
 
 
-# Pytest configuration
+# ISS-008: Pytest configuration
 def pytest_configure(config):
     """Configure pytest with custom markers and settings"""
-    config.addinivalue_line(
-        "markers", "integration: mark test as integration test"
-    )
-    config.addinivalue_line(
-        "markers", "slow: mark test as slow running"
-    )
-    config.addinivalue_line(
-        "markers", "broker: mark test as broker-related"
-    )
-    config.addinivalue_line(
-        "markers", "gates: mark test as gate-related"
-    )
-    config.addinivalue_line(
-        "markers", "cycle: mark test as weekly cycle-related"
-    )
-    config.addinivalue_line(
-        "markers", "concurrent: mark test as concurrency test"
-    )
-    config.addinivalue_line(
-        "markers", "error_handling: mark test as error handling test"
-    )
+    # These markers are also defined in pytest.ini for IDE support
+    markers = [
+        "integration: mark test as integration test",
+        "slow: mark test as slow running",
+        "broker: mark test as broker-related",
+        "gates: mark test as gate-related",
+        "cycle: mark test as weekly cycle-related",
+        "concurrent: mark test as concurrency test",
+        "error_handling: mark test as error handling test",
+        # ISS-008: Additional markers
+        "unit: mark test as unit test",
+        "e2e: mark test as end-to-end test",
+        "trading: mark test as trading engine test",
+        "portfolio: mark test as portfolio management test",
+        "safety: mark test as safety system test",
+        "market_data: mark test as market data test",
+        "security: mark test as security test",
+        "performance: mark test as performance test",
+        "mock: mark test as using mocked dependencies",
+        "live_api: mark test as requiring live API access",
+        "smoke: mark test as smoke test",
+        "regression: mark test as regression test",
+        "authentication: mark test as authentication test",
+    ]
+    for marker in markers:
+        config.addinivalue_line("markers", marker)
 
 
 def pytest_collection_modifyitems(config, items):
-    """Modify test collection to add default markers"""
+    """ISS-008: Modify test collection to add default markers based on paths and names"""
     for item in items:
+        fspath_str = str(item.fspath).lower()
+        item_name = item.name.lower()
+
         # Add markers based on test file location
-        if "broker" in str(item.fspath):
-            item.add_marker(pytest.mark.broker)
-        if "gate" in str(item.fspath):
-            item.add_marker(pytest.mark.gates)
-        if "cycle" in str(item.fspath):
-            item.add_marker(pytest.mark.cycle)
-        if "integration" in str(item.fspath):
-            item.add_marker(pytest.mark.integration)
-            
+        path_markers = {
+            "broker": pytest.mark.broker,
+            "gate": pytest.mark.gates,
+            "cycle": pytest.mark.cycle,
+            "integration": pytest.mark.integration,
+            # ISS-008: Additional path-based markers
+            "safety": pytest.mark.safety,
+            "trading": pytest.mark.trading,
+            "portfolio": pytest.mark.portfolio,
+            "market": pytest.mark.market_data,
+            "security": pytest.mark.security,
+            "performance": pytest.mark.performance,
+            "unit": pytest.mark.unit,
+            "e2e": pytest.mark.e2e,
+            "end_to_end": pytest.mark.e2e,
+            "auth": pytest.mark.authentication,
+        }
+        for keyword, marker in path_markers.items():
+            if keyword in fspath_str:
+                item.add_marker(marker)
+
         # Add markers based on test function name
-        if "concurrent" in item.name or "thread" in item.name:
-            item.add_marker(pytest.mark.concurrent)
-        if "error" in item.name or "exception" in item.name or "failure" in item.name:
-            item.add_marker(pytest.mark.error_handling)
-        if "scenario" in item.name or "workflow" in item.name or "end_to_end" in item.name:
-            item.add_marker(pytest.mark.slow)
+        name_markers = {
+            "concurrent": pytest.mark.concurrent,
+            "thread": pytest.mark.concurrent,
+            "error": pytest.mark.error_handling,
+            "exception": pytest.mark.error_handling,
+            "failure": pytest.mark.error_handling,
+            "scenario": pytest.mark.slow,
+            "workflow": pytest.mark.slow,
+            "end_to_end": pytest.mark.slow,
+            # ISS-008: Additional name-based markers
+            "smoke": pytest.mark.smoke,
+            "regression": pytest.mark.regression,
+            "perf": pytest.mark.performance,
+            "benchmark": pytest.mark.performance,
+            "security": pytest.mark.security,
+            "kill_switch": pytest.mark.safety,
+            "circuit_breaker": pytest.mark.safety,
+        }
+        for keyword, marker in name_markers.items():
+            if keyword in item_name:
+                item.add_marker(marker)
 
 
 # Fixtures for test isolation

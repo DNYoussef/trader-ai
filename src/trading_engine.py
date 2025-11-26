@@ -18,6 +18,13 @@ from .brokers.broker_interface import BrokerInterface
 from .brokers.alpaca_adapter import AlpacaAdapter
 from .integration.memory_client import MemoryClient
 
+# ISS-003: Import safety systems
+from .safety.core.safety_integration import (
+    TradingSafetyIntegration,
+    get_default_safety_config
+)
+from .safety.core.safety_manager import SafetyState, ComponentState
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +68,9 @@ class TradingEngine:
         self.portfolio_manager = None
         self.trade_executor = None
         self.memory_client = None
+
+        # ISS-003: Safety integration
+        self.safety_integration: Optional[TradingSafetyIntegration] = None
 
         # Audit log
         self.audit_log_path = '.claude/.artifacts/audit_log.jsonl'
@@ -166,15 +176,28 @@ class TradingEngine:
                 self.market_data
             )
 
+            # ISS-003: Initialize safety systems
+            try:
+                safety_config = self.config.get('safety', get_default_safety_config())
+                self.safety_integration = TradingSafetyIntegration(safety_config)
+                if asyncio.run(self.safety_integration.initialize(self)):
+                    logger.info("Safety systems initialized successfully")
+                else:
+                    logger.warning("Safety systems failed to initialize - continuing with reduced safety")
+            except Exception as e:
+                logger.warning(f"Safety integration not available: {e}")
+                self.safety_integration = None
+
             # Log initialization
             self._audit_log({
                 'event': 'engine_initialized',
                 'mode': self.mode,
                 'broker': self.config['broker'],
                 'initial_capital': self.config['initial_capital'],
+                'safety_enabled': self.safety_integration is not None,
                 'timestamp': datetime.now().isoformat()
             })
-            
+
             self._log_memory_event(
                 f"Trading engine initialized in {self.mode} mode with ${self.config['initial_capital']} capital",
                 {'category': 'lifecycle', 'event': 'initialization'}
@@ -201,13 +224,24 @@ class TradingEngine:
         self.running = True
         logger.info("Trading engine started")
 
+        # ISS-003: Start safety systems
+        if self.safety_integration:
+            try:
+                if await self.safety_integration.start():
+                    logger.info("Safety systems started")
+                else:
+                    logger.warning("Safety systems failed to start")
+            except Exception as e:
+                logger.warning(f"Error starting safety systems: {e}")
+
         # Log engine start
         self._audit_log({
             'event': 'engine_started',
             'mode': self.mode,
+            'safety_active': self.safety_integration is not None and self.safety_integration.running,
             'timestamp': datetime.now().isoformat()
         })
-        
+
         self._log_memory_event(
             "Trading engine started main loop",
             {'category': 'lifecycle', 'event': 'start'}
@@ -375,12 +409,39 @@ class TradingEngine:
         """Check system health and connectivity."""
         try:
             # Check broker connection
-            if not self.broker.is_connected:
+            broker_healthy = self.broker.is_connected
+            if not broker_healthy:
                 logger.warning("Broker disconnected, attempting reconnection...")
                 if await self.broker.connect():
                     logger.info("Broker reconnected successfully")
+                    broker_healthy = True
                 else:
                     logger.error("Failed to reconnect to broker")
+
+            # ISS-003: Report component health to safety manager
+            if self.safety_integration and self.safety_integration.safety_manager:
+                # Report broker health
+                broker_state = ComponentState.OPERATIONAL if broker_healthy else ComponentState.FAILED
+                await self.safety_integration.safety_manager.update_component_health(
+                    "broker_adapter", broker_state,
+                    error_msg=None if broker_healthy else "Broker disconnected"
+                )
+
+                # Report trading engine health (heartbeat)
+                await self.safety_integration.safety_manager.heartbeat(
+                    "trading_engine",
+                    metrics={'running': self.running, 'kill_switch': self.kill_switch_activated}
+                )
+
+                # Check safety system state
+                safety_health = self.safety_integration.safety_manager.get_system_health()
+                safety_state = safety_health.get('system_state', 'unknown')
+
+                if safety_state == SafetyState.CRITICAL.value:
+                    logger.critical("Safety system reports CRITICAL state!")
+                    # Consider triggering kill switch for critical safety states
+                elif safety_state == SafetyState.DEGRADED.value:
+                    logger.warning("Safety system reports DEGRADED state")
 
             # Check for pending orders that may be stuck
             pending_orders = self.trade_executor.get_pending_orders()
@@ -389,6 +450,15 @@ class TradingEngine:
 
         except Exception as e:
             logger.error(f"Error checking system health: {e}")
+            # ISS-003: Report error to safety manager
+            if self.safety_integration and self.safety_integration.safety_manager:
+                try:
+                    await self.safety_integration.safety_manager.update_component_health(
+                        "trading_engine", ComponentState.DEGRADED,
+                        error_msg=str(e)
+                    )
+                except Exception:
+                    pass  # Don't let safety reporting cause additional errors
 
     async def execute_manual_trade(self, symbol: str, dollar_amount: Decimal, action: str, gate: str = "MANUAL"):
         """Execute a manual trade for testing."""
@@ -468,11 +538,19 @@ class TradingEngine:
                 'positions_count': len(positions),
                 'canceled_orders': canceled_count
             })
-            
+
             self._log_memory_event(
                 "KILL SWITCH ACTIVATED - TRADING HALTED",
                 {'category': 'safety', 'event': 'kill_switch', 'severity': 'critical'}
             )
+
+            # ISS-003: Trigger safety emergency shutdown
+            if self.safety_integration:
+                try:
+                    await self.safety_integration.emergency_shutdown()
+                    logger.info("Safety emergency shutdown completed")
+                except Exception as se:
+                    logger.error(f"Error in safety emergency shutdown: {se}")
 
             # Stop the engine
             await self.stop()
@@ -494,13 +572,21 @@ class TradingEngine:
             # Get final NAV for audit
             final_nav = await self.broker.get_account_value() if self.broker else Decimal('0')
 
+            # ISS-003: Stop safety systems gracefully
+            if self.safety_integration:
+                try:
+                    await self.safety_integration.stop()
+                    logger.info("Safety systems stopped")
+                except Exception as se:
+                    logger.warning(f"Error stopping safety systems: {se}")
+
             # Final audit log
             self._audit_log({
                 'event': 'engine_stopped',
                 'timestamp': datetime.now().isoformat(),
                 'final_nav': str(final_nav)
             })
-            
+
             self._log_memory_event(
                 "Trading engine stopped",
                 {'category': 'lifecycle', 'event': 'stop'}
@@ -526,7 +612,7 @@ class TradingEngine:
             positions = await self.broker.get_positions()
             market_open = await self.market_data.get_market_status()
 
-            return {
+            status = {
                 'status': 'running' if self.running else 'stopped',
                 'mode': self.mode,
                 'nav': str(nav),
@@ -537,6 +623,23 @@ class TradingEngine:
                 'broker_connected': self.broker.is_connected,
                 'timestamp': datetime.now().isoformat()
             }
+
+            # ISS-003: Include safety system status
+            if self.safety_integration:
+                try:
+                    safety_health = self.safety_integration.get_system_health()
+                    status['safety'] = {
+                        'enabled': True,
+                        'running': self.safety_integration.running,
+                        'overall_status': safety_health.get('overall_status', 'unknown'),
+                        'circuit_breakers': safety_health.get('safety_systems', {}).get('circuit_breakers', {}),
+                    }
+                except Exception as se:
+                    status['safety'] = {'enabled': True, 'error': str(se)}
+            else:
+                status['safety'] = {'enabled': False}
+
+            return status
         except Exception as e:
             logger.error(f"Error getting status: {e}")
             return {

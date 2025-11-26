@@ -7,9 +7,10 @@ paper and live trading modes, including fractional shares up to 6 decimal places
 
 import asyncio
 import logging
+import time
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 
 from .broker_interface import (
@@ -79,6 +80,18 @@ class AlpacaAdapter(BrokerInterface):
 
         # Alpaca supports up to 6 decimal places for fractional shares
         self.qty_precision = 6
+
+        # ISS-012: Production features merged from alpaca_production.py
+        # Rate limiting
+        self.last_request_time = 0
+        self.min_request_interval = 0.1  # 100ms between requests
+
+        # Position and order caches
+        self._position_cache: Dict[str, Position] = {}
+        self._order_cache: Dict[str, Any] = {}
+        self._cache_timestamp = 0
+        self._cache_ttl = 5  # 5 second cache TTL
+        self.last_heartbeat = None
 
         # Validate credentials for production mode
         if not (self.api_key and self.secret_key):
@@ -736,3 +749,164 @@ class AlpacaAdapter(BrokerInterface):
             Optional[str]: None (Alpaca doesn't support this)
         """
         return None
+
+    # ISS-012: Production features merged from alpaca_production.py
+
+    def _rate_limit(self) -> None:
+        """Apply rate limiting to avoid hitting API limits."""
+        now = time.time()
+        elapsed = now - self.last_request_time
+        if elapsed < self.min_request_interval:
+            time.sleep(self.min_request_interval - elapsed)
+        self.last_request_time = time.time()
+
+    def _is_cache_valid(self) -> bool:
+        """Check if cache is still valid."""
+        return (time.time() - self._cache_timestamp) < self._cache_ttl
+
+    async def close_position(self, symbol: str) -> bool:
+        """
+        Close a position completely.
+
+        Args:
+            symbol: Symbol to close
+
+        Returns:
+            True if position closed successfully
+        """
+        if not self.is_connected:
+            raise ConnectionError("Not connected to broker")
+
+        self._rate_limit()
+
+        try:
+            order = await self._safe_api_call(
+                self.trading_client.close_position, symbol
+            )
+            logger.info(f"Closed position: {symbol}, Order ID: {order.id if order else 'N/A'}")
+
+            # Clear from cache
+            if symbol in self._position_cache:
+                del self._position_cache[symbol]
+
+            return True
+
+        except Exception as e:
+            if "not found" in str(e).lower() or "404" in str(e):
+                logger.warning(f"No position found for {symbol}")
+                return True  # Position doesn't exist, consider it closed
+            logger.error(f"Failed to close position: {e}")
+            return False
+
+    async def close_all_positions(self) -> bool:
+        """
+        Close ALL open positions (EMERGENCY USE).
+
+        Returns:
+            True if all positions closed successfully
+        """
+        if not self.is_connected:
+            raise ConnectionError("Not connected to broker")
+
+        self._rate_limit()
+
+        try:
+            orders = await self._safe_api_call(
+                self.trading_client.close_all_positions, cancel_orders=True
+            )
+            logger.warning(f"CLOSED ALL POSITIONS: {len(orders) if orders else 0} orders submitted")
+
+            # Clear position cache
+            self._position_cache.clear()
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to close all positions: {e}")
+            return False
+
+    async def get_current_price(self, symbol: str) -> Decimal:
+        """
+        Get current price for a symbol (alias for get_market_price).
+
+        Args:
+            symbol: Stock symbol
+
+        Returns:
+            Current price as Decimal
+        """
+        price = await self.get_market_price(symbol)
+        return price if price is not None else Decimal("0")
+
+    async def get_market_hours(self) -> Dict[str, Any]:
+        """
+        Get market hours information.
+
+        Returns:
+            Dict with market hours information
+        """
+        if not self.is_connected:
+            raise ConnectionError("Not connected to broker")
+
+        self._rate_limit()
+
+        try:
+            clock = await self._safe_api_call(self.trading_client.get_clock)
+            if clock:
+                return {
+                    'is_open': clock.is_open,
+                    'next_open': clock.next_open.isoformat() if clock.next_open else None,
+                    'next_close': clock.next_close.isoformat() if clock.next_close else None,
+                    'timestamp': clock.timestamp.isoformat() if hasattr(clock, 'timestamp') and clock.timestamp else None
+                }
+            return {'is_open': False}
+
+        except Exception as e:
+            logger.error(f"Failed to get market hours: {e}")
+            return {'is_open': False}
+
+    def get_connection_status(self) -> str:
+        """
+        Get detailed connection status.
+
+        Returns:
+            Status string
+        """
+        if not self.is_connected:
+            return "DISCONNECTED"
+
+        if self.last_heartbeat:
+            elapsed = time.time() - self.last_heartbeat
+            if elapsed > 60:
+                return f"STALE (last heartbeat: {elapsed:.0f}s ago)"
+
+        mode = "PAPER" if self.is_paper_trading else "LIVE"
+        return f"CONNECTED ({mode})"
+
+    async def health_check(self) -> Dict[str, Any]:
+        """
+        Perform health check on broker connection.
+
+        Returns:
+            Dict: Health status information
+        """
+        try:
+            clock = await self._safe_api_call(self.trading_client.get_clock)
+            self.last_heartbeat = time.time()
+            return {
+                "connected": self.is_connected,
+                "paper_trading": self.is_paper_trading,
+                "timestamp": datetime.now(timezone.utc),
+                "broker": self.__class__.__name__,
+                "market_open": clock.is_open if clock else False,
+                "healthy": True
+            }
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return {
+                "connected": False,
+                "paper_trading": self.is_paper_trading,
+                "timestamp": datetime.now(timezone.utc),
+                "broker": self.__class__.__name__,
+                "healthy": False,
+                "error": str(e)
+            }
