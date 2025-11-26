@@ -150,43 +150,53 @@ class SimpleDashboardServer:
         """Setup static file serving for React frontend build (Railway deployment)."""
         # Static files directory for built React frontend
         static_dir = Path(__file__).parent / "frontend" / "dist"
+        index_path = static_dir / "index.html"
 
+        logger.info(f"Checking for frontend at: {static_dir}")
+        logger.info(f"Static dir exists: {static_dir.exists()}")
         if static_dir.exists():
+            logger.info(f"Static dir contents: {list(static_dir.iterdir())}")
+
+        if static_dir.exists() and index_path.exists():
             # Mount static assets (JS, CSS, images)
             assets_dir = static_dir / "assets"
             if assets_dir.exists():
                 self.app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
                 logger.info(f"Static assets mounted from {assets_dir}")
 
-            # Serve index.html for SPA routing (catch-all for frontend routes)
-            @self.app.get("/{path:path}")
-            async def serve_spa(path: str):
-                # First check if it's an API route (don't serve index.html for API)
-                if path.startswith("api/") or path.startswith("ws/") or path == "health":
-                    return {"error": "Not found"}, 404
-
-                # Serve static file if exists
-                file_path = static_dir / path
-                if file_path.exists() and file_path.is_file():
-                    return FileResponse(str(file_path))
-
-                # Default: serve index.html for SPA routing
-                index_path = static_dir / "index.html"
-                if index_path.exists():
-                    return FileResponse(str(index_path))
-
-                return {"error": "Frontend not built. Run 'npm run build' in frontend directory."}
-
-            logger.info(f"SPA routing enabled, serving from {static_dir}")
+            # Store reference for use in routes
+            self._static_dir = static_dir
+            self._has_frontend = True
+            logger.info(f"Frontend found! SPA routing enabled from {static_dir}")
         else:
-            logger.warning(f"Frontend build not found at {static_dir}. Run 'npm run build' in frontend directory for production.")
+            self._has_frontend = False
+            logger.warning(f"Frontend build not found at {static_dir}. API-only mode.")
 
     def setup_routes(self):
         """Setup API routes."""
 
-        @self.app.get(C.API_ROOT)
+        @self.app.get("/")
         async def root():
-            return {"message": "Gary×Taleb Risk Dashboard API", "status": "running", "ai_enabled": AI_AVAILABLE}
+            # Serve frontend if available, otherwise API info
+            if getattr(self, '_has_frontend', False):
+                index_path = self._static_dir / "index.html"
+                return FileResponse(str(index_path))
+            return {"message": "Gary x Taleb Risk Dashboard API", "status": "running", "ai_enabled": AI_AVAILABLE}
+
+        @self.app.get("/app/{path:path}")
+        async def serve_spa(path: str = ""):
+            """Serve SPA for all frontend routes."""
+            if not getattr(self, '_has_frontend', False):
+                return {"error": "Frontend not available"}
+
+            # Serve static file if exists
+            if path:
+                file_path = self._static_dir / path
+                if file_path.exists() and file_path.is_file():
+                    return FileResponse(str(file_path))
+
+            # Default: serve index.html for SPA routing
+            return FileResponse(str(self._static_dir / "index.html"))
 
         @self.app.get(C.API_HEALTH)
         async def health_check():
