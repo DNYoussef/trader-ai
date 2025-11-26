@@ -518,68 +518,116 @@ class RealDataProvider:
     def __init__(self):
         self.db_path = project_root / 'data' / 'historical_market.db'
         self.portfolio_value = C.DEFAULT_PORTFOLIO_VALUE
+        self._use_mock = not self.db_path.exists()
+        if self._use_mock:
+            logger.warning(f"Database not found at {self.db_path}, using mock data")
         self.positions = self._initialize_positions()
         self.last_market_data = self._fetch_latest_market_data()
 
+    def _get_mock_positions(self):
+        """Return mock positions when database unavailable."""
+        return [
+            {"symbol": "SPY", "quantity": 10, "entry_price": 450.00, "current_price": 455.50},
+            {"symbol": "QQQ", "quantity": 8, "entry_price": 380.00, "current_price": 385.20},
+            {"symbol": "TLT", "quantity": 15, "entry_price": 95.00, "current_price": 94.50},
+            {"symbol": "GLD", "quantity": 12, "entry_price": 185.00, "current_price": 187.30},
+            {"symbol": "VIX", "quantity": 5, "entry_price": 15.00, "current_price": 14.80},
+        ]
+
     def _initialize_positions(self):
         """Initialize positions from real market data."""
-        # Use real symbols from database
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+        if self._use_mock:
+            return self._get_mock_positions()
 
-        # Get most traded symbols from recent data
-        cursor.execute("""
-            SELECT DISTINCT symbol, AVG(close) as avg_price, AVG(volume) as avg_volume
-            FROM market_data
-            WHERE date > date('now', '-30 days')
-            GROUP BY symbol
-            ORDER BY avg_volume DESC
-            LIMIT 8
-        """)
+        try:
+            # Use real symbols from database
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
 
-        symbols_data = cursor.fetchall()
-        conn.close()
+            # Get most traded symbols from recent data
+            cursor.execute("""
+                SELECT DISTINCT symbol, AVG(close) as avg_price, AVG(volume) as avg_volume
+                FROM market_data
+                WHERE date > date('now', '-30 days')
+                GROUP BY symbol
+                ORDER BY avg_volume DESC
+                LIMIT 8
+            """)
 
-        positions = []
-        for symbol, avg_price, avg_volume in symbols_data[:5]:  # Start with 5 positions
-            # Calculate realistic position sizes based on portfolio value
-            position_value = self.portfolio_value * 0.15  # 15% per position
-            quantity = int(position_value / avg_price) if avg_price > 0 else 10
+            symbols_data = cursor.fetchall()
+            conn.close()
 
-            positions.append({
-                "symbol": symbol,
-                "quantity": max(1, quantity),
-                "entry_price": avg_price * 0.98,  # Assume bought 2% below average
-                "current_price": avg_price
-            })
+            if not symbols_data:
+                logger.warning("No market data found, using mock positions")
+                return self._get_mock_positions()
 
-        return positions
+            positions = []
+            for symbol, avg_price, avg_volume in symbols_data[:5]:  # Start with 5 positions
+                # Calculate realistic position sizes based on portfolio value
+                position_value = self.portfolio_value * 0.15  # 15% per position
+                quantity = int(position_value / avg_price) if avg_price > 0 else 10
+
+                positions.append({
+                    "symbol": symbol,
+                    "quantity": max(1, quantity),
+                    "entry_price": avg_price * 0.98,  # Assume bought 2% below average
+                    "current_price": avg_price
+                })
+
+            return positions
+        except sqlite3.OperationalError as e:
+            logger.warning(f"Database error: {e}, using mock positions")
+            self._use_mock = True
+            return self._get_mock_positions()
+
+    def _get_mock_market_data(self) -> Dict:
+        """Return mock market data when database unavailable."""
+        return {
+            "SPY": {"close": 455.50, "volume": 50000000, "returns": 0.012, "volatility": 0.15, "rsi": 55},
+            "QQQ": {"close": 385.20, "volume": 30000000, "returns": 0.015, "volatility": 0.18, "rsi": 58},
+            "TLT": {"close": 94.50, "volume": 10000000, "returns": -0.005, "volatility": 0.12, "rsi": 45},
+            "GLD": {"close": 187.30, "volume": 8000000, "returns": 0.008, "volatility": 0.10, "rsi": 52},
+            "VIX": {"close": 14.80, "volume": 5000000, "returns": -0.02, "volatility": 0.35, "rsi": 40},
+        }
 
     def _fetch_latest_market_data(self) -> Dict:
         """Fetch latest market data from database."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+        if self._use_mock:
+            return self._get_mock_market_data()
 
-        # Get latest market data
-        cursor.execute("""
-            SELECT symbol, close, volume, returns, volatility_20d, rsi_14
-            FROM market_data
-            WHERE date = (SELECT MAX(date) FROM market_data)
-        """)
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
 
-        data = {}
-        for row in cursor.fetchall():
-            symbol, close, volume, returns, vol, rsi = row
-            data[symbol] = {
-                'close': close,
-                'volume': volume,
-                'returns': returns,
-                'volatility': vol if vol else C.DEFAULT_VOLATILITY,
-                'rsi': rsi if rsi else C.DEFAULT_RSI
-            }
+            # Get latest market data
+            cursor.execute("""
+                SELECT symbol, close, volume, returns, volatility_20d, rsi_14
+                FROM market_data
+                WHERE date = (SELECT MAX(date) FROM market_data)
+            """)
 
-        conn.close()
-        return data
+            data = {}
+            for row in cursor.fetchall():
+                symbol, close, volume, returns, vol, rsi = row
+                data[symbol] = {
+                    'close': close,
+                    'volume': volume,
+                    'returns': returns,
+                    'volatility': vol if vol else C.DEFAULT_VOLATILITY,
+                    'rsi': rsi if rsi else C.DEFAULT_RSI
+                }
+
+            conn.close()
+
+            if not data:
+                logger.warning("No market data found, using mock data")
+                return self._get_mock_market_data()
+
+            return data
+        except sqlite3.OperationalError as e:
+            logger.warning(f"Database error fetching market data: {e}, using mock data")
+            self._use_mock = True
+            return self._get_mock_market_data()
 
     def _calculate_real_risk_metrics(self, positions: List[Dict]) -> Dict:
         """Calculate real risk metrics from positions and market data."""
