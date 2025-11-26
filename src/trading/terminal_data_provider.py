@@ -1,6 +1,7 @@
 """
 Trading Terminal Data Provider
 
+ISS-020: Updated to use real Alpaca data instead of mock/placeholder data.
 Provides real-time market data, algorithmic signals, and AI inflection points
 for the professional trading terminal interface. Integrates with existing
 trading systems and causal intelligence components.
@@ -20,10 +21,12 @@ import numpy as np
 try:
     from ..intelligence.causal_integration import CausallyEnhancedDPICalculator
     from ..market.market_data import MarketDataManager
+    from ..market.alpaca_data_provider import AlpacaDataProvider
     from ..portfolio.portfolio_manager import PortfolioManager
     from ..gates.enhanced_gate_manager import EnhancedGateManager
 except ImportError:
     # Handle import errors gracefully for testing
+    AlpacaDataProvider = None
     pass
 
 logger = logging.getLogger(__name__)
@@ -110,18 +113,24 @@ class TradingTerminalDataProvider:
     def __init__(self,
                  symbols: List[str] = None,
                  update_interval: float = 1.0,
-                 enable_live_data: bool = False):
+                 enable_live_data: bool = False,
+                 alpaca_data_provider: Optional[AlpacaDataProvider] = None):
         """
         Initialize the terminal data provider
 
         Args:
             symbols: List of symbols to track
             update_interval: Data update interval in seconds
-            enable_live_data: Whether to use live market data
+            enable_live_data: Whether to use live market data (ISS-020: now uses real Alpaca data)
+            alpaca_data_provider: Optional AlpacaDataProvider instance for real market data
         """
         self.symbols = symbols or ['SPY', 'ULTY', 'AMDY', 'VTIP', 'IAU']
         self.update_interval = update_interval
         self.enable_live_data = enable_live_data
+
+        # ISS-020: Real data provider integration
+        self.alpaca_provider = alpaca_data_provider
+        self.use_real_data = bool(self.alpaca_provider) and enable_live_data
 
         # Data storage
         self.market_data: Dict[str, MarketDataPoint] = {}
@@ -145,7 +154,8 @@ class TradingTerminalDataProvider:
         self.running = False
         self.update_task = None
 
-        logger.info("Trading Terminal Data Provider initialized")
+        data_source = "Real Alpaca API" if self.use_real_data else "Mock/Cached Data"
+        logger.info(f"Trading Terminal Data Provider initialized - Data source: {data_source}")
 
     def add_market_data_callback(self, callback: Callable):
         """Add callback for market data updates"""
@@ -166,14 +176,26 @@ class TradingTerminalDataProvider:
 
         self.running = True
 
-        # Initialize with mock data if not using live data
-        if not self.enable_live_data:
+        # ISS-020: Connect to Alpaca if using real data
+        if self.use_real_data and self.alpaca_provider:
+            await self.alpaca_provider.connect()
+            # Start WebSocket streaming for real-time updates
+            await self.alpaca_provider.start_streaming(self.symbols)
+
+            # Register callbacks for real-time updates
+            self.alpaca_provider.add_trade_callback(self._handle_real_trade_update)
+
+            # Initialize with real data
+            await self._initialize_real_data()
+        else:
+            # Fallback to mock/cached data
             await self._initialize_mock_data()
 
         # Start background update task
         self.update_task = asyncio.create_task(self._update_loop())
 
-        logger.info("Trading Terminal Data Provider started")
+        data_source = "Real Alpaca API" if self.use_real_data else "Mock/Cached Data"
+        logger.info(f"Trading Terminal Data Provider started - Using: {data_source}")
 
     async def stop(self):
         """Stop the data provider"""
@@ -188,8 +210,68 @@ class TradingTerminalDataProvider:
 
         logger.info("Trading Terminal Data Provider stopped")
 
+    async def _initialize_real_data(self):
+        """ISS-020: Initialize with real Alpaca market data"""
+        current_time = time.time()
+
+        for symbol in self.symbols:
+            try:
+                # Get real latest price from Alpaca
+                price = await self.alpaca_provider.get_latest_price(symbol)
+                quote = await self.alpaca_provider.get_latest_quote(symbol)
+
+                if price is None:
+                    logger.warning(f"No real data available for {symbol}, skipping")
+                    continue
+
+                # Create initial market data from real Alpaca data
+                self.market_data[symbol] = MarketDataPoint(
+                    symbol=symbol,
+                    timestamp=current_time,
+                    price=float(price),
+                    volume=0,  # Will be updated from bars
+                    change=0.0,
+                    change_percent=0.0,
+                    bid=quote.bid if quote else price - 0.01,
+                    ask=quote.ask if quote else price + 0.01,
+                    high_24h=float(price) * 1.02,  # Will be updated from bars
+                    low_24h=float(price) * 0.98     # Will be updated from bars
+                )
+
+                # Get historical bars for price history and 24h high/low
+                bars = await self.alpaca_provider.get_historical_bars(
+                    symbol, timeframe='1Min', limit=100
+                )
+
+                if bars:
+                    # Update price history
+                    for bar in bars:
+                        self.price_history[symbol].append({
+                            'timestamp': bar.timestamp.timestamp(),
+                            'price': bar.close,
+                            'volume': bar.volume
+                        })
+
+                    # Calculate 24h high/low from bars
+                    recent_bars = bars[-1440:] if len(bars) > 1440 else bars  # Last 24 hours
+                    if recent_bars:
+                        self.market_data[symbol].high_24h = max(b.high for b in recent_bars)
+                        self.market_data[symbol].low_24h = min(b.low for b in recent_bars)
+
+                # Initialize technical indicators
+                await self._calculate_technical_indicators(symbol)
+
+                logger.info(f"Initialized real data for {symbol}: ${price}")
+
+            except Exception as e:
+                logger.error(f"Error initializing real data for {symbol}: {e}")
+
+        # Generate initial signals and inflections (still mock for now)
+        await self._generate_algorithmic_signals()
+        await self._generate_ai_inflections()
+
     async def _initialize_mock_data(self):
-        """Initialize with mock market data"""
+        """Initialize with mock market data (fallback when real data unavailable)"""
 
         base_prices = {
             'SPY': 440.25,
@@ -259,23 +341,120 @@ class TradingTerminalDataProvider:
                 logger.error(f"Error in update loop: {e}")
                 await asyncio.sleep(self.update_interval)
 
+    async def _handle_real_trade_update(self, trade):
+        """ISS-020: Handle real-time trade update from Alpaca WebSocket"""
+        symbol = trade.symbol
+        if symbol not in self.symbols:
+            return
+
+        current_time = time.time()
+        new_price = trade.price
+
+        # Get current data or initialize
+        if symbol in self.market_data:
+            current_data = self.market_data[symbol]
+            change = new_price - current_data.price
+            change_percent = (change / current_data.price) * 100 if current_data.price > 0 else 0
+        else:
+            change = 0
+            change_percent = 0
+
+        # Update market data with real trade
+        updated_data = MarketDataPoint(
+            symbol=symbol,
+            timestamp=current_time,
+            price=new_price,
+            volume=trade.size,
+            change=change,
+            change_percent=change_percent,
+            bid=new_price - 0.01,  # Approximate, will be updated from quotes
+            ask=new_price + 0.01,
+            high_24h=max(self.market_data.get(symbol, MarketDataPoint(symbol, 0, new_price, 0, 0, 0)).high_24h or new_price, new_price),
+            low_24h=min(self.market_data.get(symbol, MarketDataPoint(symbol, 0, new_price, 0, 0, 0)).low_24h or new_price, new_price)
+        )
+
+        self.market_data[symbol] = updated_data
+
+        # Add to price history
+        self.price_history[symbol].append({
+            'timestamp': current_time,
+            'price': new_price,
+            'volume': trade.size
+        })
+
+        # Notify callbacks
+        for callback in self.market_data_callbacks:
+            try:
+                callback(symbol, updated_data)
+            except Exception as e:
+                logger.error(f"Error in market data callback: {e}")
+
     async def _update_market_data(self):
-        """Update real-time market data"""
+        """Update real-time market data (ISS-020: uses real Alpaca data when available)"""
         current_time = time.time()
 
         for symbol in self.symbols:
             if symbol not in self.market_data:
                 continue
 
+            # ISS-020: Get real data if available
+            if self.use_real_data and self.alpaca_provider:
+                try:
+                    # Get latest price and quote from Alpaca
+                    price = await self.alpaca_provider.get_latest_price(symbol)
+                    quote = await self.alpaca_provider.get_latest_quote(symbol)
+
+                    if price is not None:
+                        current_data = self.market_data[symbol]
+                        change = price - current_data.price
+                        change_percent = (change / current_data.price) * 100 if current_data.price > 0 else 0
+
+                        # Update with real data
+                        updated_data = MarketDataPoint(
+                            symbol=symbol,
+                            timestamp=current_time,
+                            price=price,
+                            volume=current_data.volume,  # Cumulative volume updated from trades
+                            change=change,
+                            change_percent=change_percent,
+                            bid=quote.bid if quote else price - 0.01,
+                            ask=quote.ask if quote else price + 0.01,
+                            high_24h=max(current_data.high_24h or price, price),
+                            low_24h=min(current_data.low_24h or price, price)
+                        )
+
+                        self.market_data[symbol] = updated_data
+
+                        # Add to price history
+                        self.price_history[symbol].append({
+                            'timestamp': current_time,
+                            'price': price,
+                            'volume': 0
+                        })
+
+                        # Notify callbacks
+                        for callback in self.market_data_callbacks:
+                            try:
+                                callback(symbol, updated_data)
+                            except Exception as e:
+                                logger.error(f"Error in market data callback: {e}")
+
+                        continue  # Skip mock update
+
+                except Exception as e:
+                    logger.error(f"Error fetching real data for {symbol}: {e}")
+                    # Fall through to mock update
+
+            # Fallback: Mock/simulated price movement
             current_data = self.market_data[symbol]
 
             # Simulate price movement
-            volatility = 0.001 if symbol == 'SPY' else 0.003  # Lower volatility for more realistic movement
+            volatility = 0.001 if symbol == 'SPY' else 0.003
             price_change = np.random.normal(0, volatility) * current_data.price
 
             # Add slight trending based on time of day
             hour = datetime.now().hour
-            trend_factor = 0.0001 if 9 <= hour <= 16 else -0.0001  # Slight upward trend during market hours
+            trend_factor = 0.0001 if 9 <= hour <= 16 else -0.0001
 
             new_price = max(0.01, current_data.price + price_change + (trend_factor * current_data.price))
             volume_change = np.random.randint(-10000, 50000)
