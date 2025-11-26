@@ -30,6 +30,15 @@ import uvicorn
 sys.path.insert(0, str(Path(__file__).parent))
 import constants as C
 
+# Import LiveDataProvider for real trading engine data (ISS-005)
+try:
+    from src.dashboard.live_data_provider import LiveDataProvider, create_live_data_provider
+    LIVE_DATA_AVAILABLE = True
+    logging.info("LiveDataProvider loaded - will use real trading engine data")
+except ImportError as e:
+    LIVE_DATA_AVAILABLE = False
+    logging.warning(f"LiveDataProvider not available - using mock data: {e}")
+
 # Import AI dashboard integration
 try:
     import ai_dashboard_integration
@@ -89,12 +98,26 @@ class Position:
 class SimpleDashboardServer:
     """Simplified dashboard server without Redis dependency."""
 
-    def __init__(self):
-        self.app = FastAPI(title="Gary×Taleb Risk Dashboard")
+    def __init__(self, trading_engine=None):
+        self.app = FastAPI(title="Gary x Taleb Risk Dashboard")
         self.active_connections: Set[WebSocket] = set()
         self.setup_cors()
         self.setup_routes()
-        self.data_provider = RealDataProvider()
+
+        # ISS-005: Use LiveDataProvider for real trading engine data
+        if LIVE_DATA_AVAILABLE:
+            try:
+                self.data_provider = create_live_data_provider(trading_engine)
+                self._using_live_data = True
+                logger.info("Dashboard using LiveDataProvider (real trading engine data)")
+            except Exception as e:
+                logger.warning(f"Failed to create LiveDataProvider: {e}")
+                self.data_provider = RealDataProvider()
+                self._using_live_data = False
+        else:
+            self.data_provider = RealDataProvider()
+            self._using_live_data = False
+            logger.info("Dashboard using RealDataProvider (mock/database data)")
 
     def setup_cors(self):
         """Configure CORS for frontend access."""
@@ -119,7 +142,9 @@ class SimpleDashboardServer:
                 "status": "healthy",
                 "timestamp": time.time(),
                 "connections": len(self.active_connections),
-                "ai_available": AI_AVAILABLE
+                "ai_available": AI_AVAILABLE,
+                "live_data": getattr(self, '_using_live_data', False),
+                "data_source": "trading_engine" if getattr(self, '_using_live_data', False) else "database_mock"
             }
 
         @self.app.get(C.API_METRICS_CURRENT)
@@ -173,11 +198,29 @@ class SimpleDashboardServer:
         @self.app.get(C.API_BARBELL_ALLOCATION)
         async def get_barbell_allocation():
             """Get current barbell allocation status."""
-            if AI_AVAILABLE:
-                # This would come from AI mispricing detector
+            # ISS-005: Try live data first, then AI, then fallback
+            if getattr(self, '_using_live_data', False):
+                barbell = self.data_provider.generate_barbell_allocation()
+                barbell['source'] = 'trading_engine'
+                return barbell
+            elif AI_AVAILABLE:
                 return {"safe_allocation": 0.8, "risky_allocation": 0.2, "ai_managed": True}
             else:
                 return self.data_provider.generate_barbell_allocation()
+
+        # ISS-005: Engine status endpoint for live data monitoring
+        @self.app.get("/api/engine/status")
+        async def get_engine_status():
+            """Get trading engine connection status."""
+            if getattr(self, '_using_live_data', False) and hasattr(self.data_provider, 'generate_engine_status'):
+                return self.data_provider.generate_engine_status()
+            else:
+                return {
+                    "connected": False,
+                    "status": "mock_mode",
+                    "mode": "paper",
+                    "source": "database_mock"
+                }
 
         # New AI Component Endpoints for 5 critical systems
         @self.app.get(C.API_AI_TIMESFM_VOLATILITY)
@@ -379,12 +422,14 @@ class SimpleDashboardServer:
 
                 # Send alerts every 10 seconds
                 if int(time.time()) % 10 == 0:  # Every 10 seconds
-                    alert = self.data_provider.generate_alert()
-                    await websocket.send_json({
-                        "type": "alert",
-                        "data": alert,
-                        "timestamp": time.time()
-                    })
+                    # ISS-005: Use generate_alerts() for LiveDataProvider compatibility
+                    alerts = self.data_provider.generate_alerts()
+                    if alerts:
+                        await websocket.send_json({
+                            "type": "alert",
+                            "data": alerts[0],  # Send most recent alert
+                            "timestamp": time.time()
+                        })
 
             except Exception as e:
                 logger.error(f"Error sending update: {e}")
@@ -965,9 +1010,24 @@ async def init_ai_services():
     else:
         logger.info("Running in mock mode - AI services not available")
 
-def main():
+def create_dashboard_server(trading_engine=None) -> SimpleDashboardServer:
+    """
+    Factory function to create a dashboard server.
+
+    ISS-005: Allows integration with TradingEngine for live data.
+
+    Args:
+        trading_engine: Optional TradingEngine instance for live data
+
+    Returns:
+        Configured SimpleDashboardServer
+    """
+    return SimpleDashboardServer(trading_engine=trading_engine)
+
+
+def main(trading_engine=None):
     """Main entry point."""
-    server = SimpleDashboardServer()
+    server = SimpleDashboardServer(trading_engine=trading_engine)
 
     # Initialize AI services
     if AI_AVAILABLE:
@@ -981,13 +1041,28 @@ def main():
 
     # Start the server
     try:
-        logger.info("Starting Gary×Taleb Risk Dashboard with AI integration")
+        data_mode = "LIVE (trading engine)" if getattr(server, '_using_live_data', False) else "MOCK (database)"
+        logger.info(f"Starting Gary x Taleb Risk Dashboard - Data Mode: {data_mode}")
+        logger.info(f"AI integration: {'enabled' if AI_AVAILABLE else 'disabled'}")
         server.run(host="127.0.0.1", port=8000)
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:
         logger.error(f"Server error: {e}")
         raise
+
+
+def run_with_engine(trading_engine):
+    """
+    Run dashboard server integrated with a TradingEngine.
+
+    ISS-005: Entry point for launching dashboard with live trading data.
+
+    Args:
+        trading_engine: Active TradingEngine instance
+    """
+    main(trading_engine=trading_engine)
+
 
 if __name__ == "__main__":
     main()

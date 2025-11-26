@@ -5,5 +5,52 @@
   "api_key": "",
   "secret_key": "",
   "audit_enabled": true,
-  "rebalance_frequency_minutes": 5
+  "rebalance_frequency_minutes": 5,
+
+  "asset_universe": {
+    "safe_assets": ["SPY", "VTIP", "IAU"],
+    "momentum_assets": ["ULTY", "AMDY"],
+    "all_symbols": ["SPY", "ULTY", "AMDY", "VTIP", "IAU"],
+    "descriptions": {
+      "SPY": "S&P 500 ETF - Market hedge",
+      "ULTY": "YieldMax Ultra Option Strategy ETF - Momentum",
+      "AMDY": "YieldMax AMD Option Strategy ETF - Momentum",
+      "VTIP": "Vanguard Short-Term Inflation-Protected Securities ETF - Inflation hedge",
+      "IAU": "iShares Gold Trust - Gold hedge"
+    }
+  },
+
+  "allocations": {
+    "default": {
+      "SPY": 0.40,
+      "ULTY": 0.175,
+      "AMDY": 0.175,
+      "VTIP": 0.15,
+      "IAU": 0.10
+    },
+    "barbell": {
+      "safe_allocation": 0.65,
+      "risky_allocation": 0.35,
+      "safe_instruments": ["SPY", "VTIP", "IAU"],
+      "risky_instruments": ["ULTY", "AMDY"]
+    }
+  },
+
+  "trading": {
+    "max_position_size_percent": 40,
+    "min_cash_reserve_percent": 5,
+    "rebalance_threshold_percent": 5
+  },
+
+  "risk": {
+    "max_drawdown_percent": 20,
+    "daily_loss_limit_percent": 5,
+    "position_limit_per_asset_percent": 25
+  },
+
+  "safety": {
+    "enable_kill_switch": true,
+    "heartbeat_interval_seconds": 60,
+    "circuit_breaker_cooldown_seconds": 300
+  }
 }

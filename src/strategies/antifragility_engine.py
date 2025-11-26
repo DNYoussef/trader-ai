@@ -10,7 +10,7 @@ NO THEATER - REAL MATHEMATICS
 """
 import numpy as np
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from decimal import Decimal, getcontext
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -63,27 +63,45 @@ class AntifragilityEngine:
     5. Antifragile rebalancing during volatility spikes
     """
 
-    def __init__(self, portfolio_value: float, risk_tolerance: float = 0.02):
+    def __init__(self, portfolio_value: float, risk_tolerance: float = 0.02,
+                 config: Optional[Dict] = None):
         """
         Initialize antifragility engine
 
         Args:
             portfolio_value: Total portfolio value
             risk_tolerance: Max acceptable loss per position (2% default)
+            config: Optional configuration dict with asset_universe and allocations
         """
         self.portfolio_value = portfolio_value
         self.risk_tolerance = risk_tolerance
         self.volatility_lookback = 252  # 1 year of daily returns
         self.evt_threshold_percentile = 95  # Top 5% for extreme events
 
-        # Barbell configuration - Taleb's actual allocation
+        # ISS-011: Load barbell configuration from config or use defaults
+        if config and 'allocations' in config and 'barbell' in config['allocations']:
+            barbell_cfg = config['allocations']['barbell']
+            safe_instruments = barbell_cfg.get('safe_instruments', ['SPY', 'VTIP', 'IAU'])
+            risky_instruments = barbell_cfg.get('risky_instruments', ['ULTY', 'AMDY'])
+            safe_allocation = barbell_cfg.get('safe_allocation', 0.65)
+            risky_allocation = barbell_cfg.get('risky_allocation', 0.35)
+        else:
+            # Default Gary x Taleb allocation
+            safe_instruments = ['SPY', 'VTIP', 'IAU']
+            risky_instruments = ['ULTY', 'AMDY']
+            safe_allocation = 0.65
+            risky_allocation = 0.35
+
         self.barbell_config = BarbellAllocation(
-            safe_allocation=0.80,  # 80% safe
-            risky_allocation=0.20,  # 20% convex
-            safe_instruments=['CASH', 'SHY', 'TLT'],  # Cash, short/long treasuries
-            risky_instruments=['QQQ', 'ARKK', 'TSLA'],  # High-growth/volatile assets
+            safe_allocation=safe_allocation,
+            risky_allocation=risky_allocation,
+            safe_instruments=safe_instruments,
+            risky_instruments=risky_instruments,
             rebalance_threshold=0.05
         )
+
+        # Store config for later use
+        self.config = config or {}
 
         logger.info(f"Antifragility Engine initialized - Portfolio: ${portfolio_value:,.2f}")
 

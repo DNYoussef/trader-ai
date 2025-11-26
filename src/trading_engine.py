@@ -16,7 +16,18 @@ import os
 
 from .brokers.broker_interface import BrokerInterface
 from .brokers.alpaca_adapter import AlpacaAdapter
-from .integration.memory_client import MemoryClient
+# ISS-014: Use SyncMemoryClient with proper timeouts (async version available for async code)
+from .integration.memory_client import SyncMemoryClient as MemoryClient
+
+# ISS-008: Import AntifragilityEngine for strategy recommendations
+from .strategies.antifragility_engine import AntifragilityEngine
+
+# ISS-005: Import state provider for dashboard integration
+from .integration.trading_state_provider import (
+    TradingStateProvider,
+    get_state_provider,
+    set_trading_engine
+)
 
 # ISS-003: Import safety systems
 from .safety.core.safety_integration import (
@@ -68,6 +79,12 @@ class TradingEngine:
         self.portfolio_manager = None
         self.trade_executor = None
         self.memory_client = None
+
+        # ISS-008: AntifragilityEngine for strategy recommendations
+        self.antifragility_engine: Optional[AntifragilityEngine] = None
+
+        # ISS-005: Dashboard state provider
+        self.dashboard_state_provider: Optional[TradingStateProvider] = None
 
         # ISS-003: Safety integration
         self.safety_integration: Optional[TradingSafetyIntegration] = None
@@ -176,6 +193,28 @@ class TradingEngine:
                 self.market_data
             )
 
+            # ISS-008: Initialize AntifragilityEngine with config
+            try:
+                initial_capital = float(self.config.get('initial_capital', 200))
+                self.antifragility_engine = AntifragilityEngine(
+                    portfolio_value=initial_capital,
+                    risk_tolerance=0.02,
+                    config=self.config
+                )
+                logger.info("AntifragilityEngine initialized with config-based allocation")
+            except Exception as e:
+                logger.warning(f"AntifragilityEngine not available: {e}")
+                self.antifragility_engine = None
+
+            # ISS-005: Initialize dashboard state provider
+            try:
+                self.dashboard_state_provider = get_state_provider()
+                set_trading_engine(self)
+                logger.info("Dashboard state provider connected")
+            except Exception as e:
+                logger.warning(f"Dashboard state provider not available: {e}")
+                self.dashboard_state_provider = None
+
             # ISS-003: Initialize safety systems
             try:
                 safety_config = self.config.get('safety', get_default_safety_config())
@@ -262,6 +301,9 @@ class TradingEngine:
                     # Check portfolio status every 5 minutes
                     await self._check_system_health()
 
+                    # ISS-005: Publish state for dashboard
+                    await self._publish_dashboard_state()
+
                     # Sleep for 5 minutes before next check
                     await asyncio.sleep(300)
 
@@ -341,29 +383,54 @@ class TradingEngine:
             self._log_memory_event(f"Trading cycle error: {e}", {'category': 'cycle', 'status': 'error'})
 
     async def _execute_rebalancing(self, total_value: Decimal):
-        """Execute Gary×Taleb strategy rebalancing."""
+        """Execute Gary x Taleb strategy rebalancing."""
         try:
             logger.info("Executing portfolio rebalancing")
 
-            # Gary×Taleb allocation strategy:
-            # 40% SPY (market hedge)
-            # 35% ULTY+AMDY (momentum - split equally)
-            # 15% VTIP (inflation protection)
-            # 10% IAU (gold hedge)
-            target_allocations = {
-                'SPY': total_value * Decimal('0.40'),
-                'ULTY': total_value * Decimal('0.175'),  # Half of 35%
-                'AMDY': total_value * Decimal('0.175'),  # Half of 35%
-                'VTIP': total_value * Decimal('0.15'),
-                'IAU': total_value * Decimal('0.10')
-            }
+            # ISS-008: Use AntifragilityEngine for allocation recommendations
+            if self.antifragility_engine:
+                # Get barbell allocation from engine
+                barbell = self.antifragility_engine.calculate_barbell_allocation(float(total_value))
+                safe_amount = Decimal(str(barbell['safe_amount']))
+                risky_amount = Decimal(str(barbell['risky_amount']))
+                safe_instruments = barbell['safe_instruments']
+                risky_instruments = barbell['risky_instruments']
 
-            # Execute rebalancing for each gate
+                # Distribute safe amount across safe instruments
+                safe_per_instrument = safe_amount / Decimal(str(len(safe_instruments)))
+                # Distribute risky amount across risky instruments
+                risky_per_instrument = risky_amount / Decimal(str(len(risky_instruments)))
+
+                target_allocations = {}
+                for symbol in safe_instruments:
+                    target_allocations[symbol] = safe_per_instrument
+                for symbol in risky_instruments:
+                    target_allocations[symbol] = risky_per_instrument
+
+                logger.info(f"Using AntifragilityEngine barbell: {barbell['safe_percentage']}% safe, {barbell['risky_percentage']}% risky")
+            else:
+                # ISS-011: Fallback to config-based allocations
+                allocations = self.config.get('allocations', {}).get('default', {
+                    'SPY': 0.40,
+                    'ULTY': 0.175,
+                    'AMDY': 0.175,
+                    'VTIP': 0.15,
+                    'IAU': 0.10
+                })
+                target_allocations = {
+                    symbol: total_value * Decimal(str(pct))
+                    for symbol, pct in allocations.items()
+                }
+                logger.info("Using config-based default allocations")
+
+            # ISS-011: Build gates from config or default
+            asset_universe = self.config.get('asset_universe', {})
+            safe_assets = asset_universe.get('safe_assets', ['SPY', 'VTIP', 'IAU'])
+            momentum_assets = asset_universe.get('momentum_assets', ['ULTY', 'AMDY'])
+
             gates = {
-                'SPY_HEDGE': ['SPY'],
-                'MOMENTUM': ['ULTY', 'AMDY'],
-                'BOND_HEDGE': ['VTIP'],
-                'GOLD_HEDGE': ['IAU']
+                'SAFE_HEDGE': safe_assets,
+                'MOMENTUM': momentum_assets
             }
 
             total_orders = 0
@@ -459,6 +526,17 @@ class TradingEngine:
                     )
                 except Exception:
                     pass  # Don't let safety reporting cause additional errors
+
+    async def _publish_dashboard_state(self):
+        """ISS-005: Publish current state for dashboard consumption."""
+        if not self.dashboard_state_provider:
+            return
+
+        try:
+            state = await self.dashboard_state_provider.get_full_state()
+            self.dashboard_state_provider.publish_state(state)
+        except Exception as e:
+            logger.debug(f"Error publishing dashboard state: {e}")
 
     async def execute_manual_trade(self, symbol: str, dollar_amount: Decimal, action: str, gate: str = "MANUAL"):
         """Execute a manual trade for testing."""
