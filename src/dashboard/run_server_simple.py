@@ -5,6 +5,7 @@ This version runs without Redis dependency for development.
 """
 
 import sys
+import os
 import asyncio
 import logging
 import json
@@ -22,6 +23,8 @@ sys.path.insert(0, str(project_root))
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import uvicorn
 
 # Import constants
@@ -110,6 +113,8 @@ class SimpleDashboardServer:
         self.active_connections: Set[WebSocket] = set()
         self.setup_cors()
         self.setup_routes()
+        # Static files MUST be setup AFTER routes (catch-all route should be last)
+        self.setup_static_files()
 
         # ISS-005: Use LiveDataProvider for real trading engine data
         if LIVE_DATA_AVAILABLE:
@@ -141,6 +146,41 @@ class SimpleDashboardServer:
             configure_rate_limiting(self.app)
             logger.info("Rate limiting enabled for API endpoints")
 
+    def setup_static_files(self):
+        """Setup static file serving for React frontend build (Railway deployment)."""
+        # Static files directory for built React frontend
+        static_dir = Path(__file__).parent / "frontend" / "dist"
+
+        if static_dir.exists():
+            # Mount static assets (JS, CSS, images)
+            assets_dir = static_dir / "assets"
+            if assets_dir.exists():
+                self.app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+                logger.info(f"Static assets mounted from {assets_dir}")
+
+            # Serve index.html for SPA routing (catch-all for frontend routes)
+            @self.app.get("/{path:path}")
+            async def serve_spa(path: str):
+                # First check if it's an API route (don't serve index.html for API)
+                if path.startswith("api/") or path.startswith("ws/") or path == "health":
+                    return {"error": "Not found"}, 404
+
+                # Serve static file if exists
+                file_path = static_dir / path
+                if file_path.exists() and file_path.is_file():
+                    return FileResponse(str(file_path))
+
+                # Default: serve index.html for SPA routing
+                index_path = static_dir / "index.html"
+                if index_path.exists():
+                    return FileResponse(str(index_path))
+
+                return {"error": "Frontend not built. Run 'npm run build' in frontend directory."}
+
+            logger.info(f"SPA routing enabled, serving from {static_dir}")
+        else:
+            logger.warning(f"Frontend build not found at {static_dir}. Run 'npm run build' in frontend directory for production.")
+
     def setup_routes(self):
         """Setup API routes."""
 
@@ -158,6 +198,11 @@ class SimpleDashboardServer:
                 "live_data": getattr(self, '_using_live_data', False),
                 "data_source": "trading_engine" if getattr(self, '_using_live_data', False) else "database_mock"
             }
+
+        # Railway health check endpoint (root level)
+        @self.app.get("/health")
+        async def railway_health():
+            return {"status": "healthy", "service": "trader-ai-dashboard"}
 
         @self.app.get(C.API_METRICS_CURRENT)
         async def get_current_metrics():
@@ -1051,11 +1096,16 @@ def main(trading_engine=None):
         ai_thread.start()
 
     # Start the server
+    # Railway deployment: Read PORT from environment, bind to 0.0.0.0
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+
     try:
         data_mode = "LIVE (trading engine)" if getattr(server, '_using_live_data', False) else "MOCK (database)"
         logger.info(f"Starting Gary x Taleb Risk Dashboard - Data Mode: {data_mode}")
         logger.info(f"AI integration: {'enabled' if AI_AVAILABLE else 'disabled'}")
-        server.run(host="127.0.0.1", port=8000)
+        logger.info(f"Binding to {host}:{port}")
+        server.run(host=host, port=port)
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:

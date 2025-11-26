@@ -1,0 +1,17 @@
+[build]
+# Use Dockerfile for multi-stage build (Node + Python)
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Health check configuration
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+startCommand = "python -m src.dashboard.run_server_simple"
+
+# Restart policy
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Resource configuration (adjust based on your Railway plan)
+numReplicas = 1

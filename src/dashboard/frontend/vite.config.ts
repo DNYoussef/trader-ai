@@ -4,6 +4,8 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  // Base URL: '/' for production (served by FastAPI), relative for local dev
+  base: process.env.NODE_ENV === 'production' ? '/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -25,7 +27,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production for smaller bundle
     rollupOptions: {
       output: {
         manualChunks: {

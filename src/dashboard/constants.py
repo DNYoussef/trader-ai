@@ -4,7 +4,19 @@ Extracted to reduce magic literals and improve maintainability.
 """
 
 # CORS Configuration
-CORS_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+# Include Railway deployment URLs and local development
+import os
+RAILWAY_URL = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8000",
+    f"https://{RAILWAY_URL}" if RAILWAY_URL else None,
+    # Allow all origins in production if needed (configure via env)
+    os.environ.get("CORS_ALLOW_ORIGIN", None),
+]
+# Filter out None values
+CORS_ORIGINS = [origin for origin in CORS_ORIGINS if origin]
 
 # API Endpoints
 API_ROOT = "/"
