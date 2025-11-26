@@ -1,8 +1,5 @@
 """Bandit security linter adapter implementation."""
 
-import json
-import csv
-import io
 from typing import List, Dict, Any
 
 from src.adapters.base_adapter import BaseLinterAdapter
@@ -149,8 +146,8 @@ class BanditAdapter(BaseLinterAdapter):
         """Create violation from parsed text data."""
         # This is a simplified implementation
         # In production, you'd want more robust text parsing
-        line = issue_data.get('line', '')
-        details = issue_data.get('details', [])
+        issue_data.get('line', '')
+        issue_data.get('details', [])
         
         # Extract basic information (simplified)
         rule_id = 'B000'  # Default

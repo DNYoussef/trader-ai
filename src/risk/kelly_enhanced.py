@@ -22,14 +22,14 @@ Key Enhancements:
 import logging
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 import json
 from pathlib import Path
-from scipy.optimize import minimize, minimize_scalar
-from scipy.stats import norm, t
+from scipy.optimize import minimize
+from scipy.stats import norm
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import warnings
@@ -488,7 +488,7 @@ class EnhancedKellyCriterion:
         try:
             # Get asset CVaRs
             assets = list(weights.keys())
-            asset_cvars = np.array([self.asset_profiles[asset].cvar_95 for asset in assets])
+            np.array([self.asset_profiles[asset].cvar_95 for asset in assets])
             weights_array = np.array([weights[asset] for asset in assets])
 
             # Get correlation submatrix

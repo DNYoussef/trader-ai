@@ -2,15 +2,14 @@
 
 import asyncio
 import json
-import subprocess
 import time
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 import logging
 
 from src.models.linter_models import (
     LinterAdapter, LinterConfig, LinterResult, LinterViolation,
-    StandardSeverity, ViolationType, Position
+    StandardSeverity, Position
 )
 
 logger = logging.getLogger(__name__)

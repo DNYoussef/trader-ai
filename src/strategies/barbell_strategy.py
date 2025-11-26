@@ -10,12 +10,11 @@ while capturing massive upside when consensus is wrong about inequality effects.
 """
 
 import logging
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Any
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 import numpy as np
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -345,7 +344,7 @@ class BarbellStrategy:
 
         # Calculate target values
         target_conservative = total_value * self.conservative_ratio
-        target_aggressive = total_value * self.aggressive_ratio
+        total_value * self.aggressive_ratio
 
         # Rebalance conservative portfolio
         for symbol, target_weight in self.conservative_instruments.items():

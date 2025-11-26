@@ -9,20 +9,15 @@ import hashlib
 import hmac
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple, Set
-from dataclasses import dataclass, asdict
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 import asyncio
 import threading
 from queue import Queue, Empty
 import gzip
-import struct
 from concurrent.futures import ThreadPoolExecutor
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
 import secrets
 
 from .fips_crypto_module import FIPSCryptoModule
@@ -872,7 +867,7 @@ class EnhancedDFARSAuditTrailManager:
 
     def get_audit_statistics(self, days: int = 7) -> Dict[str, Any]:
         """Get audit trail statistics."""
-        cutoff_time = time.time() - (days * 24 * 3600)
+        time.time() - (days * 24 * 3600)
 
         stats = {
             "period_days": days,

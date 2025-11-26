@@ -9,7 +9,7 @@ import smtplib
 import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 from datetime import datetime
 import httpx
 
@@ -124,17 +124,17 @@ class EmailNotificationHandler:
     def _build_body(self, alert: Any) -> str:
         """Build plain text email body"""
         lines = [
-            f"Trader-AI Alert Notification",
+            "Trader-AI Alert Notification",
             f"{'=' * 40}",
-            f"",
+            "",
             f"Severity: {getattr(alert, 'severity', 'Unknown').value if hasattr(getattr(alert, 'severity', None), 'value') else 'Unknown'}",
             f"Symbol: {getattr(alert, 'symbol', 'Unknown')}",
             f"Type: {getattr(alert, 'alert_type', 'Unknown')}",
             f"Time: {getattr(alert, 'timestamp', datetime.now())}",
             f"Confidence: {getattr(alert, 'confidence', 0):.1%}",
-            f"",
+            "",
             f"Message: {getattr(alert, 'message', 'No message')}",
-            f"",
+            "",
         ]
 
         details = getattr(alert, 'details', {})
@@ -144,12 +144,12 @@ class EmailNotificationHandler:
                 lines.append(f"  - {key}: {value}")
 
         lines.extend([
-            f"",
+            "",
             f"Alert ID: {getattr(alert, 'alert_id', 'Unknown')}",
             f"Source: {getattr(alert, 'source_component', 'Unknown')}",
-            f"",
-            f"---",
-            f"This is an automated alert from Trader-AI Risk Management System."
+            "",
+            "---",
+            "This is an automated alert from Trader-AI Risk Management System."
         ])
 
         return '\n'.join(lines)

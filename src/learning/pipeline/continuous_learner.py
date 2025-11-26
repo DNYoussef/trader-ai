@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
 import json
-import pickle
 import sqlite3
 from pathlib import Path
 import threading
@@ -23,10 +22,10 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model import Ridge, ElasticNet
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit, cross_val_score
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.preprocessing import RobustScaler
 import joblib
 
 @dataclass

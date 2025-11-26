@@ -6,9 +6,8 @@ Integrates Ollama/Mistral for strategy selection and market analysis
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
-import numpy as np
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 import pandas as pd
 import requests
 from pathlib import Path
@@ -373,7 +372,7 @@ Provide reasoning for each probability estimate.
             )
 
             if response.status_code == 200:
-                result = response.json()
+                response.json()
                 # Parse probabilities from response
                 # This would need more sophisticated parsing
                 return {

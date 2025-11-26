@@ -14,12 +14,10 @@ Key Features:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from scipy import stats
-import warnings
 from enum import Enum
 import logging
 
@@ -640,7 +638,7 @@ class EVTBacktestingEngine:
         # Rank models
         var_95_ranking = sorted([(p['model_name'], p['var_95_accuracy']) for p in model_performances],
                                key=lambda x: x[1], reverse=True)
-        var_99_ranking = sorted([(p['model_name'], p['var_99_accuracy']) for p in model_performances],
+        sorted([(p['model_name'], p['var_99_accuracy']) for p in model_performances],
                                key=lambda x: x[1], reverse=True)
         es_ranking = sorted([(p['model_name'], p['es_accuracy']) for p in model_performances],
                            key=lambda x: x[1], reverse=True)

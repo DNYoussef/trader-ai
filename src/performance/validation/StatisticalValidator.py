@@ -5,28 +5,20 @@ Comprehensive validation system for trading strategy performance and statistical
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
 import warnings
 from scipy import stats
 from scipy.stats import (
-    normaltest, jarque_bera, shapiro, anderson, kstest,
-    ttest_1samp, ttest_ind, mannwhitneyu, wilcoxon,
-    levene, bartlett, fligner, kruskal,
-    pearsonr, spearmanr, kendalltau
+    jarque_bera, shapiro, anderson, ttest_1samp, levene, kruskal
 )
 from statsmodels.stats.diagnostic import (
-    acorr_ljungbox, het_breuschpagan, het_white
+    acorr_ljungbox
 )
-from statsmodels.tsa.stattools import adfuller, kpss, coint
+from statsmodels.tsa.stattools import adfuller, kpss
 from statsmodels.stats.stattools import durbin_watson
 from sklearn.utils import resample
-from arch import arch_model
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 
 warnings.filterwarnings('ignore')
@@ -377,7 +369,7 @@ class StatisticalValidator:
         try:
             # Simple ARCH test using squared returns
             squared_returns = clean_returns ** 2
-            mean_sq = squared_returns.mean()
+            squared_returns.mean()
 
             # Test if squared returns are serially correlated
             lb_stat_sq, lb_p_sq = acorr_ljungbox(squared_returns, lags=5, return_df=False)
@@ -472,7 +464,7 @@ class StatisticalValidator:
         # VaR Backtesting (Kupiec Test)
         var_95 = np.percentile(clean_returns, 5)
         violations = (clean_returns < var_95).sum()
-        expected_violations = len(clean_returns) * 0.05
+        len(clean_returns) * 0.05
 
         # Binomial test for VaR violations
         binom_p = stats.binom_test(violations, len(clean_returns), 0.05)
@@ -938,7 +930,7 @@ if __name__ == "__main__":
     fig = validator.create_validation_visualization(validation_result, returns_series)
     fig.show()
 
-    print(f"\nValidation completed!")
+    print("\nValidation completed!")
     print(f"Overall Score: {validation_result.overall_score:.3f}")
     print(f"Tests Performed: {len(validation_result.tests)}")
     print(f"Statistical Power: {validation_result.power_analysis['statistical_power']:.3f}")

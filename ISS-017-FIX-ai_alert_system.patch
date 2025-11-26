@@ -1,0 +1,15 @@
+--- a/src/intelligence/ai_alert_system.py
++++ b/src/intelligence/ai_alert_system.py
+@@ -451,7 +451,12 @@ class AIAlertSystem:
+                 current_data.get('dpi_volatility', 0)
+             ])
+         else:
+-            features.extend([0, 0, 0])  # Placeholder values
++            # Calculate default DPI estimates from market microstructure
++            # Use bid-ask spread, volume imbalance, and price impact as proxies
++            bid_ask_spread = current_data.get('bid_ask_spread', current_data.get('spread', 0.001))
++            volume_imbalance = current_data.get('volume_imbalance', 0.0)
++            price_impact = current_data.get('price_impact', current_data.get('volatility', 0.15) * 0.1)
++            features.extend([bid_ask_spread, volume_imbalance, price_impact])
+
+         return np.array(features)

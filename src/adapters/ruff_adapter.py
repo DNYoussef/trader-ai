@@ -1,7 +1,6 @@
 """Ruff linter adapter implementation."""
 
-import json
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
 from src.adapters.base_adapter import BaseLinterAdapter
 from src.models.linter_models import (

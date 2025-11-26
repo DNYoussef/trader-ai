@@ -10,7 +10,7 @@ import traceback
 import functools
 import asyncio
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable, Type, Union
+from typing import Dict, List, Optional, Any, Callable, Type
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
@@ -435,7 +435,7 @@ def error_boundary(component: str = "", operation: str = "",
                 return func(*args, **kwargs)
             except Exception as e:
                 # Handle with global error handler
-                error_record = _global_error_handler.handle_error(e, context)
+                _global_error_handler.handle_error(e, context)
                 
                 if re_raise:
                     raise
@@ -453,7 +453,7 @@ def error_boundary(component: str = "", operation: str = "",
                 return await func(*args, **kwargs)
             except Exception as e:
                 # Handle with global error handler
-                error_record = _global_error_handler.handle_error(e, context)
+                _global_error_handler.handle_error(e, context)
                 
                 if re_raise:
                     raise

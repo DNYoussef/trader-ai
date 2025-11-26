@@ -9,8 +9,8 @@ import sqlite3
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+from typing import List, Tuple
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 import json

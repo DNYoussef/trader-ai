@@ -8,11 +8,10 @@ for sustained user retention and behavior modification.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
-import json
 import random
 
 logger = logging.getLogger(__name__)

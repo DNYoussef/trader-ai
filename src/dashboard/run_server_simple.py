@@ -5,7 +5,6 @@ This version runs without Redis dependency for development.
 """
 
 import sys
-import os
 import asyncio
 import logging
 import json
@@ -13,9 +12,9 @@ import sqlite3
 import time
 import numpy as np
 from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Set, Optional, Any
-from dataclasses import dataclass, asdict
+from datetime import datetime
+from typing import Dict, List, Set
+from dataclasses import dataclass
 
 # Add the parent directory to the path so we can import from src
 project_root = Path(__file__).parent.parent.parent
@@ -23,7 +22,6 @@ sys.path.insert(0, str(project_root))
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import uvicorn
 
 # Import constants
@@ -38,6 +36,15 @@ try:
 except ImportError as e:
     LIVE_DATA_AVAILABLE = False
     logging.warning(f"LiveDataProvider not available - using mock data: {e}")
+
+# ISS-024: Import rate limiter for API protection
+try:
+    from src.security.rate_limiter import configure_rate_limiting, rate_limit_moderate
+    RATE_LIMITER_AVAILABLE = True
+    logging.info("Rate limiter loaded - API rate limiting enabled")
+except ImportError as e:
+    RATE_LIMITER_AVAILABLE = False
+    logging.warning(f"Rate limiter not available: {e}")
 
 # Import AI dashboard integration
 try:
@@ -128,6 +135,11 @@ class SimpleDashboardServer:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+
+        # ISS-024: Configure rate limiting
+        if RATE_LIMITER_AVAILABLE:
+            configure_rate_limiting(self.app)
+            logger.info("Rate limiting enabled for API endpoints")
 
     def setup_routes(self):
         """Setup API routes."""
@@ -796,7 +808,7 @@ class RealDataProvider:
         # Use actual portfolio allocation as proxy for wealth flows
         total_value = self.portfolio_value
         equity_value = sum(pos['quantity'] * pos['current_price'] for pos in self.positions)
-        cash_value = total_value * 0.3
+        total_value * 0.3
 
         return [
             {'source': 'Working Class Wages', 'target': 'Corporate Profits', 'value': C.FLOW_WAGES_VALUE, 'color': C.COLOR_RED},
@@ -814,7 +826,7 @@ class RealDataProvider:
             if symbol in self.last_market_data:
                 market_data = self.last_market_data[symbol]
                 rsi = market_data.get('rsi', 50)
-                vol = market_data.get('volatility', 0.15)
+                market_data.get('volatility', 0.15)
 
                 # Generate signal based on real RSI and volatility
                 if rsi < 30:  # Oversold
@@ -917,8 +929,8 @@ class RealDataProvider:
                     results = json.load(f)
                     training_accuracy = max(results.get('training_history', {}).get('clean_accuracy', [0]))
                     model_parameters = results.get('model_parameters', C.DEFAULT_MODEL_PARAMS)
-            except:
-                pass
+            except (FileNotFoundError, json.JSONDecodeError, ValueError, KeyError) as e:
+                logger.debug(f"Could not load model results from {model_path}: {e}")
 
         return {
             'utility_parameters': {
@@ -979,7 +991,6 @@ class RealDataProvider:
 
         # Check if rebalancing is needed
         target_safe = 0.8
-        target_risky = 0.2
         rebalance_needed = abs(safe_allocation - target_safe) > 0.05
 
         return {

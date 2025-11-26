@@ -6,12 +6,10 @@ analyzer components while maintaining full backward compatibility.
 """
 
 import logging
-import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable, Type
 from datetime import datetime
 import inspect
-import functools
 
 from ..telemetry.six_sigma import SixSigmaTelemetry
 from ..security.supply_chain import SupplyChainSecurity
@@ -347,7 +345,7 @@ class EnterpriseAnalyzerIntegration:
                             not attr_name.startswith('_')):
                             
                             # Wrap the analyzer class
-                            wrapped_class = integration.wrap_analyzer(
+                            integration.wrap_analyzer(
                                 f"{module_name}_{attr_name}", attr
                             )
                             

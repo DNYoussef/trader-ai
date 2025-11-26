@@ -6,8 +6,7 @@ Manages dynamic 80/20 barbell allocation based on safety evolution.
 
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from decimal import Decimal
+from datetime import datetime
 import logging
 import numpy as np
 
@@ -554,7 +553,7 @@ class AIMispricingDetector:
         """
 
         # Use existing AI signal generator
-        from .ai_signal_generator import CohortData, MarketExpectation
+        from .ai_signal_generator import MarketExpectation
 
         # Create cohort data based on asset type
         cohort_data = self._create_asset_specific_cohorts(asset)

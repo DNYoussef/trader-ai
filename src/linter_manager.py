@@ -3,13 +3,12 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional
 import time
-from concurrent.futures import ThreadPoolExecutor
 import threading
 
 from src.models.linter_models import (
-    LinterResult, LinterViolation, StandardSeverity, ViolationType
+    LinterResult, StandardSeverity
 )
 from src.config.linter_config import LinterConfigManager, LinterSuiteConfig
 from src.adapters.flake8_adapter import Flake8Adapter
@@ -162,7 +161,7 @@ class LinterManager:
     
     def _should_include_file(self, file_path: Path) -> bool:
         """Check if a file should be included based on patterns."""
-        file_str = str(file_path)
+        str(file_path)
         
         # Check exclude patterns first
         for pattern in self.suite_config.exclude_patterns:

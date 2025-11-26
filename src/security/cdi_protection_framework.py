@@ -5,21 +5,14 @@ Comprehensive data protection system for DFARS compliance with granular access c
 
 import json
 import time
-import hashlib
-import hmac
 import logging
 import secrets
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple, Set, Union
-from dataclasses import dataclass, asdict
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 import asyncio
-import threading
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.backends import default_backend
 import sqlite3
 import uuid
 

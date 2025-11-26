@@ -6,18 +6,13 @@ Automated incident detection, response, and reporting for defense industry compl
 import json
 import time
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List, Optional, Tuple
+from datetime import datetime, timezone
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
 import asyncio
-import aiohttp
 import hashlib
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import subprocess
 
 from .audit_trail_manager import DFARSAuditTrailManager, AuditEventType, SeverityLevel
 from .fips_crypto_module import FIPSCryptoModule
@@ -266,7 +261,7 @@ class DFARSIncidentResponseSystem:
 
                 for anomaly in anomalies:
                     await self.create_incident(
-                        title=f"Suspicious File Access Pattern Detected",
+                        title="Suspicious File Access Pattern Detected",
                         description=f"Unusual file access pattern detected: {anomaly['description']}",
                         severity=IncidentSeverity.MEDIUM,
                         category=IncidentCategory.POLICY_VIOLATION,
@@ -693,7 +688,7 @@ class DFARSIncidentResponseSystem:
     async def _send_incident_notifications(self, incident: SecurityIncident):
         """Send incident notifications based on severity and escalation rules."""
         escalation_rules = self.config['incident_response']['escalation_rules']
-        severity_config = escalation_rules.get(incident.severity.value, escalation_rules['medium'])
+        escalation_rules.get(incident.severity.value, escalation_rules['medium'])
 
         # Immediate notification for critical/high incidents
         if incident.severity in [IncidentSeverity.CRITICAL, IncidentSeverity.HIGH]:

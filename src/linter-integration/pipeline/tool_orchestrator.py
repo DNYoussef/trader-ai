@@ -5,15 +5,12 @@ Coordinates execution of multiple linters and aggregates results.
 """
 
 import asyncio
-import json
 import logging
 import time
-from typing import Dict, List, Any, Optional, Set
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
-from pathlib import Path
-import subprocess
 
-from ..adapters.base_adapter import LinterResult, LinterViolation, SeverityLevel
+from ..adapters.base_adapter import LinterResult, SeverityLevel
 
 @dataclass
 class PipelineConfig:

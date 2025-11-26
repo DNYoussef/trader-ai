@@ -7,11 +7,10 @@ monitoring, rollback, and online learning systems.
 """
 
 import logging
-import asyncio
 import threading
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
+from datetime import datetime
+from typing import Dict, List, Any, Callable
 from dataclasses import dataclass, asdict
 import json
 from pathlib import Path
@@ -20,9 +19,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Import learning components
-from ..pipeline.continuous_learner import ContinuousLearner, LearningConfig, RetrainingResult
-from ..feedback.performance_feedback import PerformanceFeedback, FeedbackMetrics, FeedbackSignal
-from ..testing.ab_testing import ABTestingFramework, ExperimentConfig, VariantConfig
+from ..pipeline.continuous_learner import ContinuousLearner, LearningConfig
+from ..feedback.performance_feedback import PerformanceFeedback, FeedbackSignal
+from ..testing.ab_testing import ABTestingFramework
 from ..adaptation.strategy_adaptation import StrategyAdaptationEngine, AdaptationSignal
 from ..monitoring.performance_monitor import PerformanceMonitor, PerformanceAlert, PerformanceMetrics
 

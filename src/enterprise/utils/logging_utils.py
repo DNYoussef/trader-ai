@@ -9,8 +9,9 @@ import logging
 import logging.handlers
 import json
 import sys
+import functools
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum

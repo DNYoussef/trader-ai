@@ -6,7 +6,7 @@ for the weekly cycle system.
 """
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Set, List
 # import holidays  # Disabled for testing
 
@@ -138,8 +138,82 @@ class MarketHolidayCalendar:
     
     def _update_cache(self, year: int):
         """Update holiday cache for given year"""
-        # Stub implementation for testing
-        pass
+        if self._cache_year == year:
+            return  # Cache already current
+
+        # Clear and rebuild cache for new year
+        self._holiday_cache.clear()
+        self._cache_year = year
+
+        # Add fixed holidays (observed dates handled)
+        self._add_fixed_holidays(year)
+
+        # Add floating holidays
+        self._add_good_friday(year)
+        self._add_mlk_day(year)
+        self._add_presidents_day(year)
+        self._add_memorial_day(year)
+        self._add_labor_day(year)
+        self._add_thanksgiving(year)
+
+        # Add early closures
+        self._add_christmas_eve_closure(year)
+
+        logger.debug(f"Holiday cache updated for {year}: {len(self._holiday_cache)} holidays")
+
+    def _add_fixed_holidays(self, year: int):
+        """Add fixed-date holidays with weekend observation rules"""
+        fixed_holidays = [
+            (1, 1, "New Year's Day"),
+            (7, 4, "Independence Day"),
+            (12, 25, "Christmas Day"),
+        ]
+
+        for month, day, name in fixed_holidays:
+            holiday = date(year, month, day)
+            # If Saturday, observe Friday; if Sunday, observe Monday
+            if holiday.weekday() == 5:  # Saturday
+                holiday = holiday - timedelta(days=1)
+            elif holiday.weekday() == 6:  # Sunday
+                holiday = holiday + timedelta(days=1)
+            self._holiday_cache.add(holiday)
+
+    def _add_mlk_day(self, year: int):
+        """Add Martin Luther King Jr. Day (3rd Monday of January)"""
+        first_jan = date(year, 1, 1)
+        first_monday = first_jan + timedelta(days=(7 - first_jan.weekday()) % 7)
+        mlk_day = first_monday + timedelta(weeks=2)
+        self._holiday_cache.add(mlk_day)
+
+    def _add_presidents_day(self, year: int):
+        """Add Presidents Day (3rd Monday of February)"""
+        first_feb = date(year, 2, 1)
+        first_monday = first_feb + timedelta(days=(7 - first_feb.weekday()) % 7)
+        presidents_day = first_monday + timedelta(weeks=2)
+        self._holiday_cache.add(presidents_day)
+
+    def _add_memorial_day(self, year: int):
+        """Add Memorial Day (last Monday of May)"""
+        # Start from May 31 and go backwards to find last Monday
+        may_31 = date(year, 5, 31)
+        days_since_monday = may_31.weekday()  # Monday = 0
+        memorial_day = may_31 - timedelta(days=days_since_monday)
+        self._holiday_cache.add(memorial_day)
+
+    def _add_labor_day(self, year: int):
+        """Add Labor Day (1st Monday of September)"""
+        first_sep = date(year, 9, 1)
+        days_until_monday = (7 - first_sep.weekday()) % 7
+        labor_day = first_sep + timedelta(days=days_until_monday)
+        self._holiday_cache.add(labor_day)
+
+    def _add_thanksgiving(self, year: int):
+        """Add Thanksgiving (4th Thursday of November)"""
+        first_nov = date(year, 11, 1)
+        days_until_thursday = (3 - first_nov.weekday()) % 7  # Thursday = 3
+        first_thursday = first_nov + timedelta(days=days_until_thursday)
+        thanksgiving = first_thursday + timedelta(weeks=3)
+        self._holiday_cache.add(thanksgiving)
     
     def _add_good_friday(self, year: int):
         """Add Good Friday to holiday cache"""

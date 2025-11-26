@@ -5,23 +5,17 @@ Advanced reporting engine for Gary×Taleb trading strategy performance analysis
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime
 import warnings
 import json
-import pickle
 from pathlib import Path
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.offline as pyo
 from jinja2 import Template
 import webbrowser
-import base64
-from io import BytesIO
 
 warnings.filterwarnings('ignore')
 

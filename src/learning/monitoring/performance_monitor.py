@@ -7,24 +7,18 @@ alert system, and comprehensive performance analytics dashboard.
 
 import logging
 import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any, Callable
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Optional, Any, Callable
+from dataclasses import dataclass
 import json
 import sqlite3
 from pathlib import Path
 import threading
 import time
 from collections import deque
-import statistics
 import warnings
 warnings.filterwarnings('ignore')
 
-from scipy import stats
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 @dataclass
 class PerformanceThreshold:

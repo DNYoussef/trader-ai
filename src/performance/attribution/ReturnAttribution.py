@@ -5,18 +5,11 @@ Comprehensive analysis of return sources and performance drivers for trading str
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 import warnings
-from scipy import stats
-from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 
 warnings.filterwarnings('ignore')
@@ -764,7 +757,7 @@ if __name__ == "__main__":
     fig = analyzer.create_attribution_visualization(attribution_result)
     fig.show()
 
-    print(f"\nAttribution Analysis Complete!")
+    print("\nAttribution Analysis Complete!")
     print(f"Total Return: {attribution_result.total_return:.2%}")
     print(f"Explained Variance (R²): {attribution_result.r_squared:.1%}")
     print(f"Number of Components: {len(attribution_result.components)}")

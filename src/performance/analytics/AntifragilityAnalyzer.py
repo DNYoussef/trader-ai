@@ -5,21 +5,11 @@ Comprehensive analysis system for Gary×Taleb strategy components
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 import warnings
-from scipy import stats
-from scipy.optimize import minimize
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
-import networkx as nx
 
 warnings.filterwarnings('ignore')
 
@@ -1129,7 +1119,7 @@ if __name__ == "__main__":
     fig = analyzer.create_comprehensive_visualization(integrated_analysis, returns_series)
     fig.show()
 
-    print(f"\nGary×Taleb Analysis Complete!")
+    print("\nGary×Taleb Analysis Complete!")
     print(f"Combined Effectiveness: {integrated_analysis.combined_effectiveness:.3f}")
     print(f"Synergy Score: {integrated_analysis.synergy_score:.3f}")
     print(f"Optimization Opportunities: {len(integrated_analysis.optimization_opportunities)}")

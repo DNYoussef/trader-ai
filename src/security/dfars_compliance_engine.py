@@ -7,18 +7,15 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
-import subprocess
-import hashlib
 import asyncio
-import ssl
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
-from .path_validator import PathSecurityValidator, SecurityError
-from .tls_manager import DFARSTLSManager, TLSConfiguration
-from .audit_trail_manager import DFARSAuditTrailManager, AuditEventType, SeverityLevel
+from .path_validator import PathSecurityValidator
+from .tls_manager import DFARSTLSManager
+from .audit_trail_manager import DFARSAuditTrailManager
 
 logger = logging.getLogger(__name__)
 
@@ -961,7 +958,7 @@ class DFARSComplianceEngine:
             return "Unknown"
 
         gap_severity = 1.0 - self.last_assessment.score
-        critical_gaps = len(self.last_assessment.critical_failures)
+        len(self.last_assessment.critical_failures)
 
         if gap_severity < 0.05:
             return "1-2 weeks"
@@ -1005,18 +1002,18 @@ async def main():
     try:
         result = await engine.run_comprehensive_assessment()
 
-        print(f"\n[CHART] Assessment Results:")
+        print("\n[CHART] Assessment Results:")
         print(f"Status: {result.status.value.upper()}")
         print(f"Score: {result.score:.1%}")
         print(f"Checks: {result.passed_checks}/{result.total_checks}")
 
         if result.critical_failures:
-            print(f"\n[ALERT] Critical Gaps:")
+            print("\n[ALERT] Critical Gaps:")
             for failure in result.critical_failures:
                 print(f"  - {failure}")
 
         if result.recommendations:
-            print(f"\n[BULB] Top Recommendations:")
+            print("\n[BULB] Top Recommendations:")
             for rec in result.recommendations[:5]:
                 print(f"  - {rec}")
 

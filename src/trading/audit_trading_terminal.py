@@ -6,7 +6,6 @@ proper data integration, real-time capabilities, and authentic trader experience
 """
 
 import sys
-import os
 from pathlib import Path
 import asyncio
 import time
@@ -24,7 +23,6 @@ from trading.terminal_data_provider import (
     AIInflectionPoint,
     OrderBookSnapshot
 )
-from datetime import datetime, timedelta
 import logging
 
 # Setup logging
@@ -494,7 +492,6 @@ def test_trader_authenticity():
             authenticity_features.append("Real-time data feeds")
 
         # 7. Test professional terminologies
-        professional_terms = ['DPI', 'Causal', 'RSI', 'Moving Average', 'Order Book']
         authenticity_features.append("Professional trading terminology")
 
         print("Trader authenticity features:")
@@ -591,7 +588,7 @@ async def test_data_stream_performance():
         total_time = end_time - start_time
         avg_update_time = total_time / update_count
 
-        print(f"Performance metrics:")
+        print("Performance metrics:")
         print(f"  - Average update time: {avg_update_time*1000:.1f}ms")
         print(f"  - Updates per second: {1/avg_update_time:.1f}")
 

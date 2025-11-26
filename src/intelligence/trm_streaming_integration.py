@@ -369,7 +369,7 @@ async def test_streaming():
         print(f"\n{'='*60}")
         print(f"Strategy: {prediction['strategy_name']}")
         print(f"Confidence: {prediction['confidence']:.2%}")
-        print(f"Top 3 Probabilities:")
+        print("Top 3 Probabilities:")
         probs = prediction['probabilities']
         sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:3]
         for name, prob in sorted_probs:
@@ -378,7 +378,7 @@ async def test_streaming():
 
     try:
         # Run streaming for 30 seconds
-        stream_task = asyncio.create_task(
+        asyncio.create_task(
             predictor.stream_predictions(callback=test_callback)
         )
 
@@ -387,7 +387,7 @@ async def test_streaming():
 
         # Show summary
         summary = predictor.get_prediction_summary()
-        print(f"\nPrediction Summary:")
+        print("\nPrediction Summary:")
         print(json.dumps(summary, indent=2))
 
     except KeyboardInterrupt:

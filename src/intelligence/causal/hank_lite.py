@@ -18,14 +18,10 @@ Mathematical Foundation:
 import logging
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union, Any
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-import statistics
-from scipy import stats, optimize
-from scipy.stats import multivariate_normal, gamma, beta
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -379,7 +375,7 @@ class HANKLiteModel:
         new_state = agent_state.copy()
 
         # Interest rate change
-        new_interest_rate = market_state.interest_rate + shock_magnitude
+        market_state.interest_rate + shock_magnitude
 
         # Wealth effect through asset prices (more for wealthy agents with financial assets)
         asset_price_effect = -shock_magnitude * 10 * cohort.financial_assets  # Duration effect
@@ -510,7 +506,7 @@ class HANKLiteModel:
         total_investment = 0.0
 
         for agent_type, state in agent_states.items():
-            cohort = self.agent_cohorts[agent_type]
+            self.agent_cohorts[agent_type]
 
             if agent_type == AgentType.ENTREPRENEURS:
                 # Business investment based on expected returns and credit conditions

@@ -6,7 +6,6 @@ proper integration with trading events, and effective user engagement mechanisms
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add src to path for imports
@@ -15,13 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from user_experience.psychological_reinforcement import (
     PsychologicalReinforcementEngine,
     ReinforcementType,
-    TriggerCondition,
-    IntensityLevel,
-    ReinforcementEvent,
-    UserReinforcementProfile
+    TriggerCondition
 )
 from user_experience.reinforcement_integration import ReinforcementOrchestrator
-from datetime import datetime, timedelta
 import logging
 
 # Setup logging
@@ -540,10 +535,6 @@ def test_integration_readiness():
             integration_checks.append("Callback system for UI integration")
 
         # Test batch event processing
-        batch_events = [
-            {'user_id': test_user_id, 'event_type': 'trade_executed', 'event_data': {'symbol': 'ALTY'}},
-            {'user_id': test_user_id, 'event_type': 'profit_realized', 'event_data': {'profit_amount': 10.00}}
-        ]
 
         # Note: batch processing is async, but we'll test the structure
         if hasattr(orchestrator, 'process_batch_events'):

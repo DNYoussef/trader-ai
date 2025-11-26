@@ -18,18 +18,12 @@ Mathematical Foundation:
 import logging
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union, Any
-from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Dict, List, Tuple, Optional, Any, Set
+from dataclasses import dataclass
 from enum import Enum
-import statistics
 from scipy import stats, optimize
-from scipy.stats import multivariate_normal
-from sklearn.linear_model import Ridge, Lasso
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import itertools
-import warnings
+from sklearn.linear_model import Ridge
 
 logger = logging.getLogger(__name__)
 
@@ -438,7 +432,7 @@ class SyntheticControlValidator:
 
                     placebo_effects.append(placebo_result.average_treatment_effect)
 
-                except Exception as e:
+                except Exception:
                     # Skip failed placebo tests
                     continue
 

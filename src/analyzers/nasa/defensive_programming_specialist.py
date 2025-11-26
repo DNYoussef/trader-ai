@@ -15,17 +15,14 @@ Core Capabilities:
 
 import ast
 import re
-import time
-from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List
 
 # NASA compliance imports
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from utils.types import ConnascenceViolation
 
 # Assertion framework configuration
 ASSERTION_COVERAGE_TARGET = 0.90  # 90% coverage target

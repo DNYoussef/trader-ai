@@ -8,21 +8,18 @@ of enterprise module functionality against performance claims.
 
 import asyncio
 import hashlib
-import inspect
 import json
 import logging
-import math
 import os
 import re
 import statistics
-import subprocess
 import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Callable, Set, Union
+from typing import Dict, List, Any, Optional
 from enum import Enum
 import importlib.util
 import ast
@@ -1240,7 +1237,7 @@ async def main():
     try:
         reports = await detector.detect_enterprise_theater()
 
-        print(f"\n[CHART] Theater Detection Results:")
+        print("\n[CHART] Theater Detection Results:")
         print(f"Total Modules Analyzed: {len(reports)}")
 
         # Summary statistics
@@ -1264,7 +1261,7 @@ async def main():
         # Defense industry certification status
         zero_tolerance_met = all(r.overall_theater_level in [TheaterSeverity.NONE, TheaterSeverity.LOW] for r in reports.values())
 
-        print(f"\n[SHIELD] Defense Industry Certification:")
+        print("\n[SHIELD] Defense Industry Certification:")
         print(f"Zero-Tolerance Standard: {'[OK] MET' if zero_tolerance_met else '[FAIL] NOT MET'}")
         print(f"Production Ready: {'[OK] YES' if zero_tolerance_met else '[FAIL] NO - THEATER DETECTED'}")
 

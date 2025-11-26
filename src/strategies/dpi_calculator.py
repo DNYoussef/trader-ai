@@ -18,12 +18,9 @@ import numpy as np
 import pandas as pd
 import sqlite3
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
-import statistics
-from scipy import stats
-from scipy.stats import skew, kurtosis, jarque_bera
 import yfinance as yf
 from pathlib import Path
 

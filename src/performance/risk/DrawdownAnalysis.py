@@ -5,20 +5,15 @@ Comprehensive risk management system for minimizing and preventing portfolio dra
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Tuple
+from dataclasses import dataclass
+from datetime import datetime
 import warnings
 from scipy import stats
-from scipy.optimize import minimize
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
-import json
 
 warnings.filterwarnings('ignore')
 
@@ -578,7 +573,7 @@ class DrawdownAnalysis:
 
         for stop_level, result in results.items():
             # Composite score: Sharpe ratio weighted by drawdown improvement
-            drawdown_improvement = abs(result['max_drawdown']) - abs(((equity_curve - equity_curve.expanding().max()) / equity_curve.expanding().max()).min())
+            abs(result['max_drawdown']) - abs(((equity_curve - equity_curve.expanding().max()) / equity_curve.expanding().max()).min())
             score = result['sharpe_ratio'] - abs(result['max_drawdown']) * 2
 
             if score > best_score:

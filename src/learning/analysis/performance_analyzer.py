@@ -19,9 +19,6 @@ warnings.filterwarnings('ignore')
 
 from scipy import stats
 from scipy.stats import pearsonr, spearmanr
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
 @dataclass

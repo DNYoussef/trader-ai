@@ -5,13 +5,9 @@ Financial sentiment analysis using FinGPT models for news and social media
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
-from datetime import datetime, timedelta
+from typing import Dict, List, Any
+from datetime import datetime
 from dataclasses import dataclass
-from pathlib import Path
-import warnings
-import re
 import os
 from dotenv import load_dotenv
 

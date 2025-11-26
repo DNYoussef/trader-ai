@@ -8,7 +8,7 @@ with strict capital protection safeguards.
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timezone, timedelta, date
-from typing import Dict, Optional, Tuple, NamedTuple
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 

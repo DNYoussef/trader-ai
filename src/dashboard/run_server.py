@@ -9,7 +9,6 @@ import os
 import asyncio
 import logging
 import threading
-import time
 from pathlib import Path
 
 # Add the parent directory to the path so we can import from src
@@ -152,7 +151,7 @@ def main():
 
             # Start integration monitoring if available
             if integration:
-                monitoring_task = asyncio.create_task(integration.start_monitoring())
+                asyncio.create_task(integration.start_monitoring())
                 logger.info("Integration monitoring started")
 
         # Run services in background thread

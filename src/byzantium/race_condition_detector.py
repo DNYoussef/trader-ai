@@ -15,14 +15,13 @@ Detection Capabilities:
 - Critical section violation detection
 """
 
-import ast
 import threading
 import time
 import traceback
 from collections import defaultdict, deque
 from contextlib import contextmanager
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
 import logging
 import weakref
 from enum import Enum, auto
@@ -915,10 +914,10 @@ if __name__ == "__main__":
     print(f"Race Conditions Detected: {results['race_conditions_detected']}")
     print(f"Thread Safety Assessment: {results['thread_safety_assessment']}")
     
-    print(f"\nTest Scenarios:")
+    print("\nTest Scenarios:")
     for scenario, result in results['test_scenarios'].items():
         print(f"  {scenario}: {result['races_detected']} races detected")
     
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec in results['detection_report']['recommendations']:
         print(f"  {rec}")

@@ -11,11 +11,10 @@ Advanced pattern detection system that identifies risk regime changes and market
 import logging
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
-import scipy.signal as signal
 from scipy.stats import zscore
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler

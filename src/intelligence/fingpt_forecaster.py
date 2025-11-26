@@ -5,11 +5,9 @@ Uses FinGPT-Forecaster model for stock price movement prediction based on news a
 
 import logging
 import numpy as np
-import pandas as pd
 from typing import Dict, List, Tuple, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass
-import warnings
 import os
 from dotenv import load_dotenv
 

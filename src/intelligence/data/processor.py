@@ -5,7 +5,7 @@ Comprehensive feature engineering for financial data
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 import logging
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.impute import SimpleImputer, KNNImputer
@@ -88,7 +88,6 @@ class DataProcessor:
         logger.info("Validating input data")
 
         # Ensure we have required columns
-        required_cols = ['price'] if 'price' in df.columns else []
         if 'timestamp' in df.columns or 'date' in df.columns:
             # Sort by timestamp if available
             time_col = 'timestamp' if 'timestamp' in df.columns else 'date'

@@ -18,7 +18,6 @@ import sqlite3
 import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Any
-import json
 
 
 class BankDatabase:

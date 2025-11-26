@@ -6,10 +6,7 @@ Handles multi-symbol data aggregation and feature engineering.
 """
 
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -216,10 +213,10 @@ if __name__ == "__main__":
 
     print(f"\nExtracted {len(features)} rows")
     print(f"\nColumns: {features.columns.tolist()}")
-    print(f"\nSample data:")
+    print("\nSample data:")
     print(features.head())
 
-    print(f"\nFeature statistics:")
+    print("\nFeature statistics:")
     print(features.describe())
 
     print("\n✅ Feature extractor test passed!")

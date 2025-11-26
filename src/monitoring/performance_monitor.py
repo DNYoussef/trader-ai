@@ -127,7 +127,6 @@ class PerformanceMonitor:
         try:
             # Import measurement tools
             from tests.performance.baseline_measurement import BaselineMeasurement
-            from tests.performance.enterprise_overhead import EnterpriseOverheadAnalyzer
 
             # Quick baseline measurement (minimal iterations for monitoring)
             baseline_tool = BaselineMeasurement()

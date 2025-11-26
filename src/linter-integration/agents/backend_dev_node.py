@@ -4,14 +4,10 @@ Backend Developer Agent Node - Mesh Network Specialist
 Implements adapter patterns for flake8, pylint, ruff, mypy, bandit integration.
 """
 
-import asyncio
 import json
 import logging
 import re
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-import xml.etree.ElementTree as ET
-from pathlib import Path
 
 from ..adapters.base_adapter import BaseLinterAdapter, LinterViolation, SeverityLevel, ViolationType
 

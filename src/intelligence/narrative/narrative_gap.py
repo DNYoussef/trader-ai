@@ -16,17 +16,13 @@ Key Components:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
-import aiohttp
 from sklearn.preprocessing import MinMaxScaler
-from scipy import stats
-import json
 import re
 from textblob import TextBlob
 

@@ -18,16 +18,13 @@ Mathematical Foundation:
 import logging
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union, Any, Set
+from datetime import datetime
+from typing import Dict, List, Tuple, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
 import networkx as nx
 from scipy import stats
-from scipy.stats import multivariate_normal
 import itertools
-from collections import defaultdict, deque
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -607,7 +604,7 @@ class CausalDAG:
                 raise ValueError("No valid instruments found")
 
             # Get effects for IV calculation
-            instrument_treatment_effect = self._get_edge_effect(instrument, treatment)
+            self._get_edge_effect(instrument, treatment)
             treatment_outcome_effect = self._get_edge_effect(treatment, outcome)
 
             # IV estimate: effect = (reduced form) / (first stage)

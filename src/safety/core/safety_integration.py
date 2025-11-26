@@ -13,17 +13,14 @@ Key Features:
 - Health monitoring integration
 """
 
-import asyncio
 import logging
-import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
-from pathlib import Path
 
-from .safety_manager import SafetyManager, SafetyState, ComponentState
-from ..redundancy.failover_manager import FailoverManager, ComponentRole
+from .safety_manager import SafetyManager, ComponentState
+from ..redundancy.failover_manager import FailoverManager
 from ..circuit_breakers.circuit_breaker import CircuitBreakerManager, CircuitType, CircuitBreakerConfig
-from ..recovery.recovery_manager import RecoveryManager, ComponentDescriptor, ComponentPriority
+from ..recovery.recovery_manager import RecoveryManager, ComponentPriority
 from ..monitoring.health_monitor import HealthMonitor, SystemResourceCollector, TradingSystemCollector
 
 logger = logging.getLogger(__name__)
@@ -359,7 +356,7 @@ class TradingSafetyIntegration:
             exponential_backoff=True
         )
 
-        loss_circuit = self.circuit_manager.create_circuit_breaker(
+        self.circuit_manager.create_circuit_breaker(
             name="trading_loss_protection",
             circuit_type=CircuitType.TRADING_LOSS,
             config=loss_config
@@ -373,7 +370,7 @@ class TradingSafetyIntegration:
             exponential_backoff=True
         )
 
-        connection_circuit = self.circuit_manager.create_circuit_breaker(
+        self.circuit_manager.create_circuit_breaker(
             name="broker_connection_protection",
             circuit_type=CircuitType.CONNECTION_FAILURE,
             config=connection_config
@@ -386,7 +383,7 @@ class TradingSafetyIntegration:
             open_timeout_seconds=30
         )
 
-        performance_circuit = self.circuit_manager.create_circuit_breaker(
+        self.circuit_manager.create_circuit_breaker(
             name="performance_protection",
             circuit_type=CircuitType.PERFORMANCE_LATENCY,
             config=performance_config

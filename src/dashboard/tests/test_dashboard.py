@@ -4,10 +4,7 @@ Test suite for the Gary×Taleb Risk Dashboard.
 Tests WebSocket server, API endpoints, and real-time functionality.
 """
 
-import asyncio
-import json
 import pytest
-import websockets
 from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
@@ -15,7 +12,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from server.websocket_server import RiskDashboardServer, RiskMetrics, PositionUpdate, AlertEvent
+from server.websocket_server import RiskDashboardServer
 
 # Test fixtures
 @pytest.fixture

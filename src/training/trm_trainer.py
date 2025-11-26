@@ -7,10 +7,9 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Any
 from pathlib import Path
 from tqdm import tqdm
-import json
 
 
 class TRMLoss(nn.Module):
@@ -410,7 +409,7 @@ class TRMTrainer:
                     break
 
         print(f"\n{'='*60}")
-        print(f"Training Complete!")
+        print("Training Complete!")
         print(f"Best Val Accuracy: {self.best_val_acc:.2f}% (Epoch {self.best_epoch + 1})")
         print(f"{'='*60}\n")
 

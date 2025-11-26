@@ -13,10 +13,9 @@ Features:
 
 import logging
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 
 from .gate_manager import GateLevel, GateManager, GraduationMetrics
 
@@ -455,7 +454,7 @@ class GatePsychology:
                                    current_gate: GateLevel, progress_percentage: float,
                                    current_progress: Dict[str, Any]) -> Dict[str, Any]:
         """Generate specific motivational content."""
-        template_data = self.motivation_templates[motivation_type]
+        self.motivation_templates[motivation_type]
 
         if motivation_type == MotivationType.ACHIEVEMENT_FOCUS:
             next_gate = self._get_next_gate(current_gate)

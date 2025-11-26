@@ -13,11 +13,9 @@ This module provides the final integration layer that connects:
 
 import logging
 import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union, Any
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
-import warnings
 
 # Import causal intelligence components
 from .causal_intelligence_factory import CausalIntelligenceFactory, CausalIntelligenceConfig

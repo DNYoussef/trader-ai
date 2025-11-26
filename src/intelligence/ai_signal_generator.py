@@ -3,9 +3,9 @@ AI Signal Generator - Gary-Style Mathematical Framework
 Implements DPI, Narrative Gap, Repricing Potential with AI self-calibration
 """
 
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Tuple, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 import numpy as np
 import logging
 from .ai_calibration_engine import ai_calibration_engine
@@ -270,7 +270,7 @@ class AISignalGenerator:
         self.signal_history.append(signal)
 
         # Make overall prediction for this signal
-        signal_prediction_id = ai_calibration_engine.make_prediction(
+        ai_calibration_engine.make_prediction(
             prediction_value=min(1.0, max(0.0, (composite_signal + 1) / 2)),
             confidence=ai_confidence,
             context={

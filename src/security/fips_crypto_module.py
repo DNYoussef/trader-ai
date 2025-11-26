@@ -3,11 +3,10 @@ FIPS 140-2 Level 3 Cryptographic Module
 Advanced cryptographic operations compliant with federal standards.
 """
 
-import os
 import hashlib
 import hmac
 import secrets
-from typing import Dict, Any, Optional, Tuple, List
+from typing import Dict, Any, Tuple, List
 from dataclasses import dataclass
 from enum import Enum
 import time

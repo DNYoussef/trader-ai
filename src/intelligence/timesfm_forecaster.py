@@ -8,12 +8,9 @@ For Python 3.12+, use fallback forecasting or install in separate environment
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from pathlib import Path
-import warnings
 
 logger = logging.getLogger(__name__)
 

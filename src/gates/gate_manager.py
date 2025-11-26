@@ -6,7 +6,7 @@ privileges and constraints based on capital levels, enforcing risk management
 rules and tracking performance metrics for graduation/downgrade decisions.
 """
 
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta

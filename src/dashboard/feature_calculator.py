@@ -5,13 +5,10 @@ Fetches and calculates all features from real data sources
 
 import sqlite3
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 import logging
-import json
-import yfinance as yf
 
 logger = logging.getLogger(__name__)
 

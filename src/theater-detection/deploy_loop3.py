@@ -5,7 +5,6 @@ Deploy comprehensive theater detection and reality validation system
 """
 
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -47,7 +46,7 @@ def deploy_loop3_theater_detection():
         
         # Assess success criteria
         success_criteria = validation_results['success_criteria_assessment']
-        print(f"\n3. Success Criteria Assessment:")
+        print("\n3. Success Criteria Assessment:")
         print(f"   [U+2713] All categories deployed: {success_criteria['all_categories_deployed']}")
         print(f"   [U+2713] Reality validation >=90%: {success_criteria['reality_validation_threshold']}")
         print(f"   [U+2713] Theater patterns controlled: {success_criteria['theater_patterns_monitored']}")
@@ -99,13 +98,13 @@ def deploy_loop3_theater_detection():
         with open(summary_file, 'w') as f:
             json.dump(deployment_summary, f, indent=2, default=str)
         
-        print(f"\n4. Deployment Summary:")
+        print("\n4. Deployment Summary:")
         print(f"   [U+2713] Loop 3 Status: {deployment_summary['loop_3_deployment']['status']}")
         print(f"   [U+2713] Theater Detection: {'ACTIVE' if deployment_summary['theater_detection_results']['system_deployed'] else 'INACTIVE'}")
         print(f"   [U+2713] Reality Validation: {'ACTIVE' if validation_results['continuous_monitoring_readiness']['baseline_established'] else 'INACTIVE'}")
         print(f"   [U+2713] Continuous Monitoring: {'ENABLED' if validation_results['continuous_monitoring_readiness']['alert_system_active'] else 'DISABLED'}")
         
-        print(f"\n5. Final Loop 3 Assessment:")
+        print("\n5. Final Loop 3 Assessment:")
         if success_criteria['mission_success']:
             print("   [TARGET] MISSION ACCOMPLISHED - Loop 3 theater detection and reality validation deployed successfully")
             print("   [SEARCH] All theater detection categories active with continuous monitoring")

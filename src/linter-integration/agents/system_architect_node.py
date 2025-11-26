@@ -5,13 +5,9 @@ Designs external tool pipeline architecture and coordinates tool orchestration.
 """
 
 import asyncio
-import json
 import logging
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
-import subprocess
-import shutil
-from pathlib import Path
 
 @dataclass
 class ToolPipelineSpec:
@@ -354,7 +350,7 @@ class SystemArchitectNode:
             
     async def _handle_architecture_review(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Handle architecture review requests from peers"""
-        proposed_architecture = message.get("architecture")
+        message.get("architecture")
         
         # Analyze proposed architecture
         analysis = {

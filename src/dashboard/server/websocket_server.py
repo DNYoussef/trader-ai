@@ -8,9 +8,7 @@ import json
 import logging
 import time
 import redis
-from datetime import datetime
-from decimal import Decimal
-from typing import Dict, List, Set, Optional, Any
+from typing import Dict, List, Optional
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -476,7 +474,7 @@ class RiskDashboardServer:
 
     def _check_alerts(self, metrics: RiskMetrics):
         """Check metrics against alert thresholds."""
-        current_time = time.time()
+        time.time()
 
         # P(ruin) alerts
         if metrics.p_ruin >= self.alert_thresholds['p_ruin']['critical']:

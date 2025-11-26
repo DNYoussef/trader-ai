@@ -5,13 +5,12 @@ Combines TimesFM forecasts + FinGPT sentiment + existing features → 32-dimensi
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass
 
 from .timesfm_forecaster import TimesFMForecaster
-from .fingpt_sentiment import FinGPTSentimentAnalyzer, MarketSentiment
+from .fingpt_sentiment import FinGPTSentimentAnalyzer
 from .fingpt_forecaster import FinGPTForecaster
 
 logger = logging.getLogger(__name__)
@@ -385,13 +384,13 @@ if __name__ == "__main__":
 
     print(f"   Base features (24): {features.base_features.shape}")
     print(f"   Combined features (32): {features.combined_features.shape}")
-    print(f"\n   TimesFM Features:")
+    print("\n   TimesFM Features:")
     print(f"     VIX 1h: {features.timesfm_vix_1h:.2f}")
     print(f"     VIX 6h: {features.timesfm_vix_6h:.2f}")
     print(f"     VIX 24h: {features.timesfm_vix_24h:.2f}")
     print(f"     Price forecast: {features.timesfm_price_forecast:+.2%}")
     print(f"     Uncertainty: {features.timesfm_uncertainty:.3f}")
-    print(f"\n   FinGPT Features:")
+    print("\n   FinGPT Features:")
     print(f"     Sentiment: {features.fingpt_sentiment:+.2f}")
     print(f"     Sentiment vol: {features.fingpt_sentiment_vol:.3f}")
     print(f"     Price probability: {features.fingpt_price_prob:+.2f}")

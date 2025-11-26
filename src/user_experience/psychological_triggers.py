@@ -6,11 +6,10 @@ track micro-investments, and increase engagement with the trading system.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

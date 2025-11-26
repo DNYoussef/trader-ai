@@ -19,7 +19,7 @@ Alpha Generation Logic:
 
 import logging
 import numpy as np
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     # Detailed breakdown
     components = ng_calc.calculate_ng_detailed(market_price, consensus, gary_estimate, confidence=0.8)
-    print(f"\nDetailed Components:")
+    print("\nDetailed Components:")
     print(f"Raw Gap: ${components.raw_gap:.2f}")
     print(f"Normalized NG: {components.normalized_ng:.4f}")
     print(f"Confidence: {components.confidence_score:.2f}")

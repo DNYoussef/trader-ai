@@ -19,18 +19,16 @@ Risk Management:
 import logging
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
 import time
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
-from ..strategies.dpi_calculator import DistributionalPressureIndex, PositionSizingOutput
+from ..strategies.dpi_calculator import DistributionalPressureIndex
 from ..trading.narrative_gap import NarrativeGap
-from ..gates.gate_manager import GateManager, GateLevel
-from ..trading.narrative_gap import NarrativeGap
+from ..gates.gate_manager import GateManager
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +298,7 @@ class KellyCriterionCalculator:
 
             # Calculate win rate
             win_rate = (returns > 0).mean()
-            loss_rate = 1 - win_rate
+            1 - win_rate
 
             # Adjust for recent performance (weight recent data more heavily)
             recent_returns = returns.tail(min(60, len(returns)))  # Last 60 days

@@ -133,21 +133,14 @@ class TradingEngine:
                 # ISS-002 FIX: Improved credential validation with clear error messages
                 if not api_key or not secret_key:
                     error_msg = (
-                        "Alpaca API credentials required for trading.
-"
-                        "Setup instructions:
-"
-                        "  1. Create account at https://alpaca.markets/
-"
-                        "  2. Get API keys from dashboard (paper or live)
-"
-                        "  3. Set environment variables:
-"
-                        "     export ALPACA_API_KEY=your_key_here
-"
-                        "     export ALPACA_SECRET_KEY=your_secret_here
-"
-                        "  4. Or add to .env file (see .env.example)"
+                        "Alpaca API credentials required for trading. "
+                        "Setup instructions: "
+                        "1. Create account at https://alpaca.markets/ "
+                        "2. Get API keys from dashboard (paper or live) "
+                        "3. Set environment variables: "
+                        "ALPACA_API_KEY=your_key_here "
+                        "ALPACA_SECRET_KEY=your_secret_here "
+                        "4. Or add to .env file (see .env.example)"
                     )
                     logger.error(error_msg)
                     raise ValueError(f"Missing Alpaca credentials. {error_msg}")

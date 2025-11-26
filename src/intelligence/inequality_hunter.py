@@ -14,18 +14,14 @@ Core Capabilities:
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any
 from decimal import Decimal
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-import json
 import asyncio
-from collections import defaultdict
 
 # For API data fetching (would use real APIs in production)
 import yfinance as yf
-import requests
 
 logger = logging.getLogger(__name__)
 

@@ -7,15 +7,14 @@ import json
 import time
 import hashlib
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 import asyncio
 import uuid
 
-from .dfars_compliance_engine import DFARSComplianceEngine, ComplianceStatus
+from .dfars_compliance_engine import DFARSComplianceEngine
 from .fips_crypto_module import FIPSCryptoModule
 from .incident_response_system import DFARSIncidentResponseSystem
 from .configuration_management_system import DFARSConfigurationManager
@@ -487,7 +486,7 @@ class DFARSComplianceCertification:
                 event_type=AuditEventType.COMPLIANCE_CHECK,
                 severity=SeverityLevel.INFO,
                 action="comprehensive_dfars_assessment",
-                description=f"Comprehensive DFARS assessment completed",
+                description="Comprehensive DFARS assessment completed",
                 details={
                     "assessment_id": assessment_id,
                     "overall_score": assessment_result["overall_score"],

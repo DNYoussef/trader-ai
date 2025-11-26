@@ -5,11 +5,10 @@ for comprehensive market analysis and opportunity detection.
 """
 
 from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-from decimal import Decimal
 import logging
-import json
+import numpy as np
 
 # Import existing systems
 from .inequality_hunter import InequalityHunter, ContrarianOpportunity

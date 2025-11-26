@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from performance.simple_brier import BrierTracker
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -207,7 +207,7 @@ def demo_kelly_brier():
         win_payoff=1.5
     )
 
-    print(f"\nPosition Sizing Impact:")
+    print("\nPosition Sizing Impact:")
     print(f"  Without Brier adjustment: ${account_balance * final_details['base_kelly']:,.0f}")
     print(f"  With Brier adjustment: ${final_position:,.0f}")
     print(f"  Risk reduction: {(1 - final_details['adjustment_factor'])*100:.1f}%")

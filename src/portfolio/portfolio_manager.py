@@ -5,14 +5,11 @@ Manages real portfolio positions, tracks performance, calculates NAV,
 and handles deposits/withdrawals with full broker integration.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from decimal import Decimal, ROUND_HALF_UP
+from typing import Dict, List, Any
+from decimal import Decimal
 from datetime import date, datetime, timezone, timedelta
 from dataclasses import dataclass
-import pandas as pd
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

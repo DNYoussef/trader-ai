@@ -10,12 +10,10 @@ NO THEATER - REAL MATHEMATICS
 """
 import numpy as np
 import logging
-from typing import Dict, List, Optional, Tuple, Any
-from decimal import Decimal, getcontext
+from typing import Dict, List, Optional
+from decimal import getcontext
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-import math
-from statistics import stdev, mean
+from datetime import datetime
 
 # Set high precision for financial calculations
 getcontext().prec = 10
@@ -810,7 +808,7 @@ def demo_antifragility_engine():
     print("5. ANTIFRAGILITY ASSESSMENT:")
     assessment = engine.calculate_antifragility_score(sample_portfolio, sample_portfolio['historical_returns'])
     print(f"   Overall Score: {assessment['antifragility_score']:.3f} ({assessment['confidence']} confidence)")
-    print(f"   Components:")
+    print("   Components:")
     for component, score in assessment['components'].items():
         print(f"     {component}: {score:.3f}")
 

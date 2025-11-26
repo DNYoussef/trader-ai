@@ -9,7 +9,7 @@ import json
 import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 import plaid
 from plaid.api import plaid_api

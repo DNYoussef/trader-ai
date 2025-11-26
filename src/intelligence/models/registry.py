@@ -3,14 +3,12 @@ Model registry for managing trained models
 Production-ready model versioning and storage
 """
 
-import os
 import pickle
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
-import mlflow
 import torch
 
 logger = logging.getLogger(__name__)
@@ -148,7 +146,7 @@ class ModelRegistry:
                 model = torch.load(full_model_file, map_location='cpu')
             else:
                 # Load state dict only (requires model architecture)
-                state_dict = torch.load(model_file, map_location='cpu')
+                torch.load(model_file, map_location='cpu')
                 # Note: This requires the model architecture to be available
                 raise NotImplementedError("Loading state dict requires model architecture")
         elif model_file.suffix == '.pkl':

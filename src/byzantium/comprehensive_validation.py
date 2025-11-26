@@ -8,8 +8,6 @@ Production-ready validation with comprehensive reporting.
 """
 
 import time
-import threading
-import json
 from typing import Dict, Any, List
 
 try:
@@ -457,7 +455,7 @@ def run_comprehensive_validation():
     
     # Summary
     summary = results['validation_summary']
-    print(f"\nValidation Summary:")
+    print("\nValidation Summary:")
     print(f"  Duration: {summary['total_duration_ms']:.1f}ms")
     print(f"  Phases Completed: {summary['validation_phases']}")
     print(f"  Overall Status: {summary['overall_status']}")
@@ -465,28 +463,28 @@ def run_comprehensive_validation():
     
     # Final Assessment
     assessment = results['final_assessment']
-    print(f"\nFinal Assessment:")
+    print("\nFinal Assessment:")
     print(f"  Confidence Score: {assessment['confidence_score']:.2f}")
     print(f"  Systems Operational: {'YES' if assessment['systems_operational'] else 'NO'}")
     print(f"  Quality Gates Passed: {'YES' if assessment['quality_gates_passed'] else 'NO'}")
     
     if assessment['critical_issues']:
-        print(f"  Critical Issues:")
+        print("  Critical Issues:")
         for issue in assessment['critical_issues']:
             print(f"    * {issue}")
     else:
-        print(f"  Critical Issues: None")
+        print("  Critical Issues: None")
     
     # Deployment Readiness
     deployment = results['deployment_readiness']
-    print(f"\nDeployment Readiness:")
+    print("\nDeployment Readiness:")
     print(f"  Status: {deployment['deployment_status']}")
     print(f"  Gates Passed: {deployment['gates_passed']}/{deployment['total_gates']}")
     print(f"  Pass Rate: {deployment['gate_pass_rate']:.1%}")
     print(f"  Deployment Confidence: {deployment['deployment_confidence']:.2f}")
     
     # Recommendations
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec in results['recommendations']:
         print(f"  * {rec}")
     

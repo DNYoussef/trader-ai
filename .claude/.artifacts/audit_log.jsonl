@@ -6,3 +6,5 @@
 {"event": "initialization_error", "error": "PRODUCTION ERROR: API credentials required when alpaca-py is available", "timestamp": "2025-09-14T14:23:21.296118"}
 {"event": "production_flow_test_failed", "error": "Failed to initialize trading engine", "timestamp": "2025-09-14T14:23:21.297154"}
 {"event": "initialization_error", "error": "PRODUCTION ERROR: API credentials required for trading", "timestamp": "2025-11-24T16:57:40.225060"}
+{"event": "initialization_error", "error": "PRODUCTION ERROR: API credentials required for trading", "timestamp": "2025-11-25T23:32:20.379198"}
+{"event": "initialization_error", "error": "PRODUCTION ERROR: API credentials required for trading", "timestamp": "2025-11-25T23:32:31.683995"}

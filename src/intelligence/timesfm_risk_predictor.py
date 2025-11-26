@@ -5,13 +5,12 @@ Extends predictive warning system from 5-15min to 6-48hr horizon using TimesFM
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .timesfm_forecaster import TimesFMForecaster, VolatilityForecast, ForecastResult
+from .timesfm_forecaster import TimesFMForecaster, VolatilityForecast
 
 logger = logging.getLogger(__name__)
 
@@ -445,17 +444,17 @@ if __name__ == "__main__":
         market_state=market_state
     )
 
-    print(f"\nImmediate Risk (1-6hr):")
+    print("\nImmediate Risk (1-6hr):")
     for risk, prob in forecast.immediate_risk.items():
         if prob > 0.1:
             print(f"  {risk}: {prob:.1%}")
 
-    print(f"\nShort-term Risk (6-24hr):")
+    print("\nShort-term Risk (6-24hr):")
     for risk, prob in forecast.short_term_risk.items():
         if prob > 0.1:
             print(f"  {risk}: {prob:.1%}")
 
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec in forecast.recommended_actions:
         print(f"  {rec}")
 

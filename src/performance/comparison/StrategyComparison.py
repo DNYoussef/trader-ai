@@ -5,11 +5,9 @@ Advanced comparison framework for trading strategy validation and ranking
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 import scipy.stats as stats
 from scipy.stats import ttest_ind, mannwhitneyu, ks_2samp, jarque_bera, normaltest
 import warnings
@@ -17,7 +15,6 @@ from sklearn.utils import resample
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.tsa.stattools import adfuller
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 
 warnings.filterwarnings('ignore')
@@ -414,7 +411,7 @@ class StrategyComparison:
 
             # Key performance differences
             perf_diff = result.performance_difference
-            report.append(f"  Performance Differences:")
+            report.append("  Performance Differences:")
             report.append(f"    Mean Return: {perf_diff['mean_return_diff']:.4f}")
             report.append(f"    Sharpe Ratio: {perf_diff['sharpe_diff']:.3f}")
             report.append(f"    Max Drawdown: {perf_diff['max_drawdown_diff']:.2%}")

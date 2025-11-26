@@ -8,8 +8,7 @@ real trading events and user behavior.
 
 import logging
 from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
-import asyncio
+from datetime import datetime
 
 from .psychological_reinforcement import (
     PsychologicalReinforcementEngine,

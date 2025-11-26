@@ -5,22 +5,15 @@ Advanced optimization system for trading strategy parameter tuning and performan
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Callable
+from dataclasses import dataclass
+from datetime import datetime
 import warnings
-from scipy.optimize import minimize, differential_evolution, basinhopping
+from scipy.optimize import minimize, differential_evolution
 from scipy import stats
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_score
 import optuna
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-import json
-import pickle
 
 warnings.filterwarnings('ignore')
 
@@ -853,7 +846,7 @@ if __name__ == "__main__":
     report = optimizer.generate_optimization_report(results, recommendations, current_params)
     print(report)
 
-    print(f"\nOptimization completed successfully!")
+    print("\nOptimization completed successfully!")
     if results:
         print(f"Best objective value: {results[0].objective_value:.4f}")
         print(f"Best parameters: {results[0].parameters}")

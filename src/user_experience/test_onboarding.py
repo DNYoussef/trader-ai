@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from user_experience.onboarding_flow import TradingOnboardingFlow, OnboardingStep
-from user_experience.value_screens import ValueScreenGenerator, TradingInsight
+from user_experience.value_screens import ValueScreenGenerator
 from user_experience.psychological_triggers import MotivationEngine, CommitmentTracker, UserPsychProfile, MicroCommitment, MicroCommitmentType
 import logging
 
@@ -175,12 +175,12 @@ def test_integration_completeness():
         onboarding = TradingOnboardingFlow()
         value_gen = ValueScreenGenerator()
         commitment_tracker = CommitmentTracker()
-        motivation_engine = MotivationEngine(commitment_tracker)
+        MotivationEngine(commitment_tracker)
         print("All components initialize")
 
         # Test basic functionality
-        session = onboarding.start_onboarding()
-        screens = value_gen.generate_persona_value_screens("beginner", ["fear"], ["income"])
+        onboarding.start_onboarding()
+        value_gen.generate_persona_value_screens("beginner", ["fear"], ["income"])
         print("Basic functionality works")
 
         return True

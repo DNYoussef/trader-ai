@@ -9,8 +9,8 @@ import logging
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime, timedelta
 
-from .gate_manager import GateManager, GateLevel, GraduationMetrics, TradeValidationResult
-from .gate_psychology import GatePsychology, CelebrationFlow, ProgressMotivation
+from .gate_manager import GateManager, GateLevel
+from .gate_psychology import GatePsychology
 
 logger = logging.getLogger(__name__)
 
@@ -440,7 +440,7 @@ class EnhancedGateManager:
         """Check for profit-related milestones."""
         milestones = []
 
-        total_return = portfolio_metrics.get('total_return', 0)
+        portfolio_metrics.get('total_return', 0)
         total_profit = portfolio_metrics.get('total_profit', 0)
 
         # First profit milestone

@@ -6,7 +6,6 @@ and Dashboard to read it. This is a lightweight alternative to Redis.
 """
 import json
 import logging
-import os
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path

@@ -1,7 +1,7 @@
 """Flake8 linter adapter implementation."""
 
 import re
-from typing import List, Dict, Any
+from typing import List
 import json
 
 from src.adapters.base_adapter import BaseLinterAdapter

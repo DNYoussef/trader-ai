@@ -8,10 +8,9 @@ Gary DPI and Taleb antifragility in real-time.
 
 import logging
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any, Union
-from dataclasses import dataclass, asdict
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Any
+from dataclasses import dataclass
 import json
 import sqlite3
 from pathlib import Path
@@ -21,11 +20,7 @@ from collections import deque
 import warnings
 warnings.filterwarnings('ignore')
 
-from scipy.optimize import minimize, differential_evolution
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-import joblib
 
 @dataclass
 class MarketRegime:

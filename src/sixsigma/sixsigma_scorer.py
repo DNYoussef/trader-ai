@@ -6,9 +6,8 @@ Theater-Free Quality Validation with DPMO/RTY Calculations
 
 import json
 import math
-import statistics
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
 import yaml
@@ -385,7 +384,7 @@ class SixSigmaScorer:
         </div>
             """
         
-        html += f"""
+        html += """
     </div>
     
     <div class="opportunities">

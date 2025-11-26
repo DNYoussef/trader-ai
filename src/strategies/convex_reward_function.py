@@ -11,7 +11,7 @@ This is the core of our antifragile AI training - teaching the model to:
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 import logging
 import json
@@ -251,9 +251,9 @@ class ConvexRewardFunction:
 
         # Calculate strategy characteristics
         returns = [o.returns for o in strategy_outcomes]
-        avg_return = np.mean(returns)
-        return_std = np.std(returns)
-        max_return = max(returns)
+        np.mean(returns)
+        np.std(returns)
+        max(returns)
         min_return = min(returns)
 
         # Calculate black swan capture rate
@@ -506,7 +506,7 @@ if __name__ == "__main__":
 
     # Get statistics
     stats = reward_func.get_reward_statistics()
-    print(f"\nReward Statistics:")
+    print("\nReward Statistics:")
     for key, value in stats.items():
         if isinstance(value, float):
             print(f"  {key}: {value:.4f}")

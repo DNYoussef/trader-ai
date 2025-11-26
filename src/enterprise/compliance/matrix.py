@@ -12,7 +12,6 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, date
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -472,7 +471,6 @@ class ComplianceMatrix:
             recommendations.append(f"Test {len(need_testing)} implemented controls")
             
         # Overdue reviews
-        from datetime import timedelta
         overdue = [
             c for c in controls 
             if c.next_review and c.next_review < date.today()

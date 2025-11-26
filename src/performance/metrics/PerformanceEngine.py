@@ -5,15 +5,9 @@ Specialized engine for trading strategy performance analysis with Sharpe optimiz
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-import scipy.stats as stats
+from typing import Dict, Tuple, Optional
+from dataclasses import dataclass
 from scipy.optimize import minimize
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -587,7 +581,7 @@ class PerformanceEngine:
 
         # Apply some parameter-based modifications
         momentum_factor = params.get('momentum_factor', 1.0)
-        volatility_factor = params.get('volatility_factor', 1.0)
+        params.get('volatility_factor', 1.0)
 
         # Simple momentum strategy simulation
         momentum_signal = returns.rolling(20).mean()

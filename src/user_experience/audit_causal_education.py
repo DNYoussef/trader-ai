@@ -6,7 +6,6 @@ and effective knowledge transfer with mobile app psychology principles.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add src to path for imports

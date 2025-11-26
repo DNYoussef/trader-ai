@@ -5,18 +5,16 @@ Implements the BrokerInterface for Alpaca Trading API with support for both
 paper and live trading modes, including fractional shares up to 6 decimal places.
 """
 
-import asyncio
 import logging
 import time
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timezone, timedelta
-import uuid
+from datetime import datetime, timezone
 
 from .broker_interface import (
-    BrokerInterface, Order, Position, Fill, OrderStatus, OrderType, TimeInForce,
+    BrokerInterface, Order, Position, OrderStatus, OrderType, TimeInForce,
     BrokerError, ConnectionError, AuthenticationError, InsufficientFundsError,
-    InvalidOrderError, MarketClosedError, RateLimitError
+    InvalidOrderError, RateLimitError
 )
 
 logger = logging.getLogger(__name__)

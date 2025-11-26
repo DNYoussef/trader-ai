@@ -156,6 +156,9 @@ __all__ = [
     "ReportConfig"
 ]
 
+# Required for comprehensive analysis helper function
+import pandas as pd
+
 # Quick access functions for common workflows
 def create_comprehensive_analysis(returns, equity_curve, initial_capital=200.0):
     """
@@ -173,7 +176,7 @@ def create_comprehensive_analysis(returns, equity_curve, initial_capital=200.0):
     # Initialize all analyzers
     benchmark_framework = BenchmarkFramework(initial_capital)
     performance_engine = PerformanceEngine()
-    strategy_comparison = StrategyComparison()
+    StrategyComparison()
     drawdown_analyzer = DrawdownAnalysis()
     antifragility_analyzer = AntifragilityAnalyzer()
     validator = StatisticalValidator()

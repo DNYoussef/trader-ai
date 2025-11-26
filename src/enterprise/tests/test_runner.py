@@ -6,10 +6,8 @@ compliance validation, and integration testing capabilities.
 """
 
 import logging
-import asyncio
-import unittest
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Type
+from typing import Optional
 from datetime import datetime
 import json
 import tempfile
@@ -18,7 +16,7 @@ import shutil
 from ..telemetry.six_sigma import SixSigmaTelemetry, SixSigmaMetrics
 from ..security.supply_chain import SupplyChainSecurity, SecurityLevel
 from ..compliance.matrix import ComplianceMatrix, ComplianceFramework
-from ..flags.feature_flags import FeatureFlagManager, FeatureFlag, FlagStatus
+from ..flags.feature_flags import FeatureFlagManager, FlagStatus
 from ..integration.analyzer import EnterpriseAnalyzerIntegration
 from ..config.enterprise_config import EnterpriseConfig, EnvironmentType
 
@@ -251,7 +249,7 @@ class EnterpriseTestRunner:
             flag_manager = FeatureFlagManager()
             
             # Create test flag
-            test_flag = flag_manager.create_flag(
+            flag_manager.create_flag(
                 "test_feature",
                 "Test feature flag",
                 status=FlagStatus.ENABLED
@@ -286,7 +284,7 @@ class EnterpriseTestRunner:
             config = EnterpriseConfig(environment=EnvironmentType.TESTING)
             
             # Test configuration validation
-            issues = config.validate_config()
+            config.validate_config()
             # Allow no issues or minor issues
             
             # Test configuration dictionary
@@ -359,7 +357,7 @@ class EnterpriseTestRunner:
             telemetry = SixSigmaTelemetry("e2e_test")
             security = SupplyChainSecurity(self.temp_dir, SecurityLevel.BASIC)
             compliance = ComplianceMatrix(self.temp_dir)
-            integration = EnterpriseAnalyzerIntegration(self.temp_dir)
+            EnterpriseAnalyzerIntegration(self.temp_dir)
             
             # Add compliance framework
             compliance.add_framework(ComplianceFramework.SOC2_TYPE2)
@@ -575,7 +573,7 @@ class EnterpriseTestRunner:
             calc_start = datetime.now()
             dpmo = telemetry.calculate_dpmo()
             rty = telemetry.calculate_rty()
-            sigma_level = telemetry.calculate_sigma_level()
+            telemetry.calculate_sigma_level()
             calc_time = (datetime.now() - calc_start).total_seconds()
             
             # Performance assertions

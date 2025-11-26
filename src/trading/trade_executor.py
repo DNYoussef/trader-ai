@@ -5,9 +5,8 @@ Executes real market orders through Alpaca with proper risk management,
 order validation, and gate-based position tracking.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timezone
 from dataclasses import dataclass
@@ -96,7 +95,7 @@ class TradeExecutor:
             await self._validate_position_size(symbol, dollar_amount, "buy")
 
             # Create order
-            order_id = str(uuid.uuid4())
+            str(uuid.uuid4())
             client_order_id = f"buy_{gate}_{symbol}_{int(datetime.now().timestamp())}"
 
             # Use notional (dollar amount) order for fractional shares
@@ -215,7 +214,7 @@ class TradeExecutor:
                 actual_dollar_amount = dollar_amount
 
             # Create order
-            order_id = str(uuid.uuid4())
+            str(uuid.uuid4())
             client_order_id = f"sell_{gate}_{symbol}_{int(datetime.now().timestamp())}"
 
             from ..brokers.broker_interface import Order, OrderType, TimeInForce

@@ -1,8 +1,7 @@
 """MyPy type checker adapter implementation."""
 
-import json
 import re
-from typing import List, Dict, Any
+from typing import List
 
 from src.adapters.base_adapter import BaseLinterAdapter
 from src.models.linter_models import (

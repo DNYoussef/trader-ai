@@ -14,9 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Import existing systems
 from .ai_calibration_engine import ai_calibration_engine
-from .ai_signal_generator import ai_signal_generator, CohortData, MarketExpectation
-from .ai_market_analyzer import ai_market_analyzer
-from .inequality_hunter import InequalityHunter
+from .ai_signal_generator import ai_signal_generator
 
 logger = logging.getLogger(__name__)
 

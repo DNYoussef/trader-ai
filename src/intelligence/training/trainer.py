@@ -8,23 +8,23 @@ import pickle
 import logging
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, Optional, Tuple, List
+from typing import Dict, Any, Optional, Tuple
 from pathlib import Path
 
 import mlflow
 import mlflow.sklearn
 import mlflow.pytorch
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.model_selection import train_test_split, GridSearchCV, TimeSeriesSplit
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.preprocessing import RobustScaler
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from ..data.processor import DataProcessor
-from ..models.neural_networks import TradingLSTM, TradingTransformer
+from ..models.neural_networks import TradingLSTM
 from ..models.registry import ModelRegistry
 
 logger = logging.getLogger(__name__)

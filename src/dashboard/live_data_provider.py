@@ -7,11 +7,9 @@ Supports both in-process connection and file-based state reading.
 import asyncio
 import logging
 import time
-import json
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
-from dataclasses import dataclass, asdict
 import sys
 
 # Add parent to path for imports
@@ -19,9 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.integration.trading_state_provider import (
     TradingStateProvider,
-    get_state_provider,
-    DashboardMetrics,
-    DashboardPosition
+    get_state_provider
 )
 
 logger = logging.getLogger(__name__)
@@ -68,7 +64,7 @@ class LiveDataProvider:
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     # Already in async context - schedule coroutine
-                    future = asyncio.ensure_future(self._provider.get_full_state())
+                    asyncio.ensure_future(self._provider.get_full_state())
                     # Can't await here in sync context, use cached or file
                     pass
                 else:

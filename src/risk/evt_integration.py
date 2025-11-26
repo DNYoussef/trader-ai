@@ -14,13 +14,11 @@ Key Features:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Optional, Tuple, Union, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple, Any
+from dataclasses import dataclass
+from datetime import datetime
 import time
 import logging
-import warnings
 
 # Import existing antifragility engine components
 import sys
@@ -29,7 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'strategies'))
 from antifragility_engine import TailRiskModel, AntifragilityEngine
 
 # Import enhanced EVT components
-from .enhanced_evt_models import EnhancedEVTEngine, EnhancedTailRiskModel, TailDistribution
+from .enhanced_evt_models import EnhancedEVTEngine, EnhancedTailRiskModel
 from .evt_backtesting import EVTBacktestingEngine, run_comprehensive_backtest
 
 logger = logging.getLogger(__name__)

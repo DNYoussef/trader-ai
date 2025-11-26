@@ -7,11 +7,10 @@ micro-commitments that increase conversion and retention.
 """
 
 import logging
-import json
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import datetime
 import uuid
 
 logger = logging.getLogger(__name__)

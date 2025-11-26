@@ -15,11 +15,10 @@ import logging
 import os
 import subprocess
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Any
-import tempfile
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +211,7 @@ class RealSecurityScanner:
     
     async def _run_security_tool(self, tool_name: str) -> SecurityScanResult:
         """Run individual security tool with REAL execution."""
-        start_time = time.time()
+        time.time()
         config = self.tools_config[tool_name]
         
         if tool_name == "semgrep":
@@ -895,13 +894,13 @@ class RealSecurityScanner:
         
         try:
             # Step 1: Run comprehensive security scan
-            scan_results = await self.run_comprehensive_scan()
+            await self.run_comprehensive_scan()
             
             # Step 2: Evaluate security gates
             gate_results = await self.evaluate_security_gates()
             
             # Step 3: Generate SARIF report
-            sarif_report = await self.generate_sarif_report()
+            await self.generate_sarif_report()
             
             # Step 4: Generate comprehensive report
             security_report = await self.generate_security_report(gate_results)

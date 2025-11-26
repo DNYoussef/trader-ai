@@ -16,14 +16,11 @@ Key Features:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Tuple, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 import logging
-import json
-import asyncio
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
@@ -109,7 +106,7 @@ class StakeholderWelfareFramework(EthicalFramework):
     def evaluate_trade_ethics(self, trade_data: Dict[str, Any]) -> Tuple[AlphaType, float]:
         """Evaluate trade based on stakeholder welfare impact"""
         try:
-            symbol = trade_data.get("symbol", "")
+            trade_data.get("symbol", "")
             strategy = trade_data.get("strategy_id", "")
             quantity = abs(trade_data.get("quantity", 0))
 
@@ -354,7 +351,7 @@ class PolicyTwin:
 
             # Liquidity Provision Metric
             total_volume = sum(abs(t.quantity * t.price) for t in recent_trades)
-            avg_trade_size = total_volume / len(recent_trades) if recent_trades else 0
+            total_volume / len(recent_trades) if recent_trades else 0
 
             liquidity_score = min(1.0, total_volume / 10_000_000)  # Normalize to $10M
             metrics.append(SocialImpactMetric(
@@ -687,7 +684,7 @@ def test_policy_twin():
 
     # Create transparency report
     report = policy_twin.create_transparency_report()
-    print(f"\nTransparency Report Summary:")
+    print("\nTransparency Report Summary:")
     print(f"Total trades analyzed: {report['trade_summary']['total_trades']}")
     print(f"Constructive trades: {report['trade_summary']['constructive_percentage']:.1f}%")
     print(f"Average social impact: {report['impact_metrics']['average_social_impact_score']:.3f}")

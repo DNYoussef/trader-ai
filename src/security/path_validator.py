@@ -6,7 +6,7 @@ Implements comprehensive path traversal prevention and validation.
 import os
 import re
 from pathlib import Path
-from typing import List, Set, Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 from urllib.parse import unquote
 import logging
 

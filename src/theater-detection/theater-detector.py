@@ -9,13 +9,10 @@ Performance, Quality, Security, Compliance, Architecture
 """
 
 import json
-import time
-import hashlib
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from datetime import datetime, timedelta
-import subprocess
+from datetime import datetime
 import statistics
 import logging
 

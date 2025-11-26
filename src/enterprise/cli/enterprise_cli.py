@@ -10,15 +10,13 @@ import asyncio
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 import json
 
 from ..telemetry.six_sigma import SixSigmaTelemetry
 from ..security.supply_chain import SupplyChainSecurity, SecurityLevel
 from ..compliance.matrix import ComplianceMatrix, ComplianceFramework
-from ..flags.feature_flags import flag_manager
-from ..integration.analyzer import EnterpriseAnalyzerIntegration
 from ..config.enterprise_config import EnterpriseConfig, EnvironmentType
 from ..tests.test_runner import EnterpriseTestRunner
 
@@ -178,7 +176,7 @@ class SecurityCommand(EnterpriseCommand):
         report_parser.add_argument('--output', '-o', help='Output directory')
         
         # Status command
-        status_parser = subparsers.add_parser('status', help='Show security status')
+        subparsers.add_parser('status', help='Show security status')
         
     async def execute(self, args: argparse.Namespace) -> int:
         try:
@@ -380,7 +378,7 @@ class TestCommand(EnterpriseCommand):
                     
                 result = await test_runner.run_all_tests()
                 
-                print(f"\nTest Results:")
+                print("\nTest Results:")
                 print(f"Tests Run: {result.tests_run}")
                 print(f"Successes: {result.tests_run - result.failures - result.errors}")
                 print(f"Failures: {result.failures}")

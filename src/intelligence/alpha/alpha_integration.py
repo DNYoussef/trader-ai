@@ -12,14 +12,11 @@ alpha generation framework.
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
-import json
 
 # Import our alpha generation components
 import sys

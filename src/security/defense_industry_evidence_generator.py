@@ -11,21 +11,15 @@ import hashlib
 import json
 import logging
 import os
-import tarfile
 import zipfile
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-import subprocess
-import tempfile
+from typing import Dict, List, Any, Optional
 
 from .enterprise_theater_detection import (
     EnterpriseTheaterDetector,
-    TheaterDetectionReport,
-    TheaterEvidence,
-    TheaterSeverity,
-    ValidationMetrics
+    TheaterSeverity
 )
 from .continuous_theater_monitor import ContinuousTheaterMonitor
 
@@ -649,7 +643,7 @@ class DefenseIndustryEvidenceGenerator:
 
                         component_completeness = sum([has_collectors, has_config, has_reporting]) / 3
 
-                    except Exception as e:
+                    except Exception:
                         init_successful = False
                         component_completeness = 0.0
 
@@ -1150,11 +1144,11 @@ async def main():
             compress_package=True
         )
 
-        print(f"[OK] Evidence package generated successfully")
+        print("[OK] Evidence package generated successfully")
         print(f"[FOLDER] Package location: {package_path}")
 
         # Display evidence summary
-        print(f"\n[CHART] Evidence Summary:")
+        print("\n[CHART] Evidence Summary:")
         print(f"  Evidence items collected: {len(generator.evidence_items)}")
         verified_items = len([item for item in generator.evidence_items if item.validation_status == "VERIFIED"])
         print(f"  Verified evidence items: {verified_items}")

@@ -16,25 +16,15 @@ Key Features:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Callable
+from typing import Dict, List, Tuple, Optional, Any, Callable, AsyncIterable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import logging
 import asyncio
-import aiohttp
-import websockets
-import json
-from concurrent.futures import ThreadPoolExecutor
-import queue
-import threading
 from abc import ABC, abstractmethod
 
 # Import alpha generation components
 from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
-from ..narrative.narrative_gap import NarrativeGapEngine
-from ..learning.shadow_book import ShadowBookEngine, Trade, TradeType, ActionType
-from ..learning.policy_twin import PolicyTwin
 
 logger = logging.getLogger(__name__)
 
@@ -692,7 +682,7 @@ async def test_realtime_pipeline():
 
     try:
         # Start pipeline and run for a test period
-        start_task = asyncio.create_task(pipeline.start())
+        asyncio.create_task(pipeline.start())
 
         # Let it run for 30 seconds
         await asyncio.sleep(30)

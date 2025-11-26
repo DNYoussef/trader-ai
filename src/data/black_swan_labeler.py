@@ -8,11 +8,10 @@ enabling the AI to learn patterns that precede extreme market events.
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from scipy import stats
-from scipy.signal import find_peaks
 import logging
 import warnings
 warnings.filterwarnings('ignore')

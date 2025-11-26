@@ -4,11 +4,9 @@ Mesh Queen Coordinator for Phase 2 Linter Integration Architecture Swarm
 Establishes peer-to-peer mesh topology for distributed linter integration coordination.
 """
 
-import asyncio
-import json
 import logging
-from dataclasses import dataclass, asdict
-from typing import Dict, List, Set, Optional, Any
+from dataclasses import dataclass
+from typing import Dict, List, Set, Any
 from enum import Enum
 import time
 

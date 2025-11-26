@@ -3,15 +3,12 @@ AI Self-Calibrating Decision Engine
 Implements mathematical framework for AI to learn its own risk tolerances and decision curves.
 """
 
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-from decimal import Decimal
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import logging
 import numpy as np
 from scipy import stats
-from scipy.optimize import minimize
 import pickle
 import os
 

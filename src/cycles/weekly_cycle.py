@@ -11,7 +11,7 @@ Handles weekly trading cycles with:
 
 import logging
 from datetime import datetime, time, timedelta
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, Optional, List
 from enum import Enum
 import pytz
 from dataclasses import dataclass

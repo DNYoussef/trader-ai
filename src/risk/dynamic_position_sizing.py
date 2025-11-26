@@ -14,21 +14,18 @@ Key Features:
 
 import logging
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Union
+from datetime import datetime
+from typing import Dict, List, Union
 from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import time
 
 from .kelly_criterion import (
     KellyCriterionCalculator,
-    PositionSizeRecommendation,
-    KellyRegime
+    PositionSizeRecommendation
 )
 from ..strategies.dpi_calculator import DistributionalPressureIndex
-from ..gates.gate_manager import GateManager, GateLevel
+from ..gates.gate_manager import GateManager
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +240,7 @@ class DynamicPositionSizer:
                 return {}
 
             # 1. Calculate risk budget allocation
-            risk_budget = self._calculate_risk_budget(
+            self._calculate_risk_budget(
                 individual_recommendations, total_capital
             )
 

@@ -89,7 +89,7 @@ class TinyRecursiveModel(nn.Module):
         total_params = sum(p.numel() for p in self.parameters())
         trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         logger.info(f"TRM Parameter Count: {total_params:,} total, {trainable_params:,} trainable")
-        logger.info(f"Target: ~7M parameters (TRM standard)")
+        logger.info("Target: ~7M parameters (TRM standard)")
 
     def reasoning_update(self, x: torch.Tensor, y: torch.Tensor, z: torch.Tensor) -> torch.Tensor:
         """

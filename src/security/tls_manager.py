@@ -6,11 +6,11 @@ Implements defense-grade TLS 1.3 configuration for internal communications.
 import ssl
 import socket
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 import subprocess
 import tempfile
 import os
@@ -363,7 +363,6 @@ class DFARSTLSManager:
                                        common_name: str,
                                        validity_days: int = 90) -> TLSCertificate:
         """Generate self-signed certificate for development/testing."""
-        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -495,7 +494,7 @@ class DFARSTLSManager:
                 validation['checks'].append(f"Certificate {name}: Key size compliant")
 
         # Check cipher suite compliance
-        approved_ciphers = set(self.default_tls_config.cipher_suites)
+        set(self.default_tls_config.cipher_suites)
         # Note: Direct cipher validation would require context inspection
         validation['checks'].append("Cipher suites: Using DFARS-approved TLS 1.3 suites")
 

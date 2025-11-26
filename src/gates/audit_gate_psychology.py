@@ -6,7 +6,6 @@ and proper integration with the existing gate management system.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add src to path for imports
@@ -15,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from gates.gate_manager import GateManager, GateLevel, GraduationMetrics
 from gates.gate_psychology import GatePsychology, CelebrationStyle, MotivationType
 from gates.enhanced_gate_manager import EnhancedGateManager
-from datetime import datetime, timedelta
 import logging
 
 # Setup logging

@@ -7,15 +7,13 @@ import asyncio
 import time
 import logging
 import threading
-from datetime import datetime, timezone
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
 import statistics
-import json
 from collections import deque, defaultdict
 
-from .kill_switch_system import TriggerType, KillSwitchEvent
+from .kill_switch_system import TriggerType
 
 logger = logging.getLogger(__name__)
 
@@ -666,7 +664,6 @@ if __name__ == '__main__':
     # Test multi-trigger system
     async def test_system():
         from unittest.mock import Mock
-        from .kill_switch_system import KillSwitchSystem
 
         # Mock broker
         broker = Mock()

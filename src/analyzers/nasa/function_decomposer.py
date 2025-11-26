@@ -14,18 +14,14 @@ Core Capabilities:
 """
 
 import ast
-import re
-import time
-from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 # NASA compliance imports
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from utils.types import ConnascenceViolation
 
 # NASA Rule 2 constants
 NASA_FUNCTION_SIZE_LIMIT = 60  # Lines of code

@@ -4,7 +4,7 @@ Unified Severity Mapping System for Cross-Tool Violation Normalization.
 Provides consistent severity levels and violation classification across all linters.
 """
 
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 import json

@@ -10,17 +10,13 @@ Coordinates all AI alert components for real-time risk detection and notificatio
 """
 
 import logging
-import asyncio
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
-from concurrent.futures import ThreadPoolExecutor
 import threading
 import queue
-from collections import defaultdict
-import json
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -28,7 +24,7 @@ warnings.filterwarnings('ignore')
 from .ai_alert_system import AIAlertSystem, RiskAlert, AlertSeverity
 from .risk_pattern_engine import RiskPatternEngine, PatternDetection
 from .predictive_warning_system import PredictiveWarningSystem, EarlyWarning
-from .context_filter import ContextAwareFilter, FilterResult, MarketContext
+from .context_filter import ContextAwareFilter
 
 logger = logging.getLogger(__name__)
 
@@ -552,7 +548,7 @@ class AlertOrchestrator:
 
             # Time-based escalation (would be implemented with alert aging)
             # This is a simplified version
-            escalation_threshold = self.escalation_rules.get(alert.severity, 1800)
+            self.escalation_rules.get(alert.severity, 1800)
 
             return False  # Placeholder - would implement alert aging logic
 

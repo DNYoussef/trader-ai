@@ -6,14 +6,10 @@ Performance analysis and comparison system for antifragile trading strategies
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from typing import Dict, List, Tuple
+from dataclasses import dataclass
+from datetime import datetime
 import warnings
-from scipy import stats
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-import yfinance as yf
 from abc import ABC, abstractmethod
 
 warnings.filterwarnings('ignore')
@@ -511,7 +507,7 @@ class BenchmarkFramework:
             risks.append(metrics.volatility)
             names.append(self.strategies[name].name)
 
-        scatter = ax3.scatter(risks, returns, s=100, alpha=0.7, c=range(len(names)), cmap='viridis')
+        ax3.scatter(risks, returns, s=100, alpha=0.7, c=range(len(names)), cmap='viridis')
 
         for i, name in enumerate(names):
             ax3.annotate(name, (risks[i], returns[i]), xytext=(5, 5),

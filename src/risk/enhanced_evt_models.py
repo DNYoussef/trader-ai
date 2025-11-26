@@ -11,13 +11,10 @@ Key Enhancements:
 """
 
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 from scipy import stats
 from scipy.optimize import minimize
-import warnings
 from enum import Enum
 import logging
 
@@ -754,7 +751,7 @@ class EnhancedEVTEngine:
         ks_stat = np.max(np.abs(empirical_cdf - theoretical_cdf))
 
         # Approximate p-value (simplified)
-        sqrt_n = np.sqrt(n)
+        np.sqrt(n)
         p_value = 2 * np.exp(-2 * n * ks_stat**2) if ks_stat > 0 else 1.0
 
         return ks_stat, p_value

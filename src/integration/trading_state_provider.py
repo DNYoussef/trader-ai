@@ -441,7 +441,7 @@ class TradingStateProvider:
 
             # Estimate volatility from position weights
             # This is simplified - real implementation would use historical returns
-            weights = [p.weight / 100 for p in positions]
+            [p.weight / 100 for p in positions]
             avg_volatility = 0.20  # 20% annualized as baseline
 
             # Calculate VaR (simplified parametric)

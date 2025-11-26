@@ -6,9 +6,8 @@ Provides common interface for all linter tool adapters.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from enum import Enum
-import json
 import subprocess
 import asyncio
 

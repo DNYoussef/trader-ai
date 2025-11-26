@@ -149,16 +149,16 @@ class TelemetryCollector:
         now = data_point.timestamp
         
         # Hourly aggregation
-        hour_key = now.strftime("%Y-%m-%d-%H")
+        now.strftime("%Y-%m-%d-%H")
         self.aggregated_data[data_point.metric_name]["hourly"].append(data_point.value)
         
         # Daily aggregation
-        day_key = now.strftime("%Y-%m-%d")
+        now.strftime("%Y-%m-%d")
         self.aggregated_data[data_point.metric_name]["daily"].append(data_point.value)
         
         # Weekly aggregation
         week_start = now - timedelta(days=now.weekday())
-        week_key = week_start.strftime("%Y-W%U")
+        week_start.strftime("%Y-W%U")
         self.aggregated_data[data_point.metric_name]["weekly"].append(data_point.value)
     
     def _perform_aggregation(self) -> None:

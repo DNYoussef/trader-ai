@@ -5,24 +5,17 @@ Live monitoring and optimization recommendations for trading strategies
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Union, Callable
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Callable
+from dataclasses import dataclass, asdict
+from datetime import datetime
 import warnings
 import threading
 import time
 import json
-import asyncio
 from queue import Queue, Empty
 from collections import deque
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
-import websocket
-import sqlite3
-from sqlalchemy import create_engine, text
 
 warnings.filterwarnings('ignore')
 

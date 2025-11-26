@@ -25,9 +25,8 @@ from pathlib import Path
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from safety.core.safety_integration import TradingSafetyIntegration, initialize_trading_safety
+from safety.core.safety_integration import TradingSafetyIntegration
 from safety.core.safety_manager import ComponentState
-from safety.circuit_breakers.circuit_breaker import CircuitType
 from safety.monitoring.health_monitor import AlertSeverity
 
 # Configure logging
@@ -457,7 +456,7 @@ async def run_availability_test():
         logger.info(f"Total Downtime: {total_downtime:.2f} seconds")
         logger.info(f"Uptime: {uptime:.2f} seconds")
         logger.info(f"Availability: {availability:.3f}%")
-        logger.info(f"Target: 99.900%")
+        logger.info("Target: 99.900%")
         logger.info(f"Status: {'✅ PASS' if availability >= 99.0 else '❌ FAIL'}")
         logger.info(f"Failures Simulated: {failure_count}")
         logger.info(f"Average Recovery Time: {avg_recovery_time:.2f}s")

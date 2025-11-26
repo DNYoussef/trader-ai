@@ -9,7 +9,7 @@ import numpy as np
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from datetime import datetime
 from dataclasses import dataclass
 
@@ -373,7 +373,6 @@ class AIModelService:
         """Assess risk level of predicted strategy"""
         high_risk_strategies = ["Black Swan Hunt", "Antifragile Convex", "Volatility Arbitrage"]
         medium_risk_strategies = ["Inequality Mispricing Exploit", "Narrative Gap Trade", "Correlation Breakdown"]
-        low_risk_strategies = ["Barbell Position", "Risk Parity Rebalance"]
 
         if prediction.strategy_name in high_risk_strategies:
             return "HIGH"

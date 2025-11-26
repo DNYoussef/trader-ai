@@ -9,15 +9,13 @@ import logging
 import json
 import hashlib
 import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict, field
 from enum import Enum
 import threading
 import queue
 from pathlib import Path
 import sqlite3
-import gzip
 import csv
 
 from .kill_switch_system import TriggerType, KillSwitchEvent

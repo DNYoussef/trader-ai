@@ -10,7 +10,7 @@ Formula: brier_score = mean((forecast - outcome)^2)
 """
 
 import numpy as np
-from typing import List, Optional
+from typing import List
 from datetime import datetime
 
 

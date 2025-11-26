@@ -22,14 +22,12 @@ Key Features:
 """
 
 import logging
-import asyncio
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-import json
 from pathlib import Path
 import threading
 import time
@@ -38,9 +36,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Import our Phase 5 components
-from .brier_scorer import BrierScorer, CalibrationMetrics
+from .brier_scorer import BrierScorer
 from .convexity_manager import ConvexityManager, RegimeState, MarketRegime
-from .kelly_enhanced import EnhancedKellyCriterion, MultiAssetKellyResult, SurvivalMode
+from .kelly_enhanced import EnhancedKellyCriterion, MultiAssetKellyResult
 
 # Import existing infrastructure
 try:
@@ -273,7 +271,7 @@ class Phase5Integration:
         try:
             # Update convexity manager with market data
             if self.convexity_manager:
-                regime_state = self.convexity_manager.update_market_data(
+                self.convexity_manager.update_market_data(
                     price_data, volume_data, volatility_data
                 )
 

@@ -4,7 +4,7 @@ Connects AI mathematical framework to existing dashboard components and data str
 """
 
 import asyncio
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime, timedelta
 import json
 import logging

@@ -14,10 +14,13 @@ from datetime import timedelta
 from typing import Dict, Any, Generator, Optional
 from unittest.mock import Mock, MagicMock
 
-# Add mocks to path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'mocks'))
+# Add tests directory to path for mock imports
+# ISS-015: Fix import paths for mock modules
+_tests_dir = os.path.dirname(__file__)
+if _tests_dir not in sys.path:
+    sys.path.insert(0, _tests_dir)
 
-# Import all mock components
+# Import all mock components (using package-style imports from tests/mocks/)
 from mocks.mock_broker import MockBroker, create_mock_broker
 from mocks.mock_gate_manager import MockGateManager, create_mock_gate_manager
 from mocks.mock_weekly_cycle import MockWeeklyCycleManager, create_mock_weekly_cycle_manager

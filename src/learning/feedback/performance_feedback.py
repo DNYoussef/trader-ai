@@ -7,10 +7,9 @@ and provides adaptive learning signals for continuous model improvement.
 
 import logging
 import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 import json
 import sqlite3
 from pathlib import Path
@@ -21,10 +20,7 @@ import statistics
 import warnings
 warnings.filterwarnings('ignore')
 
-from scipy import stats
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-import matplotlib.pyplot as plt
-import seaborn as sns
+from sklearn.metrics import r2_score
 
 @dataclass
 class FeedbackMetrics:

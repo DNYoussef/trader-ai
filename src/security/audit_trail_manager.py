@@ -6,17 +6,16 @@ Defense-grade audit logging and trail management for compliance requirements.
 import json
 import logging
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 from enum import Enum
 import threading
 import queue
 import sqlite3
 import uuid
 from contextlib import contextmanager
-import os
 
 # Configure secure logging
 logging.basicConfig(

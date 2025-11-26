@@ -11,20 +11,16 @@ the performance of the integrated alpha generation system including:
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import asyncio
-import json
-from pathlib import Path
-import pickle
 
 # Import alpha generation components
 from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
-from ..narrative.narrative_gap import NGSignal
-from ..learning.shadow_book import ShadowBookEngine, Trade
-from ..learning.policy_twin import PolicyTwin, EthicalTrade
+from ..learning.shadow_book import ShadowBookEngine
+from ..learning.policy_twin import PolicyTwin
 
 logger = logging.getLogger(__name__)
 
@@ -520,18 +516,18 @@ def run_alpha_backtest():
         print(f"Period: {result.start_date.date()} to {result.end_date.date()}")
         print(f"Initial Capital: ${config.initial_capital:,.0f}")
         print(f"Final Value: ${result.metadata['final_portfolio_value']:,.0f}")
-        print(f"\nPerformance Metrics:")
+        print("\nPerformance Metrics:")
         print(f"  Total Return: {result.total_return:.2%}")
         print(f"  Annualized Return: {result.annualized_return:.2%}")
         print(f"  Volatility: {result.volatility:.2%}")
         print(f"  Sharpe Ratio: {result.sharpe_ratio:.2f}")
         print(f"  Max Drawdown: {result.max_drawdown:.2%}")
         print(f"  Calmar Ratio: {result.calmar_ratio:.2f}")
-        print(f"\nAlpha Generation Metrics:")
+        print("\nAlpha Generation Metrics:")
         print(f"  NG Signal Accuracy: {result.ng_signal_accuracy:.2%}")
         print(f"  Average Ethical Score: {result.ethical_score_average:.3f}")
         print(f"  Shadow Book Outperformance: {result.shadow_book_outperformance:.2%}")
-        print(f"\nTrading Metrics:")
+        print("\nTrading Metrics:")
         print(f"  Total Trades: {result.total_trades}")
         print(f"  Winning Trades: {result.winning_trades}")
         print(f"  Win Rate: {result.winning_trades/result.total_trades:.2%}" if result.total_trades > 0 else "  Win Rate: N/A")

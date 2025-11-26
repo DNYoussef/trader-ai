@@ -16,14 +16,13 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Callable
+from typing import Dict, List, Any, Optional, Callable
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
 
 from .enterprise_theater_detection import (
     EnterpriseTheaterDetector,
-    TheaterType,
     TheaterSeverity,
     TheaterEvidence,
     TheaterDetectionReport

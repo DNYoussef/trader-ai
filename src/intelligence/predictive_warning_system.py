@@ -12,15 +12,13 @@ import logging
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any, Union
-from dataclasses import dataclass, field
+from typing import Dict, List, Tuple, Optional, Any
+from dataclasses import dataclass
 from enum import Enum
 import warnings
 warnings.filterwarnings('ignore')
 
 # Time series and forecasting
-from scipy import stats
-from scipy.signal import find_peaks
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
@@ -576,7 +574,7 @@ class PredictiveWarningSystem:
 
             # Context factors
             if context:
-                if context.get('market_hours', True) == False:
+                if not context.get('market_hours', True):
                     factors.append("After-hours trading conditions")
 
                 if context.get('market_stress', False):

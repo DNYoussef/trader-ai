@@ -8,13 +8,10 @@ import time
 import logging
 import hashlib
 import hmac
-import json
 import platform
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
-import subprocess
 import os
 
 # Hardware authentication imports with fallbacks

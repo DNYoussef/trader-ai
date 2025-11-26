@@ -7,9 +7,8 @@ SLSA attestation, and vulnerability management.
 
 import logging
 import json
-import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
@@ -258,7 +257,7 @@ class SupplyChainSecurity:
         
         # Export report as JSON
         report_file = output_dir / "security-report.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, 'w'):
             json.dump({
                 "timestamp": report.timestamp.isoformat(),
                 "security_level": report.security_level.value,

@@ -7,14 +7,11 @@ import json
 import time
 import hashlib
 import logging
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple, Set
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
-import yaml
 import asyncio
-import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
 from .audit_trail_manager import DFARSAuditTrailManager, AuditEventType, SeverityLevel

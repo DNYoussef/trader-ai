@@ -6,8 +6,6 @@ Implements the Guild of the Rose 5-step decision process for trading decisions.
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
-import json
 import logging
 from datetime import datetime, timedelta
 import numpy as np

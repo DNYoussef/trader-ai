@@ -7,13 +7,11 @@ import json
 import time
 import hashlib
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List, Optional, Tuple, Set
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
 import asyncio
-import aiohttp
 import numpy as np
 from collections import defaultdict, deque
 
@@ -320,10 +318,10 @@ class DFARSContinuousRiskAssessment:
         self.active_monitoring = True
 
         # Start monitoring tasks
-        assessment_task = asyncio.create_task(self._continuous_assessment_loop())
-        threat_intel_task = asyncio.create_task(self._threat_intelligence_loop())
-        vuln_scan_task = asyncio.create_task(self._vulnerability_scanning_loop())
-        asset_discovery_task = asyncio.create_task(self._asset_discovery_loop())
+        asyncio.create_task(self._continuous_assessment_loop())
+        asyncio.create_task(self._threat_intelligence_loop())
+        asyncio.create_task(self._vulnerability_scanning_loop())
+        asyncio.create_task(self._asset_discovery_loop())
 
         logger.info("Started continuous risk assessment monitoring")
 
@@ -1132,7 +1130,7 @@ class DFARSContinuousRiskAssessment:
         """Handle high-risk conditions detected during assessment."""
         # Create incident for high/critical risk conditions
         await self.incident_response.create_incident(
-            title=f"High Risk Condition Detected",
+            title="High Risk Condition Detected",
             description=f"Risk assessment shows {risk_assessment.risk_level.value} overall risk",
             severity=IncidentSeverity.CRITICAL if risk_assessment.risk_level == RiskLevel.CRITICAL else IncidentSeverity.HIGH,
             category=IncidentCategory.SYSTEM_COMPROMISE,
@@ -1277,7 +1275,7 @@ if __name__ == "__main__":
 
         print(f"Assessment ID: {assessment.assessment_id}")
         print(f"Overall Risk: {assessment.risk_level.value} ({assessment.overall_risk_score:.2f})")
-        print(f"Top Recommendations:")
+        print("Top Recommendations:")
         for i, rec in enumerate(assessment.recommendations[:3], 1):
             print(f"  {i}. {rec}")
 

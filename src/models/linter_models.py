@@ -3,9 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
-import json
-from pathlib import Path
+from typing import Dict, List, Optional, Any
 
 
 class StandardSeverity(Enum):

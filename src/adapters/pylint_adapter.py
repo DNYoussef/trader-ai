@@ -1,7 +1,6 @@
 """Pylint linter adapter implementation."""
 
-import json
-from typing import List, Dict, Any
+from typing import List
 
 from src.adapters.base_adapter import BaseLinterAdapter
 from src.models.linter_models import (

@@ -7,9 +7,8 @@ strategies, and parameter configurations with statistical significance testing.
 
 import logging
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any, Union
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
 import json
 import sqlite3
@@ -22,9 +21,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from scipy import stats
-from scipy.stats import ttest_ind, mannwhitneyu, chi2_contingency
-import matplotlib.pyplot as plt
-import seaborn as sns
+from scipy.stats import ttest_ind, mannwhitneyu
 
 class ExperimentStatus(Enum):
     PLANNED = "planned"

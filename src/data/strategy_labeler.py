@@ -9,7 +9,7 @@ Output: (market_features, winning_strategy_idx, realized_pnl)
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Tuple, Optional
 from datetime import datetime, timedelta
 import logging
 from pathlib import Path

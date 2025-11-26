@@ -5,8 +5,7 @@ Combines traditional market data with AI dashboard data sources for better signa
 
 import logging
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import asyncio
