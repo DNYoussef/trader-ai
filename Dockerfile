@@ -9,7 +9,7 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
-# Copy frontend package files
+# Copy frontend package files (cache bust: 2025-11-26)
 COPY src/dashboard/frontend/package*.json ./
 
 # Install dependencies
