@@ -1,49 +1,52 @@
-# === Core Analysis Engine ===
-astroid>=2.15.0,<3.0.0
-pylint>=2.17.0,<3.0.0
-pathspec>=0.11.0,<1.0.0
+# ============================================
+# TRADER-AI RUNTIME DEPENDENCIES
+# ============================================
+# These are required to run the trading system
+
+# === Web Framework & Server ===
+fastapi>=0.109.0,<1.0.0
+uvicorn[standard]>=0.27.0,<1.0.0
+slowapi>=0.1.9,<1.0.0
+websockets>=12.0,<13.0.0
+pydantic>=2.6.0,<3.0.0
+
+# === Environment & Configuration ===
+python-dotenv>=1.0.0,<2.0.0
+pyyaml>=6.0,<7.0
 toml>=0.10.0,<1.0.0
 
-# === Security & Quality Tools ===
-semgrep>=1.134.0,<2.0.0
-pip-audit>=2.9.0,<3.0.0
-bandit>=1.8.0,<2.0.0
-safety>=3.6.0,<4.0.0
-detect-secrets>=1.5.0,<2.0.0
-ruff>=0.13.0,<1.0.0
-mypy>=1.17.0,<2.0.0
-radon>=5.1.0,<6.0.0
-black>=23.12.1,<24.0.0
-
-# === Configuration & Data ===
-pyyaml>=6.0,<7.0
-dataclasses-json>=0.5.9,<1.0.0
-typing-extensions>=4.7.0,<5.0.0
-
-# === Performance & Testing ===
-pytest>=7.4.0,<8.0.0
-pytest-benchmark>=4.0.0,<5.0.0
-pytest-timeout>=2.1.0,<3.0.0
-pytest-json-report>=1.5.0,<2.0.0
-memory-profiler>=0.61.0,<1.0.0
-psutil>=6.1.0,<8.0.0
-
-# === HTTP & Network (for integrations) ===
+# === HTTP Client ===
+httpx>=0.26.0,<1.0.0
 requests>=2.31.0,<3.0.0
 urllib3>=2.0.0,<3.0.0
 
-# === JSON & Data Processing ===
-jsonschema>=4.19.0,<5.0.0
-
-# === File Monitoring ===
-watchdog>=3.0.0,<4.0.0
-
-# === Antifragility Engine Dependencies ===
-numpy>=1.24.0,<2.0.0
-scipy>=1.10.0,<2.0.0
-pandas>=2.0.0,<3.0.0
+# === Security & Authentication ===
+python-jose[cryptography]>=3.3.0,<4.0.0
+cryptography>=42.0.0,<43.0.0
 
 # === Trading & Market Data ===
-alpaca-py>=0.26.0,<1.0.0
+alpaca-py>=0.21.0,<1.0.0
 yfinance>=0.2.18,<1.0.0
 pytz>=2023.3
+
+# === Data Processing & Numerical ===
+numpy>=1.26.0,<2.0.0
+scipy>=1.12.0,<2.0.0
+pandas>=2.2.0,<3.0.0
+
+# === Banking Integration (Optional) ===
+plaid-python>=18.0.0,<20.0.0
+
+# === Database ===
+aiofiles>=23.2.0,<24.0.0
+
+# === Async Support ===
+asyncio-throttle>=1.0.0,<2.0.0
+
+# === JSON & Data Validation ===
+jsonschema>=4.19.0,<5.0.0
+dataclasses-json>=0.5.9,<1.0.0
+typing-extensions>=4.7.0,<5.0.0
+
+# === System Monitoring ===
+psutil>=6.0.0,<7.0.0

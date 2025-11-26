@@ -129,15 +129,21 @@ class Phase2SystemFactory:
             })
             logger.info("Using PRODUCTION Alpaca broker adapter")
         else:
-            # Use mock for development/testing
+            # ISS-004 FIX: Require real credentials, no mock defaults
+            api_key = broker_config.get("api_key")
+            api_secret = broker_config.get("api_secret")
+            if not api_key or not api_secret:
+                raise ValueError(
+                    "ALPACA_API_KEY and ALPACA_SECRET_KEY required. "
+                    "Set in .env file or config. See .env.example for setup."
+                )
             broker = AlpacaAdapter({
-                "api_key": broker_config.get("api_key", "mock_key"),
-                "api_secret": broker_config.get("api_secret", "mock_secret"),
+                "api_key": api_key,
+                "secret_key": api_secret,
                 "base_url": broker_config.get("base_url", "https://paper-api.alpaca.markets"),
-                "paper_trading": broker_config.get("paper_trading", True),
-                "mock_mode": True
+                "paper_trading": broker_config.get("paper_trading", True)
             })
-            logger.info("Using MOCK broker adapter for development")
+            logger.info("Using Alpaca broker adapter (credentials required)")
 
         # Initialize market data provider
         market_data = MarketDataProvider(broker)

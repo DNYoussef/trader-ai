@@ -21,6 +21,31 @@ from .integration.memory_client import MemoryClient
 logger = logging.getLogger(__name__)
 
 
+def validate_trading_mode() -> str:
+    """ISS-019 FIX: Validate and confirm trading mode before startup."""
+    mode = os.getenv("TRADING_MODE", "paper").lower()
+
+    if mode not in ("paper", "live"):
+        raise ValueError(f"Invalid TRADING_MODE: {mode}. Must be 'paper' or 'live'")
+
+    if mode == "live":
+        logger.warning("=" * 60)
+        logger.warning("WARNING: LIVE TRADING MODE DETECTED")
+        logger.warning("Real money will be at risk!")
+        logger.warning("=" * 60)
+
+        # For non-interactive mode, check for LIVE_TRADING_CONFIRMED env var
+        if os.getenv("LIVE_TRADING_CONFIRMED", "").upper() != "YES":
+            confirm = input("Type 'CONFIRM LIVE TRADING' to proceed: ")
+            if confirm != "CONFIRM LIVE TRADING":
+                raise SystemExit("Live trading not confirmed. Exiting safely.")
+            logger.info("Live trading confirmed by user.")
+        else:
+            logger.info("Live trading pre-confirmed via LIVE_TRADING_CONFIRMED env var.")
+
+    return mode
+
+
 class TradingEngine:
     """Production trading engine with proper async integration and audit logging."""
 
@@ -75,18 +100,46 @@ class TradingEngine:
 
             # Initialize broker
             if self.config['broker'] == 'alpaca':
+                api_key = self.config.get('api_key', '') or os.getenv('ALPACA_API_KEY', '')
+                secret_key = self.config.get('secret_key', '') or os.getenv('ALPACA_SECRET_KEY', '')
+
+                # ISS-002 FIX: Improved credential validation with clear error messages
+                if not api_key or not secret_key:
+                    error_msg = (
+                        "Alpaca API credentials required for trading.
+"
+                        "Setup instructions:
+"
+                        "  1. Create account at https://alpaca.markets/
+"
+                        "  2. Get API keys from dashboard (paper or live)
+"
+                        "  3. Set environment variables:
+"
+                        "     export ALPACA_API_KEY=your_key_here
+"
+                        "     export ALPACA_SECRET_KEY=your_secret_here
+"
+                        "  4. Or add to .env file (see .env.example)"
+                    )
+                    logger.error(error_msg)
+                    raise ValueError(f"Missing Alpaca credentials. {error_msg}")
+
                 broker_config = {
-                    'api_key': self.config.get('api_key', ''),
-                    'secret_key': self.config.get('secret_key', ''),
+                    'api_key': api_key,
+                    'secret_key': secret_key,
                     'paper_trading': self.mode == 'paper'
                 }
 
-                if not broker_config['api_key'] or not broker_config['secret_key']:
-                    logger.error("PRODUCTION ERROR: Alpaca API credentials not provided")
-                    if self.mode == 'live':
-                        return False
-
-                self.broker = AlpacaAdapter(broker_config)
+                try:
+                    self.broker = AlpacaAdapter(broker_config)
+                except ValueError as e:
+                    logger.error(f"Failed to initialize Alpaca adapter: {e}")
+                    raise
+                except ImportError as e:
+                    logger.error(f"Alpaca library not available: {e}")
+                    logger.error("Install with: pip install alpaca-py")
+                    raise
             else:
                 raise ValueError(f"Unknown broker: {self.config['broker']}")
 

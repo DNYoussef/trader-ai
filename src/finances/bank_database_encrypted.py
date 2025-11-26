@@ -68,10 +68,8 @@ class BankDatabase:
             self.encryption_enabled = True
             logger.info("Token encryption initialized for database")
         except TokenEncryptionError as e:
-            logger.warning(f"Token encryption not available: {e}")
-            logger.warning("Access tokens will be stored in plaintext (NOT RECOMMENDED)")
-            self.encryptor = None
-            self.encryption_enabled = False
+            logger.error(f"Token encryption REQUIRED but not available: {e}")
+            logger.error("Set DATABASE_ENCRYPTION_KEY in .env file. Generate key: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""); raise RuntimeError(f"Token encryption is REQUIRED. Set DATABASE_ENCRYPTION_KEY. Error: {e}") from e
 
         # Initialize database schema
         self._init_schema()

@@ -1,0 +1,41 @@
+# ============================================
+# TRADER-AI DEVELOPMENT DEPENDENCIES
+# ============================================
+# These are required for development, testing, and code quality
+
+# Include runtime dependencies
+-r requirements.txt
+
+# === Testing Framework ===
+pytest>=8.2.0,<9.0.0
+pytest-asyncio>=0.23.0,<1.0.0
+pytest-cov>=4.1.0,<5.0.0
+pytest-benchmark>=4.0.0,<5.0.0
+pytest-timeout>=2.1.0,<3.0.0
+pytest-json-report>=1.5.0,<2.0.0
+
+# === Code Quality & Linting ===
+ruff>=0.3.0,<1.0.0
+mypy>=1.8.0,<2.0.0
+black>=24.2.0,<25.0.0
+pylint>=3.0.0,<4.0.0
+
+# === Security Scanning ===
+bandit>=1.7.0,<2.0.0
+safety>=3.0.0,<4.0.0
+pip-audit>=2.9.0,<3.0.0
+semgrep>=1.50.0,<2.0.0
+detect-secrets>=1.5.0,<2.0.0
+
+# === Static Analysis ===
+astroid>=3.0.0,<4.0.0
+radon>=6.0.0,<7.0.0
+
+# === Performance Profiling ===
+memory-profiler>=0.61.0,<1.0.0
+
+# === File Monitoring (for development) ===
+watchdog>=4.0.0,<5.0.0
+
+# === Path Handling ===
+pathspec>=0.12.0,<1.0.0
