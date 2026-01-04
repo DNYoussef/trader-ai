@@ -8,6 +8,7 @@ Launches paper trading with all Phase 5 enhancements:
 - Brier score risk calibration
 - Enhanced DPI with wealth flow tracking
 - Comprehensive monitoring and reporting
+- PostgreSQL persistence for cloud execution
 """
 
 import sys
@@ -19,12 +20,15 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 
+import os
 import sys
 import time
+import json
 import random
 import logging
+import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 import numpy as np
 
 # Phase 5 Enhanced Components
@@ -33,8 +37,19 @@ from src.performance.simple_brier import BrierTracker
 from src.strategies.dpi_calculator import DistributionalPressureIndex
 from src.monitoring.phase5_monitor import Phase5Monitor
 
+# Database persistence (optional - graceful fallback if not available)
+DB_AVAILABLE = False
+try:
+    from src.database.trading_schema import (
+        init_db, get_session, Trade, PortfolioState,
+        Phase5Metrics, TradingSession, test_connection
+    )
+    DB_AVAILABLE = True
+except ImportError:
+    pass
+
 class EnhancedPaperTradingSystem:
-    """Enhanced paper trading with Phase 5 vision components"""
+    """Enhanced paper trading with Phase 5 vision components and database persistence"""
 
     def __init__(self, initial_capital: float = 200.0):
         self.initial_capital = initial_capital
@@ -57,6 +72,11 @@ class EnhancedPaperTradingSystem:
         self.winning_trades = 0
         self.total_pnl = 0.0
 
+        # Database session
+        self.db = None
+        self.session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        self._init_database()
+
         # Setup logging
         logging.basicConfig(
             level=logging.INFO,
@@ -67,6 +87,135 @@ class EnhancedPaperTradingSystem:
             ]
         )
         self.logger = logging.getLogger("EnhancedTrading")
+
+    def _init_database(self):
+        """Initialize database connection and tables"""
+        if not DB_AVAILABLE:
+            print("Database module not available - running in memory-only mode")
+            return
+
+        try:
+            if test_connection():
+                init_db()
+                self.db = get_session()
+                self._load_state_from_db()
+                self._create_session_record()
+                print(f"Database connected - Session ID: {self.session_id}")
+            else:
+                print("Database connection failed - running in memory-only mode")
+        except Exception as e:
+            print(f"Database init error: {e} - running in memory-only mode")
+
+    def _load_state_from_db(self):
+        """Load the most recent portfolio state from database"""
+        if not self.db:
+            return
+
+        try:
+            # Get most recent active state
+            latest_state = self.db.query(PortfolioState).filter(
+                PortfolioState.is_active == True
+            ).order_by(PortfolioState.timestamp.desc()).first()
+
+            if latest_state:
+                self.current_capital = latest_state.capital
+                self.initial_capital = latest_state.initial_capital
+                self.total_pnl = latest_state.total_pnl
+                self.total_trades = latest_state.trade_count
+                self.winning_trades = latest_state.winning_trades
+                self.positions = latest_state.get_positions()
+                print(f"Restored state: Capital=${self.current_capital:.2f}, Trades={self.total_trades}")
+        except Exception as e:
+            print(f"State load error: {e}")
+
+    def _create_session_record(self):
+        """Create a new trading session record"""
+        if not self.db:
+            return
+
+        try:
+            session = TradingSession(
+                session_id=self.session_id,
+                initial_capital=self.initial_capital,
+                base_position_size=self.base_position_size,
+                max_position_size=self.max_position_size,
+                status='active'
+            )
+            self.db.add(session)
+            self.db.commit()
+        except Exception as e:
+            print(f"Session record error: {e}")
+
+    def _save_trade_to_db(self, trade_record: Dict):
+        """Save trade to database"""
+        if not self.db:
+            return
+
+        try:
+            trade = Trade(
+                trade_id=trade_record['trade_id'],
+                timestamp=trade_record['timestamp'],
+                symbol=trade_record['symbol'],
+                direction=trade_record['direction'],
+                position_size=trade_record['position_size'],
+                entry_price=trade_record['entry_price'],
+                pnl=trade_record['pnl'],
+                return_pct=trade_record['return_pct'],
+                ng_score=trade_record['ng_score'],
+                ng_multiplier=trade_record['ng_multiplier'],
+                brier_adjustment=trade_record['brier_adjustment'],
+                dpi_enhancement=trade_record['dpi_enhancement'],
+                is_simulation=True
+            )
+            self.db.add(trade)
+            self.db.commit()
+        except Exception as e:
+            print(f"Trade save error: {e}")
+
+    def _save_state_to_db(self):
+        """Save current portfolio state to database"""
+        if not self.db:
+            return
+
+        try:
+            state = PortfolioState(
+                capital=self.current_capital,
+                initial_capital=self.initial_capital,
+                positions_json=json.dumps(self.positions),
+                total_pnl=self.total_pnl,
+                trade_count=self.total_trades,
+                winning_trades=self.winning_trades,
+                session_id=self.session_id,
+                is_active=True
+            )
+            self.db.add(state)
+            self.db.commit()
+        except Exception as e:
+            print(f"State save error: {e}")
+
+    def _save_metrics_to_db(self):
+        """Save Phase 5 metrics to database"""
+        if not self.db:
+            return
+
+        try:
+            ng_trades = len([t for t in self.trade_history if abs(t['ng_score']) > 0.03])
+            metrics = Phase5Metrics(
+                brier_score=self.brier_tracker.get_brier_score(),
+                prediction_count=self.brier_tracker.get_prediction_count(),
+                recent_accuracy=self._calculate_recent_accuracy(),
+                ng_signal_count=len(self.trade_history),
+                avg_ng_score=np.mean([t['ng_score'] for t in self.trade_history]) if self.trade_history else 0,
+                high_ng_trades=ng_trades,
+                dpi_regime="active",
+                avg_dpi_enhancement=np.mean([t['dpi_enhancement'] for t in self.trade_history]) if self.trade_history else 1.0,
+                health_status="healthy",
+                session_id=self.session_id
+            )
+            self.db.add(metrics)
+            self.db.commit()
+        except Exception as e:
+            print(f"Metrics save error: {e}")
 
     def start_trading(self, duration_hours: int = 24):
         """Start enhanced paper trading session"""
@@ -187,7 +336,7 @@ class EnhancedPaperTradingSystem:
         )
 
         self.monitor.record_brier_update(
-            current_brier, self.brier_tracker.prediction_count,
+            current_brier, self.brier_tracker.get_prediction_count(),
             self._calculate_recent_accuracy(), brier_adjustment
         )
 
@@ -252,6 +401,10 @@ class EnhancedPaperTradingSystem:
         }
 
         self.trade_history.append(trade_record)
+
+        # Persist to database
+        self._save_trade_to_db(trade_record)
+        self._save_state_to_db()
 
         # Log trade
         self.logger.info(f"{trade_id}: {signal['direction'].upper()} ${signal['position_size']:.2f} "
@@ -338,10 +491,37 @@ class EnhancedPaperTradingSystem:
         self.logger.info(f"Session report saved: {report_filename}")
         self.logger.info(f"Monitoring metrics: {metrics_filename}")
 
+        # Save final state and metrics to database
+        self._save_state_to_db()
+        self._save_metrics_to_db()
+        self._finalize_session()
+
         # Stop monitoring
         self.monitor.stop_monitoring()
 
         return report
+
+    def _finalize_session(self):
+        """Update session record with final results"""
+        if not self.db:
+            return
+
+        try:
+            session = self.db.query(TradingSession).filter(
+                TradingSession.session_id == self.session_id
+            ).first()
+
+            if session:
+                session.end_time = datetime.now()
+                session.final_capital = self.current_capital
+                session.total_return_pct = ((self.current_capital - self.initial_capital) / self.initial_capital) * 100
+                session.total_trades = self.total_trades
+                session.winning_trades = self.winning_trades
+                session.status = 'completed'
+                self.db.commit()
+                self.logger.info(f"Session {self.session_id} finalized in database")
+        except Exception as e:
+            print(f"Session finalize error: {e}")
 
 def main():
     """Launch enhanced paper trading session"""

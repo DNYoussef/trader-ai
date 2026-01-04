@@ -526,6 +526,54 @@ class DistributionalPressureIndex:
             logger.error(f"Error calculating confidence factor: {e}")
             return 0.5
 
+    def calculate_wealth_flow(self, wealth_flow_data: Dict) -> float:
+        """
+        Calculate wealth flow score from distributional data
+
+        Used by enhanced paper trading to adjust position sizes based on
+        simulated wealth distribution patterns.
+
+        Args:
+            wealth_flow_data: Dict containing:
+                - high_income_gains or institutional_flow: High-value flow
+                - total_gains or retail_flow: Total market flow
+                - wealth_concentration: Concentration ratio (0-1)
+
+        Returns:
+            Flow score in range [-1, 1] indicating distributional pressure
+        """
+        try:
+            # Extract flow metrics (handle both naming conventions)
+            high_flow = wealth_flow_data.get('high_income_gains',
+                        wealth_flow_data.get('institutional_flow', 0))
+            total_flow = wealth_flow_data.get('total_gains',
+                         wealth_flow_data.get('retail_flow', 1))
+            concentration = wealth_flow_data.get('wealth_concentration', 0.5)
+
+            # Avoid division by zero
+            if total_flow == 0:
+                total_flow = 1
+
+            # Calculate flow ratio (institutional vs total)
+            flow_ratio = high_flow / total_flow
+
+            # Combine with concentration for distributional pressure
+            # High concentration + high institutional ratio = bullish pressure
+            distributional_pressure = (flow_ratio * 0.6 + concentration * 0.4)
+
+            # Normalize to [-1, 1] range (0.5 is neutral)
+            flow_score = (distributional_pressure - 0.5) * 2
+
+            # Clamp to valid range
+            flow_score = max(-1.0, min(1.0, flow_score))
+
+            logger.debug(f"Wealth flow score: {flow_score:.4f} (ratio: {flow_ratio:.2f}, conc: {concentration:.2f})")
+            return flow_score
+
+        except Exception as e:
+            logger.error(f"Error calculating wealth flow: {e}")
+            return 0.0
+
     def get_dpi_summary(self, symbols: List[str]) -> Dict:
         """Get DPI summary for multiple symbols"""
         summary = {
