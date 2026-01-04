@@ -53,17 +53,18 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 };
 
 export const PRuinCard: React.FC<{ value: number; className?: string }> = ({ value, className }) => {
+  const safeValue = value ?? 0;
   const getColor = () => {
-    if (value >= 0.2) return 'text-red-600';
-    if (value >= 0.1) return 'text-yellow-600';
+    if (safeValue >= 0.2) return 'text-red-600';
+    if (safeValue >= 0.1) return 'text-yellow-600';
     return 'text-green-600';
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className ?? ''}`}>
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">P(ruin)</h3>
       <p className={`text-2xl font-bold mt-2 ${getColor()}`}>
-        {(value * 100).toFixed(1)}%
+        {(safeValue * 100).toFixed(1)}%
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         Probability of ruin
@@ -73,10 +74,10 @@ export const PRuinCard: React.FC<{ value: number; className?: string }> = ({ val
 };
 
 export const PortfolioValueCard: React.FC<{ value: number; className?: string }> = ({ value, className }) => (
-  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}>
+  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className ?? ''}`}>
     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Portfolio Value</h3>
     <p className="text-2xl font-bold text-green-600 mt-2">
-      ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      ${(value ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     </p>
     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
       Total market value
@@ -85,10 +86,10 @@ export const PortfolioValueCard: React.FC<{ value: number; className?: string }>
 );
 
 export const VarCard: React.FC<{ value: number; className?: string }> = ({ value, className }) => (
-  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}>
+  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className ?? ''}`}>
     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">VaR 95%</h3>
     <p className="text-2xl font-bold text-red-600 mt-2">
-      ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      ${(value ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     </p>
     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
       Value at Risk (95% confidence)
@@ -97,17 +98,18 @@ export const VarCard: React.FC<{ value: number; className?: string }> = ({ value
 );
 
 export const SharpeRatioCard: React.FC<{ value: number; className?: string }> = ({ value, className }) => {
+  const safeValue = value ?? 0;
   const getColor = () => {
-    if (value > 1.5) return 'text-green-600';
-    if (value < 0.5) return 'text-red-600';
+    if (safeValue > 1.5) return 'text-green-600';
+    if (safeValue < 0.5) return 'text-red-600';
     return 'text-yellow-600';
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className ?? ''}`}>
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Sharpe Ratio</h3>
       <p className={`text-2xl font-bold mt-2 ${getColor()}`}>
-        {value.toFixed(2)}
+        {safeValue.toFixed(2)}
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         Risk-adjusted return
@@ -117,17 +119,18 @@ export const SharpeRatioCard: React.FC<{ value: number; className?: string }> = 
 };
 
 export const DrawdownCard: React.FC<{ value: number; className?: string }> = ({ value, className }) => {
+  const safeValue = value ?? 0;
   const getColor = () => {
-    if (value >= 0.2) return 'text-red-600';
-    if (value >= 0.1) return 'text-yellow-600';
+    if (safeValue >= 0.2) return 'text-red-600';
+    if (safeValue >= 0.1) return 'text-yellow-600';
     return 'text-green-600';
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className ?? ''}`}>
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Max Drawdown</h3>
       <p className={`text-2xl font-bold mt-2 ${getColor()}`}>
-        {(value * 100).toFixed(1)}%
+        {(safeValue * 100).toFixed(1)}%
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
         Peak-to-trough decline
