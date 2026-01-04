@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
+import { API_ENDPOINTS, getWebSocketUrl } from '../config/api';
 
 interface Metrics {
   portfolio_value: number;
@@ -73,7 +74,7 @@ export const useTradingData = (enableWebSocket: boolean = true) => {
   });
 
   // WebSocket connection for real-time updates
-  const websocket = enableWebSocket ? useWebSocket('ws://localhost:8000', {
+  const websocket = enableWebSocket ? useWebSocket(getWebSocketUrl(), {
     auto_connect: true,
     reconnect_attempts: 5,
     heartbeat_interval: 30000
@@ -84,12 +85,12 @@ export const useTradingData = (enableWebSocket: boolean = true) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Fetch all trading data in parallel
+      // Fetch all trading data in parallel (using relative URLs for production compatibility)
       const [metricsRes, positionsRes, alertsRes, gatesRes] = await Promise.all([
-        fetch('http://localhost:8000/api/metrics/current'),
-        fetch('http://localhost:8000/api/positions'),
-        fetch('http://localhost:8000/api/alerts'),
-        fetch('http://localhost:8000/api/gates/status')
+        fetch(API_ENDPOINTS.metrics),
+        fetch(API_ENDPOINTS.positions),
+        fetch(API_ENDPOINTS.alerts),
+        fetch(API_ENDPOINTS.gateStatus)
       ]);
 
       const [metrics, positions, alerts, gateStatus] = await Promise.all([
