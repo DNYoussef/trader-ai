@@ -203,7 +203,7 @@ const AppUnified: React.FC = () => {
                 <span className="text-sm font-medium">Live Data</span>
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
-                ${metrics.portfolio_value?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0'}
+                ${metrics?.portfolio_value?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
               </div>
             </div>
           </div>
@@ -264,25 +264,25 @@ const AppUnified: React.FC = () => {
             {/* Main Metrics Grid */}
             {currentMode.features.includes('metrics') && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <PortfolioValueCard value={metrics.portfolio_value} />
-                <PRuinCard value={metrics.p_ruin} />
-                <VarCard value={metrics.var_95} />
-                <SharpeRatioCard value={metrics.sharpe_ratio} />
+                <PortfolioValueCard value={metrics?.portfolio_value ?? 0} />
+                <PRuinCard value={metrics?.p_ruin ?? 0} />
+                <VarCard value={metrics?.var_95 ?? 0} />
+                <SharpeRatioCard value={metrics?.sharpe_ratio ?? 0} />
               </div>
             )}
 
             {/* Secondary Metrics */}
             {currentMode.features.includes('metrics') && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <DrawdownCard value={metrics.max_drawdown} />
+                <DrawdownCard value={metrics?.max_drawdown ?? 0} />
                 <MetricCard
                   title="Daily P&L"
-                  value={`$${metrics.daily_pnl?.toFixed(2) || '0.00'}`}
-                  trend={metrics.daily_pnl >= 0 ? "up" : "down"}
+                  value={`$${metrics?.daily_pnl?.toFixed(2) || '0.00'}`}
+                  trend={(metrics?.daily_pnl ?? 0) >= 0 ? "up" : "down"}
                 />
                 <MetricCard
                   title="Unrealized P&L"
-                  value={`$${metrics.unrealized_pnl?.toFixed(2) || '0.00'}`}
+                  value={`$${metrics?.unrealized_pnl?.toFixed(2) || '0.00'}`}
                   trend="up"
                 />
               </div>
@@ -346,7 +346,7 @@ const AppUnified: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TradingJourney />
-              <GateProgression currentCapital={metrics.portfolio_value} />
+              <GateProgression currentCapital={metrics?.portfolio_value ?? 0} />
             </div>
           </div>
         )}
