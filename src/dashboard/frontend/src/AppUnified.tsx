@@ -310,7 +310,11 @@ const AppUnified: React.FC = () => {
                 type: (alert?.severity || 'info') as 'warning' | 'info' | 'success' | 'error',
                 title: alert?.title || 'Alert',
                 message: alert?.message || '',
-                timestamp: alert?.timestamp ? alert.timestamp.toLocaleTimeString() : new Date().toLocaleTimeString()
+                timestamp: alert?.timestamp
+                  ? (alert.timestamp instanceof Date
+                      ? alert.timestamp.toLocaleTimeString()
+                      : new Date(alert.timestamp).toLocaleTimeString())
+                  : new Date().toLocaleTimeString()
               })) || []} />
             </div>
           </div>

@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// API endpoints - use relative URLs for production compatibility
+const AI_API_ENDPOINTS = {
+  volatility: '/api/ai/timesfm/volatility',
+  risk: '/api/ai/timesfm/risk',
+  sentiment: '/api/ai/fingpt/sentiment',
+  forecast: '/api/ai/fingpt/forecast',
+  features: '/api/ai/features/32d',
+};
+
 interface TimesFMVolatility {
   horizons: number[];
   vix_forecast: number[];
@@ -87,13 +96,13 @@ export const useAIData = (refreshInterval: number = 5000) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Fetch all AI data in parallel for performance
+      // Fetch all AI data in parallel for performance (using relative URLs for production)
       const [volatility, risk, sentiment, forecast, features] = await Promise.all([
-        fetch('http://localhost:8000/api/ai/timesfm/volatility').then(r => r.json()),
-        fetch('http://localhost:8000/api/ai/timesfm/risk').then(r => r.json()),
-        fetch('http://localhost:8000/api/ai/fingpt/sentiment').then(r => r.json()),
-        fetch('http://localhost:8000/api/ai/fingpt/forecast').then(r => r.json()),
-        fetch('http://localhost:8000/api/ai/features/32d').then(r => r.json())
+        fetch(AI_API_ENDPOINTS.volatility).then(r => r.json()),
+        fetch(AI_API_ENDPOINTS.risk).then(r => r.json()),
+        fetch(AI_API_ENDPOINTS.sentiment).then(r => r.json()),
+        fetch(AI_API_ENDPOINTS.forecast).then(r => r.json()),
+        fetch(AI_API_ENDPOINTS.features).then(r => r.json())
       ]);
 
       setState({
