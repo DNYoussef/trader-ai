@@ -48,10 +48,10 @@ class KellyWithBrier:
 
         loss_prob = 1.0 - win_prob
 
-        # Kelly formula: (bp - q) / b
-        # where b = win_payoff, p = win_prob, q = loss_prob
-        numerator = (win_payoff * win_prob) - loss_prob
-        denominator = win_payoff
+        # Kelly formula for asymmetric payoffs: (bp - aq) / (ab)
+        # where b = win_payoff, p = win_prob, q = loss_prob, a = loss_payoff
+        numerator = (win_payoff * win_prob) - (loss_payoff * loss_prob)
+        denominator = win_payoff * loss_payoff
 
         if denominator <= 0 or numerator <= 0:
             return 0.0
