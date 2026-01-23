@@ -474,26 +474,70 @@ class KillSwitchSystem:
                 break
 
     def _loss_limit_monitor(self):
-        """Monitor loss limits"""
+        """
+        Monitor loss limits with broker integration.
+        TRD-004: Wire up actual P&L monitoring via broker.get_positions().
+        """
         while self.monitoring_active:
             try:
-                # This would integrate with portfolio manager
-                # For now, just a placeholder check
+                # TRD-004: Get positions and calculate total unrealized P&L
+                positions = asyncio.run(self.broker.get_positions())
+
+                total_unrealized_pl = sum(
+                    p.unrealized_pl or 0 for p in positions
+                )
+
+                if total_unrealized_pl < self.loss_limit:
+                    logger.critical(
+                        f"Loss limit breached: ${total_unrealized_pl:.2f} < ${self.loss_limit:.2f}"
+                    )
+                    asyncio.run(self.trigger_kill_switch(
+                        TriggerType.LOSS_LIMIT,
+                        {
+                            'unrealized_pl': float(total_unrealized_pl),
+                            'loss_limit': float(self.loss_limit),
+                            'positions': len(positions)
+                        }
+                    ))
+                    break
+
                 time.sleep(10)  # Check every 10 seconds
             except Exception as e:
                 logger.error(f"Loss limit monitor error: {e}")
-                break
+                time.sleep(10)  # Wait before retry
 
     def _position_limit_monitor(self):
-        """Monitor position size limits"""
+        """
+        Monitor position size limits with broker integration.
+        TRD-004: Wire up actual position size monitoring via broker.get_positions().
+        """
         while self.monitoring_active:
             try:
-                # This would integrate with position tracker
-                # For now, just a placeholder check
+                # TRD-004: Get positions and calculate total market value
+                positions = asyncio.run(self.broker.get_positions())
+
+                total_market_value = sum(
+                    abs(p.market_value or 0) for p in positions
+                )
+
+                if total_market_value > self.position_limit:
+                    logger.critical(
+                        f"Position limit breached: ${total_market_value:.2f} > ${self.position_limit:.2f}"
+                    )
+                    asyncio.run(self.trigger_kill_switch(
+                        TriggerType.POSITION_LIMIT,
+                        {
+                            'total_market_value': float(total_market_value),
+                            'position_limit': float(self.position_limit),
+                            'positions': len(positions)
+                        }
+                    ))
+                    break
+
                 time.sleep(15)  # Check every 15 seconds
             except Exception as e:
                 logger.error(f"Position limit monitor error: {e}")
-                break
+                time.sleep(15)  # Wait before retry
 
     def _api_health_monitor(self):
         """Monitor API health"""
