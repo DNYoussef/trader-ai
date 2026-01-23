@@ -5,6 +5,7 @@ Executes real market orders through Alpaca with proper risk management,
 order validation, and gate-based position tracking.
 """
 
+import asyncio
 import logging
 from typing import Dict, List, Any, Optional
 from decimal import Decimal, ROUND_HALF_UP
@@ -75,6 +76,10 @@ class TradeExecutor:
         # Order tracking
         self.pending_orders: Dict[str, OrderResult] = {}
         self.completed_orders: List[OrderResult] = []
+
+        # TRD-009: Lock for thread-safe order state mutations
+        # Protects pending_orders, completed_orders, and _order_journal from race conditions
+        self._order_lock = asyncio.Lock()
 
         # TRD-003: Order journal for atomic transactions
         # Records order intent before submission for recovery/reconciliation
@@ -236,8 +241,9 @@ class TradeExecutor:
                 }
             )
 
-            # Track order
-            self.pending_orders[submitted_order.id] = result
+            # Track order (TRD-009: protected by lock)
+            async with self._order_lock:
+                self.pending_orders[submitted_order.id] = result
 
             # TRD-001: Only record transaction if order is actually filled
             # For market orders, filled_quantity may be 0 at submission time
@@ -405,8 +411,9 @@ class TradeExecutor:
                 }
             )
 
-            # Track order
-            self.pending_orders[submitted_order.id] = result
+            # Track order (TRD-009: protected by lock)
+            async with self._order_lock:
+                self.pending_orders[submitted_order.id] = result
 
             # Record transaction in portfolio
             await self.portfolio.record_transaction(
@@ -488,10 +495,27 @@ class TradeExecutor:
     async def get_order_status(self, order_id: str) -> Optional[OrderResult]:
         """Get current status of an order."""
         try:
-            # Check if we're tracking this order
-            if order_id in self.pending_orders:
-                # Update from broker
-                broker_order = await self.broker.get_order(order_id)
+            # TRD-009: Protected by lock for thread-safe access
+            async with self._order_lock:
+                # Check if we're tracking this order
+                if order_id in self.pending_orders:
+                    # Update from broker (release lock during network call)
+                    pass
+                else:
+                    # Check completed orders
+                    for result in self.completed_orders:
+                        if result.order_id == order_id:
+                            return result
+                    return None
+
+            # Update from broker (outside lock to avoid blocking)
+            broker_order = await self.broker.get_order(order_id)
+
+            async with self._order_lock:
+                if order_id not in self.pending_orders:
+                    # Order was moved/removed while we were fetching
+                    return None
+
                 if broker_order:
                     # Update our tracking
                     result = self.pending_orders[order_id]
@@ -506,11 +530,6 @@ class TradeExecutor:
 
                     return result
 
-            # Check completed orders
-            for result in self.completed_orders:
-                if result.order_id == order_id:
-                    return result
-
             return None
 
         except Exception as e:
@@ -521,12 +540,14 @@ class TradeExecutor:
         """Cancel a pending order."""
         try:
             success = await self.broker.cancel_order(order_id)
-            if success and order_id in self.pending_orders:
-                result = self.pending_orders[order_id]
-                result.status = "canceled"
-                self.completed_orders.append(result)
-                del self.pending_orders[order_id]
-                logger.info(f"Order {order_id} canceled successfully")
+            # TRD-009: Protected by lock for thread-safe state mutation
+            async with self._order_lock:
+                if success and order_id in self.pending_orders:
+                    result = self.pending_orders[order_id]
+                    result.status = "canceled"
+                    self.completed_orders.append(result)
+                    del self.pending_orders[order_id]
+                    logger.info(f"Order {order_id} canceled successfully")
             return success
         except Exception as e:
             logger.error(f"Failed to cancel order {order_id}: {e}")
@@ -574,7 +595,8 @@ class TradeExecutor:
 
     def get_order_history(self, gate: str = None, limit: int = 100) -> List[OrderResult]:
         """Get order history, optionally filtered by gate."""
-        orders = self.completed_orders + list(self.pending_orders.values())
+        # TRD-009: Create copies of shared state for thread safety
+        orders = list(self.completed_orders) + list(self.pending_orders.values())
 
         if gate:
             orders = [order for order in orders if order.gate == gate]
@@ -586,12 +608,15 @@ class TradeExecutor:
 
     def get_pending_orders(self) -> List[OrderResult]:
         """Get all pending orders."""
+        # TRD-009: Return copy of list for thread safety
         return list(self.pending_orders.values())
 
     async def cancel_all_pending_orders(self) -> int:
         """Cancel all pending orders."""
         canceled_count = 0
-        pending_order_ids = list(self.pending_orders.keys())
+        # TRD-009: Get copy of keys under lock to avoid mutation during iteration
+        async with self._order_lock:
+            pending_order_ids = list(self.pending_orders.keys())
 
         for order_id in pending_order_ids:
             success = await self.cancel_order(order_id)
