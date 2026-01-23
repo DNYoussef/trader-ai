@@ -70,7 +70,7 @@ class TradeExecutor:
         self.max_position_size_percent = Decimal("40.0")  # Max 40% in any single position
         self.min_order_amount = Decimal("1.00")  # Minimum $1 order
         self.max_order_amount = Decimal("1000.00")  # Maximum $1000 order
-        self.market_impact_threshold = Decimal("0.5")  # 0.5% market impact tolerance
+        # Note: market_impact_threshold was removed (TRD-007) - was defined but never used
 
         # Order tracking
         self.pending_orders: Dict[str, OrderResult] = {}
