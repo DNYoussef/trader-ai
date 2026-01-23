@@ -40,7 +40,7 @@ class TradeExecutor:
     and position tracking across multiple gates.
     """
 
-    def __init__(self, broker_adapter, portfolio_manager, market_data_provider):
+    def __init__(self, broker_adapter, portfolio_manager, market_data_provider, gate_manager, circuit_manager):
         """
         Initialize trade executor.
 
@@ -48,10 +48,23 @@ class TradeExecutor:
             broker_adapter: Connected broker adapter
             portfolio_manager: Portfolio manager instance
             market_data_provider: Market data provider
+            gate_manager: Gate manager for trade validation (MANDATORY - TRD-006)
+            circuit_manager: Circuit breaker manager for risk controls (MANDATORY - TRD-006)
+
+        Raises:
+            ValueError: If gate_manager or circuit_manager is None
         """
+        # TRD-006: Gate and circuit breaker protections are now mandatory
+        if gate_manager is None:
+            raise ValueError("gate_manager is required - risk controls cannot be bypassed")
+        if circuit_manager is None:
+            raise ValueError("circuit_manager is required - risk controls cannot be bypassed")
+
         self.broker = broker_adapter
         self.portfolio = portfolio_manager
         self.market_data = market_data_provider
+        self.gate_manager = gate_manager
+        self.circuit_manager = circuit_manager
 
         # Risk management settings
         self.max_position_size_percent = Decimal("40.0")  # Max 40% in any single position
@@ -63,7 +76,51 @@ class TradeExecutor:
         self.pending_orders: Dict[str, OrderResult] = {}
         self.completed_orders: List[OrderResult] = []
 
+        # TRD-003: Order journal for atomic transactions
+        # Records order intent before submission for recovery/reconciliation
+        self._order_journal: Dict[str, Dict[str, Any]] = {}
+
         logger.info("Trade Executor initialized with production broker integration")
+
+    def _journal_order_intent(self, client_order_id: str, order_intent: Dict[str, Any]) -> None:
+        """
+        TRD-003: Record order intent before submission.
+
+        This creates a journal entry that can be used for recovery if
+        the process fails between broker submission and portfolio recording.
+        """
+        order_intent['status'] = 'pending'
+        order_intent['journaled_at'] = datetime.now(timezone.utc).isoformat()
+        self._order_journal[client_order_id] = order_intent
+        logger.debug(f"Journaled order intent: {client_order_id}")
+
+    def _journal_order_submitted(self, client_order_id: str, broker_order_id: str) -> None:
+        """TRD-003: Mark order as submitted to broker."""
+        if client_order_id in self._order_journal:
+            self._order_journal[client_order_id]['status'] = 'submitted'
+            self._order_journal[client_order_id]['broker_order_id'] = broker_order_id
+            self._order_journal[client_order_id]['submitted_at'] = datetime.now(timezone.utc).isoformat()
+
+    def _journal_order_recorded(self, client_order_id: str) -> None:
+        """TRD-003: Mark order as fully recorded (atomic transaction complete)."""
+        if client_order_id in self._order_journal:
+            self._order_journal[client_order_id]['status'] = 'recorded'
+            self._order_journal[client_order_id]['recorded_at'] = datetime.now(timezone.utc).isoformat()
+            logger.debug(f"Order atomically completed: {client_order_id}")
+
+    def _journal_order_failed(self, client_order_id: str, error: str) -> None:
+        """TRD-003: Mark order as failed for reconciliation."""
+        if client_order_id in self._order_journal:
+            self._order_journal[client_order_id]['status'] = 'failed'
+            self._order_journal[client_order_id]['error'] = error
+            self._order_journal[client_order_id]['failed_at'] = datetime.now(timezone.utc).isoformat()
+
+    def get_unreconciled_orders(self) -> List[Dict[str, Any]]:
+        """TRD-003: Get orders that were submitted but not recorded (need reconciliation)."""
+        return [
+            entry for entry in self._order_journal.values()
+            if entry.get('status') == 'submitted'
+        ]
 
     async def buy_market_order(self, symbol: str, dollar_amount: Decimal, gate: str) -> OrderResult:
         """
@@ -78,6 +135,19 @@ class TradeExecutor:
             OrderResult with execution details
         """
         try:
+            # TRD-006: Check circuit breaker status (now mandatory)
+            system_status = self.circuit_manager.get_system_status()
+
+            # Check if any critical breakers are open
+            if system_status.get('open_breakers', 0) > 0:
+                logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
+                raise Exception(f"Trading halted: Circuit breakers active")
+
+            # Check specific trading loss breaker
+            trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
+            if trading_cb.get('state') == 'open':
+                raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
+
             # Validate inputs
             await self._validate_order_params(symbol, dollar_amount, "buy", gate)
 
@@ -85,6 +155,20 @@ class TradeExecutor:
             current_price = await self.market_data.get_current_price(symbol)
             if current_price is None:
                 raise ValueError(f"Unable to get current price for {symbol}")
+
+            # TRD-006: Validate trade against gate constraints (now mandatory)
+            trade_details = {
+                'symbol': symbol,
+                'side': 'BUY',
+                'quantity': float(dollar_amount / Decimal(str(current_price))),
+                'price': float(current_price),
+                'trade_type': 'STOCK'
+            }
+            current_portfolio = await self.portfolio.get_portfolio_summary()
+            validation_result = self.gate_manager.validate_trade(trade_details, current_portfolio)
+            if not validation_result.is_valid:
+                logger.warning(f"Trade validation failed: {validation_result.violations}")
+                raise ValueError(f"Trade blocked by gate validation: {validation_result.violations}")
 
             # Check buying power
             buying_power = await self.broker.get_buying_power()
@@ -95,8 +179,19 @@ class TradeExecutor:
             await self._validate_position_size(symbol, dollar_amount, "buy")
 
             # Create order
-            str(uuid.uuid4())
-            client_order_id = f"buy_{gate}_{symbol}_{int(datetime.now().timestamp())}"
+            # TRD-002: Use microsecond timestamp + UUID suffix to prevent collisions
+            ts = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
+            uid = uuid.uuid4().hex[:8]
+            client_order_id = f"buy_{gate}_{symbol}_{ts}_{uid}"
+
+            # TRD-003: Journal order intent before submission
+            self._journal_order_intent(client_order_id, {
+                'side': 'buy',
+                'symbol': symbol,
+                'dollar_amount': str(dollar_amount),
+                'gate': gate,
+                'current_price': str(current_price)
+            })
 
             # Use notional (dollar amount) order for fractional shares
             from ..brokers.broker_interface import Order, OrderType, TimeInForce
@@ -117,6 +212,9 @@ class TradeExecutor:
 
             # Submit to broker
             submitted_order = await self.broker.submit_order(order)
+
+            # TRD-003: Mark order as submitted
+            self._journal_order_submitted(client_order_id, submitted_order.id)
 
             # Create order result
             result = OrderResult(
@@ -141,20 +239,29 @@ class TradeExecutor:
             # Track order
             self.pending_orders[submitted_order.id] = result
 
-            # Record transaction in portfolio
-            await self.portfolio.record_transaction(
-                transaction_type="buy",
-                amount=dollar_amount,
-                symbol=symbol,
-                quantity=result.filled_quantity,
-                price=result.filled_price,
-                gate=gate
-            )
-
-            logger.info(f"BUY order submitted: {symbol} ${dollar_amount} - Order ID: {submitted_order.id}")
+            # TRD-001: Only record transaction if order is actually filled
+            # For market orders, filled_quantity may be 0 at submission time
+            if result.filled_quantity and result.filled_quantity > 0 and result.filled_price:
+                await self.portfolio.record_transaction(
+                    transaction_type="buy",
+                    amount=dollar_amount,
+                    symbol=symbol,
+                    quantity=result.filled_quantity,
+                    price=result.filled_price,
+                    gate=gate
+                )
+                # TRD-003: Mark atomic transaction as complete
+                self._journal_order_recorded(client_order_id)
+                logger.info(f"BUY order filled: {symbol} ${dollar_amount} @ {result.filled_price} - Order ID: {submitted_order.id}")
+            else:
+                # TRD-003: Order pending - will need fill confirmation later
+                logger.info(f"BUY order submitted (pending fill): {symbol} ${dollar_amount} - Order ID: {submitted_order.id}")
             return result
 
         except Exception as e:
+            # TRD-003: Mark order as failed for reconciliation
+            if 'client_order_id' in dir():
+                self._journal_order_failed(client_order_id, str(e))
             logger.error(f"Failed to execute BUY order {symbol} ${dollar_amount}: {e}")
             # Return error result
             return OrderResult(
@@ -185,6 +292,19 @@ class TradeExecutor:
             OrderResult with execution details
         """
         try:
+            # TRD-006: Check circuit breaker status (now mandatory)
+            system_status = self.circuit_manager.get_system_status()
+
+            # Check if any critical breakers are open
+            if system_status.get('open_breakers', 0) > 0:
+                logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
+                raise Exception(f"Trading halted: Circuit breakers active")
+
+            # Check specific trading loss breaker
+            trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
+            if trading_cb.get('state') == 'open':
+                raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
+
             # Validate inputs
             await self._validate_order_params(symbol, dollar_amount, "sell", gate)
 
@@ -213,9 +333,35 @@ class TradeExecutor:
                 )
                 actual_dollar_amount = dollar_amount
 
+            # TRD-006: Validate trade against gate constraints (now mandatory)
+            trade_details = {
+                'symbol': symbol,
+                'side': 'SELL',
+                'quantity': float(sell_quantity),
+                'price': float(current_price),
+                'trade_type': 'STOCK'
+            }
+            current_portfolio = await self.portfolio.get_portfolio_summary()
+            validation_result = self.gate_manager.validate_trade(trade_details, current_portfolio)
+            if not validation_result.is_valid:
+                logger.warning(f"Trade validation failed: {validation_result.violations}")
+                raise ValueError(f"Trade blocked by gate validation: {validation_result.violations}")
+
             # Create order
-            str(uuid.uuid4())
-            client_order_id = f"sell_{gate}_{symbol}_{int(datetime.now().timestamp())}"
+            # TRD-002: Use microsecond timestamp + UUID suffix to prevent collisions
+            ts = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
+            uid = uuid.uuid4().hex[:8]
+            client_order_id = f"sell_{gate}_{symbol}_{ts}_{uid}"
+
+            # TRD-003: Journal order intent before submission
+            self._journal_order_intent(client_order_id, {
+                'side': 'sell',
+                'symbol': symbol,
+                'quantity': str(sell_quantity),
+                'dollar_amount': str(actual_dollar_amount),
+                'gate': gate,
+                'current_price': str(current_price)
+            })
 
             from ..brokers.broker_interface import Order, OrderType, TimeInForce
 
@@ -235,6 +381,9 @@ class TradeExecutor:
 
             # Submit to broker
             submitted_order = await self.broker.submit_order(order)
+
+            # TRD-003: Mark order as submitted
+            self._journal_order_submitted(client_order_id, submitted_order.id)
 
             # Create order result
             result = OrderResult(
@@ -269,10 +418,15 @@ class TradeExecutor:
                 gate=gate
             )
 
+            # TRD-003: Mark atomic transaction as complete
+            self._journal_order_recorded(client_order_id)
             logger.info(f"SELL order submitted: {symbol} {sell_quantity} shares - Order ID: {submitted_order.id}")
             return result
 
         except Exception as e:
+            # TRD-003: Mark order as failed for reconciliation
+            if 'client_order_id' in dir():
+                self._journal_order_failed(client_order_id, str(e))
             logger.error(f"Failed to execute SELL order {symbol} ${dollar_amount}: {e}")
             # Return error result
             return OrderResult(
