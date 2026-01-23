@@ -3,15 +3,23 @@ Production Portfolio Manager for Gary×Taleb trading system.
 
 Manages real portfolio positions, tracks performance, calculates NAV,
 and handles deposits/withdrawals with full broker integration.
+
+TRD-010: Added persistent trade history storage via JSON file.
 """
 
+import json
 import logging
+import os
 from typing import Dict, List, Any
 from decimal import Decimal
 from datetime import date, datetime, timezone, timedelta
 from dataclasses import dataclass
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# TRD-010: Default path for persistent trade history
+TRADE_HISTORY_PATH = os.getenv("TRADE_HISTORY_PATH", "./data/trade_history.json")
 
 
 @dataclass
@@ -71,6 +79,15 @@ class PortfolioManager:
         # Performance tracking
         self.daily_snapshots: Dict[date, PortfolioSnapshot] = {}
         self.transaction_history: List[Dict[str, Any]] = []
+
+        # TRD-010: Load persisted trade history on init
+        self._load_transaction_history()
+
+        # Daily loss tracking - SAFETY LIMIT
+        self.daily_start_value = None
+        self.daily_reset_time = None
+        self.daily_loss_limit_pct = Decimal("-0.02")  # -2% hard limit
+        self.daily_loss_triggered = False
 
         # Gates configuration
         self.gates = {
@@ -318,6 +335,9 @@ class PortfolioManager:
         elif transaction_type == 'withdrawal':
             self.total_withdrawals += amount
 
+        # TRD-010: Persist transaction history after each transaction
+        self._save_transaction_history()
+
         logger.info(f"Transaction recorded: {transaction_type} ${amount} {symbol or ''}")
 
     def _determine_gate(self, symbol: str) -> str:
@@ -365,3 +385,105 @@ class PortfolioManager:
             'gates': gate_summaries,
             'last_updated': datetime.now(timezone.utc)
         }
+
+    async def check_daily_loss(self) -> dict:
+        """Check if daily loss limit exceeded."""
+        current_time = datetime.now(timezone.utc)
+        
+        # Reset at market open (9:30 AM) or first call of day
+        if self.daily_start_value is None or self._should_reset_daily(current_time):
+            current_value = await self.get_total_portfolio_value()
+            self.daily_start_value = current_value
+            self.daily_reset_time = current_time
+            self.daily_loss_triggered = False
+            logger.info(f"Daily loss limit reset - Start value: ${self.daily_start_value}")
+            return {'daily_reset': True, 'start_value': float(current_value)}
+        
+        # Calculate daily change
+        current_value = await self.get_total_portfolio_value()
+        daily_change = (current_value - self.daily_start_value) / self.daily_start_value
+        
+        # Check limit
+        if daily_change <= self.daily_loss_limit_pct and not self.daily_loss_triggered:
+            self.daily_loss_triggered = True
+            logger.critical(f"DAILY LOSS LIMIT TRIGGERED: {daily_change*Decimal('100'):.2f}%")
+        
+        return {
+            'daily_start_value': float(self.daily_start_value),
+            'current_value': float(current_value),
+            'daily_change_pct': float(daily_change),
+            'limit_pct': float(self.daily_loss_limit_pct),
+            'triggered': self.daily_loss_triggered
+        }
+
+    def _should_reset_daily(self, current_time: datetime) -> bool:
+        """Check if daily reset needed (new trading day)."""
+        if self.daily_reset_time is None:
+            return True
+        return current_time.date() > self.daily_reset_time.date()
+
+    # TRD-010: Persistence methods for trade history
+    def _load_transaction_history(self) -> None:
+        """Load transaction history from persistent storage."""
+        try:
+            history_path = Path(TRADE_HISTORY_PATH)
+            if history_path.exists():
+                with open(history_path, 'r') as f:
+                    data = json.load(f)
+
+                self.transaction_history = []
+                for tx in data.get('transactions', []):
+                    # Convert date strings back to datetime
+                    if 'date' in tx and isinstance(tx['date'], str):
+                        tx['date'] = datetime.fromisoformat(tx['date'])
+                    # Convert numeric strings back to Decimal
+                    for key in ['amount', 'quantity', 'price', 'portfolio_value']:
+                        if key in tx and tx[key] is not None:
+                            tx[key] = Decimal(str(tx[key]))
+                    self.transaction_history.append(tx)
+
+                # Recalculate totals from loaded history
+                self.total_deposits = self.initial_capital
+                self.total_withdrawals = Decimal("0.00")
+                for tx in self.transaction_history:
+                    if tx.get('type') == 'deposit':
+                        self.total_deposits += tx.get('amount', Decimal("0.00"))
+                    elif tx.get('type') == 'withdrawal':
+                        self.total_withdrawals += tx.get('amount', Decimal("0.00"))
+
+                logger.info(f"Loaded {len(self.transaction_history)} transactions from {TRADE_HISTORY_PATH}")
+        except Exception as e:
+            logger.warning(f"Failed to load transaction history: {e}")
+            self.transaction_history = []
+
+    def _save_transaction_history(self) -> None:
+        """Save transaction history to persistent storage."""
+        try:
+            history_path = Path(TRADE_HISTORY_PATH)
+            history_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Convert to JSON-serializable format
+            serializable_transactions = []
+            for tx in self.transaction_history:
+                serializable_tx = {}
+                for key, value in tx.items():
+                    if isinstance(value, datetime):
+                        serializable_tx[key] = value.isoformat()
+                    elif isinstance(value, Decimal):
+                        serializable_tx[key] = str(value)
+                    else:
+                        serializable_tx[key] = value
+                serializable_transactions.append(serializable_tx)
+
+            data = {
+                'last_updated': datetime.now(timezone.utc).isoformat(),
+                'transaction_count': len(serializable_transactions),
+                'transactions': serializable_transactions
+            }
+
+            with open(history_path, 'w') as f:
+                json.dump(data, f, indent=2)
+
+            logger.debug(f"Saved {len(self.transaction_history)} transactions to {TRADE_HISTORY_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to save transaction history: {e}")
