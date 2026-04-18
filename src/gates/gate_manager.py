@@ -269,19 +269,29 @@ class GateManager:
         # 3. Check cash floor after trade
         trade_value = quantity * price
         if side == 'BUY':
-            post_trade_cash = current_portfolio.get('cash', 0) - trade_value
-            required_cash = current_portfolio.get('total_value', 0) * config.cash_floor_pct
-            
+            current_cash = current_portfolio.get('cash', 0)
+            current_total = current_portfolio.get('total_value', 0)
+
+            # Calculate POST-TRADE portfolio value (reduced by trade amount)
+            post_trade_total = current_total  # For buys, total stays same (cash -> stock)
+            post_trade_cash = current_cash - trade_value
+
+            # Required cash floor based on portfolio value
+            required_cash = post_trade_total * config.cash_floor_pct
+
             if post_trade_cash < required_cash:
                 result.add_violation(
                     ViolationType.CASH_FLOOR_VIOLATION,
                     f"Trade would violate {config.cash_floor_pct*100:.0f}% cash floor",
                     {
+                        'current_cash': current_cash,
                         'post_trade_cash': post_trade_cash,
                         'required_cash': required_cash,
-                        'cash_floor_pct': config.cash_floor_pct
+                        'cash_floor_pct': config.cash_floor_pct,
+                        'shortfall': required_cash - post_trade_cash
                     }
                 )
+
         
         # 4. Check theta limits for options
         if (trade_type == 'OPTION' and config.max_theta_pct is not None and 

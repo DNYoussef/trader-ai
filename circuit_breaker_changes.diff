@@ -1,0 +1,236 @@
+diff --git a/src/trading/trade_executor.py b/src/trading/trade_executor.py
+index f4de961..5663a21 100644
+--- a/src/trading/trade_executor.py
++++ b/src/trading/trade_executor.py
+@@ -40,7 +40,7 @@ class TradeExecutor:
+     and position tracking across multiple gates.
+     """
+ 
+-    def __init__(self, broker_adapter, portfolio_manager, market_data_provider):
++    def __init__(self, broker_adapter, portfolio_manager, market_data_provider, gate_manager=None):
+         """
+         Initialize trade executor.
+ 
+@@ -48,10 +48,12 @@ class TradeExecutor:
+             broker_adapter: Connected broker adapter
+             portfolio_manager: Portfolio manager instance
+             market_data_provider: Market data provider
++            gate_manager: Optional gate manager for trade validation
+         """
+         self.broker = broker_adapter
+         self.portfolio = portfolio_manager
+         self.market_data = market_data_provider
++        self.gate_manager = gate_manager
+ 
+         # Risk management settings
+         self.max_position_size_percent = Decimal("40.0")  # Max 40% in any single position
+@@ -78,6 +80,20 @@ class TradeExecutor:
+             OrderResult with execution details
+         """
+         try:
++            # Check circuit breaker status
++            if hasattr(self, 'circuit_manager') and self.circuit_manager:
++                system_status = self.circuit_manager.get_system_status()
++
++                # Check if any critical breakers are open
++                if system_status.get('open_breakers', 0) > 0:
++                    logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
++                    raise Exception(f"Trading halted: Circuit breakers active")
++
++                # Check specific trading loss breaker
++                trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
++                if trading_cb.get('state') == 'open':
++                    raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
++
+             # Validate inputs
+             await self._validate_order_params(symbol, dollar_amount, "buy", gate)
+ 
+@@ -86,6 +102,21 @@ class TradeExecutor:
+             if current_price is None:
+                 raise ValueError(f"Unable to get current price for {symbol}")
+ 
++            # Validate trade against gate constraints
++            if hasattr(self, 'gate_manager') and self.gate_manager:
++                trade_details = {
++                    'symbol': symbol,
++                    'side': 'BUY',
++                    'quantity': float(dollar_amount / Decimal(str(current_price))),
++                    'price': float(current_price),
++                    'trade_type': 'STOCK'
++                }
++                current_portfolio = await self.portfolio.get_portfolio_summary()
++                validation_result = self.gate_manager.validate_trade(trade_details, current_portfolio)
++                if not validation_result.is_valid:
++                    logger.warning(f"Trade validation failed: {validation_result.violations}")
++                    raise ValueError(f"Trade blocked by gate validation: {validation_result.violations}")
++
+             # Check buying power
+             buying_power = await self.broker.get_buying_power()
+             if dollar_amount > buying_power:
+@@ -185,6 +216,20 @@ class TradeExecutor:
+             OrderResult with execution details
+         """
+         try:
++            # Check circuit breaker status
++            if hasattr(self, 'circuit_manager') and self.circuit_manager:
++                system_status = self.circuit_manager.get_system_status()
++
++                # Check if any critical breakers are open
++                if system_status.get('open_breakers', 0) > 0:
++                    logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
++                    raise Exception(f"Trading halted: Circuit breakers active")
++
++                # Check specific trading loss breaker
++                trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
++                if trading_cb.get('state') == 'open':
++                    raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
++
+             # Validate inputs
+             await self._validate_order_params(symbol, dollar_amount, "sell", gate)
+ 
+@@ -213,6 +258,21 @@ class TradeExecutor:
+                 )
+                 actual_dollar_amount = dollar_amount
+ 
++            # Validate trade against gate constraints
++            if hasattr(self, 'gate_manager') and self.gate_manager:
++                trade_details = {
++                    'symbol': symbol,
++                    'side': 'SELL',
++                    'quantity': float(sell_quantity),
++                    'price': float(current_price),
++                    'trade_type': 'STOCK'
++                }
++                current_portfolio = await self.portfolio.get_portfolio_summary()
++                validation_result = self.gate_manager.validate_trade(trade_details, current_portfolio)
++                if not validation_result.is_valid:
++                    logger.warning(f"Trade validation failed: {validation_result.violations}")
++                    raise ValueError(f"Trade blocked by gate validation: {validation_result.violations}")
++
+             # Create order
+             str(uuid.uuid4())
+             client_order_id = f"sell_{gate}_{symbol}_{int(datetime.now().timestamp())}"
+diff --git a/src/trading_engine.py b/src/trading_engine.py
+index 83817bb..23096a5 100644
+--- a/src/trading_engine.py
++++ b/src/trading_engine.py
+@@ -218,6 +218,10 @@ class TradingEngine:
+                 self.safety_integration = TradingSafetyIntegration(safety_config)
+                 if asyncio.run(self.safety_integration.initialize(self)):
+                     logger.info("Safety systems initialized successfully")
++                    # Assign circuit_manager to trade_executor for pre-trade checks
++                    if self.safety_integration.circuit_manager:
++                        self.trade_executor.circuit_manager = self.safety_integration.circuit_manager
++                        logger.info("Circuit breaker manager attached to trade executor")
+                 else:
+                     logger.warning("Safety systems failed to initialize - continuing with reduced safety")
+             except Exception as e:
+@@ -323,6 +327,11 @@ class TradingEngine:
+         """Execute production trading cycle."""
+         try:
+             logger.info("Executing trading cycle")
++
++            # Check kill switch
++            if self.kill_switch_activated:
++                logger.critical("Trading cycle blocked: Kill switch active")
++                return
+             
+             self._log_memory_event(
+                 "Starting trading cycle",
+@@ -342,11 +351,25 @@ class TradingEngine:
+                 logger.error("Failed to sync portfolio with broker")
+                 return
+ 
++            # SAFETY CHECK: Daily loss limit
++            daily_loss_status = await self.portfolio_manager.check_daily_loss()
++            if daily_loss_status.get("triggered", False):
++                logger.critical("TRADING BLOCKED: Daily loss limit triggered")
++                self._audit_log({
++                    "event": "daily_loss_limit_blocked_trading",
++                    "daily_change_pct": daily_loss_status["daily_change_pct"],
++                    "limit_pct": daily_loss_status["limit_pct"],
++                    "timestamp": datetime.now().isoformat()
++                })
++                return
++
++
+             # Get current portfolio status
+             portfolio_value = await self.portfolio_manager.get_total_portfolio_value()
+             cash_balance = await self.broker.get_cash_balance()
+ 
+             logger.info(f"Portfolio Status - Value: ${portfolio_value}, Cash: ${cash_balance}")
++            logger.info(f"Daily P&L: {daily_loss_status["daily_change_pct"]*100:.2f}% (Limit: {daily_loss_status["limit_pct"]*100:.2f}%)")
+ 
+             # Execute rebalancing if portfolio value is sufficient
+             if portfolio_value >= Decimal("10.00"):
+@@ -502,8 +525,22 @@ class TradingEngine:
+                 safety_state = safety_health.get('system_state', 'unknown')
+ 
+                 if safety_state == SafetyState.CRITICAL.value:
+-                    logger.critical("Safety system reports CRITICAL state!")
+-                    # Consider triggering kill switch for critical safety states
++                    logger.critical("CRITICAL STATE - ACTIVATING KILL SWITCH!")
++                    self.kill_switch_activated = True
++
++                    # Cancel pending orders if possible
++                    if hasattr(self, 'trade_executor') and self.trade_executor:
++                        try:
++                            await self.trade_executor.cancel_all_pending_orders()
++                            logger.critical("All pending orders cancelled")
++                        except Exception as e:
++                            logger.error(f"Failed to cancel orders: {e}")
++
++                    self._audit_log({
++                        'event': 'kill_switch_activated',
++                        'reason': 'CRITICAL safety state',
++                        'timestamp': datetime.now().isoformat()
++                    })
+                 elif safety_state == SafetyState.DEGRADED.value:
+                     logger.warning("Safety system reports DEGRADED state")
+ 
+@@ -537,6 +574,25 @@ class TradingEngine:
+ 
+     async def execute_manual_trade(self, symbol: str, dollar_amount: Decimal, action: str, gate: str = "MANUAL"):
+         """Execute a manual trade for testing."""
++        # Check kill switch
++        if self.kill_switch_activated:
++            raise Exception("Trading BLOCKED: Kill switch active (CRITICAL safety state)")
++
++        # Check circuit breaker status
++        if self.safety_integration and self.safety_integration.circuit_manager:
++            system_status = self.safety_integration.circuit_manager.get_system_status()
++
++            # Check if any critical breakers are open
++            if system_status.get('open_breakers', 0) > 0:
++                logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
++                raise Exception(f"Trading halted: Circuit breakers active")
++
++            # Check specific trading loss breaker
++            trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
++            if trading_cb.get('state') == 'open':
++                raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
++
++
+         try:
+             logger.info(f"Executing manual trade: {action} {symbol} ${dollar_amount}")
+ 
+@@ -781,6 +837,19 @@ class TradingEngine:
+             logger.info(f"Portfolio Sync: {'SUCCESS' if sync_success else 'FAILED'}")
+ 
+             # Get portfolio summary
++
++            # SAFETY CHECK: Daily loss limit
++            daily_loss_status = await self.portfolio_manager.check_daily_loss()
++            if daily_loss_status.get("triggered", False):
++                logger.critical("TRADING BLOCKED: Daily loss limit triggered")
++                self._audit_log({
++                    "event": "daily_loss_limit_blocked_trading",
++                    "daily_change_pct": daily_loss_status["daily_change_pct"],
++                    "limit_pct": daily_loss_status["limit_pct"],
++                    "timestamp": datetime.now().isoformat()
++                })
++                return
++
+             portfolio_summary = await self.get_portfolio_summary()
+             logger.info(f"Portfolio Summary: {portfolio_summary}")
+ 

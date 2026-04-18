@@ -11,6 +11,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.trading_engine import TradingEngine
+from src.universal_components import (
+    init_connascence_bridge,
+    init_memory_client,
+    init_tagger,
+    init_telemetry_bridge,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -23,6 +29,11 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+tagger = init_tagger()
+memory_client = init_memory_client()
+telemetry_bridge = init_telemetry_bridge()
+connascence_bridge = init_connascence_bridge()
 
 # Global engine instance for signal handling
 engine = None

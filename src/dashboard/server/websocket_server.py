@@ -262,12 +262,35 @@ class RiskDashboardServer:
 
     def _setup_cors(self):
         """Setup CORS middleware for frontend access."""
+        # Explicit whitelist of allowed headers for security
+        ALLOWED_HEADERS = [
+            "authorization",
+            "content-type",
+            "accept",
+            "origin",
+            "x-requested-with",
+            "x-csrf-token",
+        ]
+
+        # Production CORS origins (configure via environment variables)
+        import os
+        CORS_ORIGINS = [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:8000",
+        ]
+        if os.environ.get("RAILWAY_PUBLIC_DOMAIN"):
+            CORS_ORIGINS.append(f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}")
+        if os.environ.get("CORS_ALLOW_ORIGIN"):
+            CORS_ORIGINS.append(os.environ["CORS_ALLOW_ORIGIN"])
+
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],  # Configure appropriately for production
+            allow_origins=CORS_ORIGINS,
             allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
+            allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+            allow_headers=ALLOWED_HEADERS,
+            max_age=3600,  # Cache preflight for 1 hour
         )
 
     def _setup_routes(self):

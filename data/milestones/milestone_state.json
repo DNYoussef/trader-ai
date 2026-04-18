@@ -1,0 +1,154 @@
+{
+  "current_capital": 510,
+  "current_milestone": "M3_GOAL",
+  "start_date": "2025-12-16",
+  "start_capital": 200,
+  "milestone_history": [
+    {
+      "milestone": "M1_TRACTION",
+      "capital": 310,
+      "timestamp": "2025-12-16T17:16:42.106060",
+      "days_from_start": 0,
+      "previous_milestone": "M0_START"
+    },
+    {
+      "milestone": "M2_MOMENTUM",
+      "capital": 420,
+      "timestamp": "2025-12-16T17:16:42.108054",
+      "days_from_start": 0,
+      "previous_milestone": "M1_TRACTION"
+    },
+    {
+      "milestone": "M3_GOAL",
+      "capital": 510,
+      "timestamp": "2025-12-16T17:16:42.109051",
+      "days_from_start": 0,
+      "previous_milestone": "M2_MOMENTUM"
+    }
+  ],
+  "daily_snapshots": [
+    {
+      "date": "2025-12-16",
+      "capital": 200,
+      "milestone": "M0_START",
+      "allocation": {
+        "spy": 0.9,
+        "tlt": 0.08,
+        "cash": 0.02
+      },
+      "daily_return": 0.0,
+      "total_return": 0.0
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 225,
+      "milestone": "M0_START",
+      "allocation": {
+        "spy": 0.9,
+        "tlt": 0.08,
+        "cash": 0.02
+      },
+      "daily_return": 0.125,
+      "total_return": 0.125
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 250,
+      "milestone": "M0_START",
+      "allocation": {
+        "spy": 0.9,
+        "tlt": 0.08,
+        "cash": 0.02
+      },
+      "daily_return": 0.1111111111111111,
+      "total_return": 0.25
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 280,
+      "milestone": "M0_START",
+      "allocation": {
+        "spy": 0.9,
+        "tlt": 0.08,
+        "cash": 0.02
+      },
+      "daily_return": 0.12,
+      "total_return": 0.4
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 310,
+      "milestone": "M1_TRACTION",
+      "allocation": {
+        "spy": 0.8,
+        "tlt": 0.15,
+        "cash": 0.05
+      },
+      "daily_return": 0.10714285714285714,
+      "total_return": 0.55
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 350,
+      "milestone": "M1_TRACTION",
+      "allocation": {
+        "spy": 0.8,
+        "tlt": 0.15,
+        "cash": 0.05
+      },
+      "daily_return": 0.12903225806451613,
+      "total_return": 0.75
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 390,
+      "milestone": "M1_TRACTION",
+      "allocation": {
+        "spy": 0.8,
+        "tlt": 0.15,
+        "cash": 0.05
+      },
+      "daily_return": 0.11428571428571428,
+      "total_return": 0.95
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 420,
+      "milestone": "M2_MOMENTUM",
+      "allocation": {
+        "spy": 0.7,
+        "tlt": 0.2,
+        "cash": 0.1
+      },
+      "daily_return": 0.07692307692307693,
+      "total_return": 1.1
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 480,
+      "milestone": "M2_MOMENTUM",
+      "allocation": {
+        "spy": 0.7,
+        "tlt": 0.2,
+        "cash": 0.1
+      },
+      "daily_return": 0.14285714285714285,
+      "total_return": 1.4
+    },
+    {
+      "date": "2025-12-16",
+      "capital": 510,
+      "milestone": "M3_GOAL",
+      "allocation": {
+        "spy": 0.6,
+        "tlt": 0.25,
+        "cash": 0.15
+      },
+      "daily_return": 0.0625,
+      "total_return": 1.55
+    }
+  ],
+  "peak_capital": 510,
+  "max_drawdown": 0.0,
+  "days_at_current_milestone": 0
+}

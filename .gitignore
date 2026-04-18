@@ -89,6 +89,22 @@ tmp/
 # Performance test results
 performance_results/
 
-# Large model files
+# ML artifacts (large binaries — not for git)
+models/
+mlruns/
+checkpoints/
 *.pth
-models/*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.h5
+*.pkl
+
+# Generated metrics/reports
+phase*_metrics_*.json
+phase*_status_report.json
+*.patch
+
+# Plaid link HTML contains sandbox token — do not version
+plaid_connect.html

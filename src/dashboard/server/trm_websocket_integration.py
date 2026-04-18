@@ -218,13 +218,29 @@ async def run_standalone_server():
 
     app = FastAPI(title="TRM Streaming Server")
 
-    # CORS
+    # CORS - Explicit whitelist for security
+    ALLOWED_HEADERS = [
+        "authorization",
+        "content-type",
+        "accept",
+        "origin",
+        "x-requested-with",
+        "x-csrf-token",
+    ]
+
+    CORS_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000",
+    ]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=CORS_ORIGINS,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+        allow_headers=ALLOWED_HEADERS,
+        max_age=3600,  # Cache preflight for 1 hour
     )
 
     # Simple connection manager

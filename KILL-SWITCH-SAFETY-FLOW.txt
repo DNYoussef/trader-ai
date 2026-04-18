@@ -1,0 +1,79 @@
+KILL SWITCH SAFETY FLOW
+========================
+
+1. DETECTION PHASE
+   ---------------
+   _check_system_health() (called every 5 min)
+   |
+   +-- Check safety_integration.get_system_health()
+   |
+   +-- if system_state == CRITICAL
+       |
+       V
+
+2. ACTIVATION PHASE
+   ----------------
+   self.kill_switch_activated = True
+   |
+   +-- Log: "CRITICAL STATE - ACTIVATING KILL SWITCH!"
+   |
+   +-- Cancel all pending orders
+   |   |
+   |   +-- trade_executor.cancel_all_pending_orders()
+   |   |
+   |   +-- Log: "All pending orders cancelled"
+   |
+   +-- Audit log event:
+       {
+         'event': 'kill_switch_activated',
+         'reason': 'CRITICAL safety state',
+         'timestamp': ...
+       }
+
+3. PROTECTION PHASE
+   ----------------
+   
+   A. Main Loop (line 290)
+      |
+      +-- while self.running and not self.kill_switch_activated:
+          |
+          +-- [EXITS LOOP - ENGINE STOPS]
+   
+   B. Trading Cycle (_execute_trading_cycle)
+      |
+      +-- Check: if self.kill_switch_activated
+          |
+          +-- Log: "Trading cycle blocked: Kill switch active"
+          |
+          +-- return [EARLY EXIT - NO TRADING]
+   
+   C. Manual Trade (execute_manual_trade)
+      |
+      +-- Check: if self.kill_switch_activated
+          |
+          +-- raise Exception("Trading BLOCKED: Kill switch active")
+          |
+          +-- [EXCEPTION THROWN - TRADE REJECTED]
+
+4. AUDIT TRAIL
+   ------------
+   - Kill switch activation logged
+   - All blocked attempts logged
+   - Order cancellations logged
+   - CRITICAL state changes logged
+
+SAFETY GUARANTEES
+=================
+1. NO automated trading during CRITICAL state
+2. NO manual trading during CRITICAL state  
+3. ALL pending orders cancelled immediately
+4. Full audit trail maintained
+5. Multiple layers of protection
+6. Fail-safe design (blocks by default)
+
+RECOVERY
+========
+- Kill switch requires manual restart to clear
+- Allows investigation of CRITICAL state cause
+- Prevents accidental resume of trading
+- Ensures human oversight before resumption

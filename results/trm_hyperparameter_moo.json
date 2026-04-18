@@ -1,0 +1,108 @@
+{
+  "optimization_config": {
+    "n_generations": 6,
+    "population_size": 8,
+    "eval_epochs": 2,
+    "total_evaluations": 48,
+    "total_time_seconds": 57.351649045944214
+  },
+  "pareto_front": [
+    {
+      "rank": 5,
+      "hyperparameters": {
+        "hidden_dim": 512,
+        "T": 3,
+        "n": 6,
+        "learning_rate": 0.001,
+        "batch_size": 256
+      },
+      "objectives": {
+        "val_accuracy": 19.350282485875706,
+        "param_count_millions": 1.981449,
+        "overfit_gap": 0.0,
+        "epoch_time_seconds": 0.24964439868927002
+      }
+    },
+    {
+      "rank": 2,
+      "hyperparameters": {
+        "hidden_dim": 512,
+        "T": 4,
+        "n": 4,
+        "learning_rate": 0.0003,
+        "batch_size": 256
+      },
+      "objectives": {
+        "val_accuracy": 18.64406779661017,
+        "param_count_millions": 1.981449,
+        "overfit_gap": 0.0,
+        "epoch_time_seconds": 0.2104891538619995
+      }
+    },
+    {
+      "rank": 1,
+      "hyperparameters": {
+        "hidden_dim": 512,
+        "T": 3,
+        "n": 4,
+        "learning_rate": 0.0001,
+        "batch_size": 256
+      },
+      "objectives": {
+        "val_accuracy": 18.07909604519774,
+        "param_count_millions": 1.981449,
+        "overfit_gap": 0.0,
+        "epoch_time_seconds": 0.19420969486236572
+      }
+    },
+    {
+      "rank": 4,
+      "hyperparameters": {
+        "hidden_dim": 256,
+        "T": 2,
+        "n": 4,
+        "learning_rate": 0.001,
+        "batch_size": 256
+      },
+      "objectives": {
+        "val_accuracy": 17.937853107344633,
+        "param_count_millions": 0.499209,
+        "overfit_gap": 0.0,
+        "epoch_time_seconds": 0.16488325595855713
+      }
+    },
+    {
+      "rank": 3,
+      "hyperparameters": {
+        "hidden_dim": 256,
+        "T": 2,
+        "n": 4,
+        "learning_rate": 0.001,
+        "batch_size": 256
+      },
+      "objectives": {
+        "val_accuracy": 12.711864406779661,
+        "param_count_millions": 0.499209,
+        "overfit_gap": 0.0,
+        "epoch_time_seconds": 0.1624305248260498
+      }
+    }
+  ],
+  "best_config": {
+    "rank": 5,
+    "hyperparameters": {
+      "hidden_dim": 512,
+      "T": 3,
+      "n": 6,
+      "learning_rate": 0.001,
+      "batch_size": 256
+    },
+    "objectives": {
+      "val_accuracy": 19.350282485875706,
+      "param_count_millions": 1.981449,
+      "overfit_gap": 0.0,
+      "epoch_time_seconds": 0.24964439868927002
+    }
+  },
+  "timestamp": "2025-12-10T21:02:57.499516"
+}

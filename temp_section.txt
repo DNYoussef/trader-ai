@@ -1,0 +1,8 @@
+# API Keys and Secrets
+config/secrets.json
+config/api_keys.json
+*.key
+*.pem
+secrets/
+.env.prod
+.env.production

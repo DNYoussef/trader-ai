@@ -1,0 +1,122 @@
+{
+  "_comment": "MOO Configuration - Multi-Objective Optimization settings",
+  "_version": "1.0.0",
+  "_source": "NNC-MOO-UNIFIED-IMPLEMENTATION-PLAN.md v2.1",
+
+  "globalmoo": {
+    "enabled": false,
+    "api_url": "https://app.globalmoo.com/api/",
+    "api_key_env_var": "GLOBALMOO_API_KEY",
+    "project_name": "TraderAI_Strategy_Optimization",
+    "default_iterations": 30,
+    "timeout_seconds": 300,
+    "retry_attempts": 3
+  },
+
+  "pymoo": {
+    "enabled": true,
+    "algorithm": "NSGA2",
+    "population_size": 40,
+    "n_generations": 50,
+    "seed": 42,
+    "verbose": false
+  },
+
+  "woven": {
+    "enabled": false,
+    "globalmoo_iterations": 30,
+    "pymoo_generations": 50,
+    "bounds_margin": 0.10,
+    "_bounds_margin_desc": "Margin to add to GlobalMOO bounds (10%)"
+  },
+
+  "objectives": {
+    "neg_sharpe": {
+      "direction": "minimize",
+      "description": "Negative NNC-adjusted Sharpe ratio",
+      "bounds": [-5, 0]
+    },
+    "max_drawdown": {
+      "direction": "minimize",
+      "description": "Maximum portfolio drawdown",
+      "bounds": [0, 1]
+    },
+    "neg_win_rate": {
+      "direction": "minimize",
+      "description": "Negative win rate",
+      "bounds": [-1, 0]
+    },
+    "volatility": {
+      "direction": "minimize",
+      "description": "Annualized volatility",
+      "bounds": [0, 1]
+    },
+    "neg_consensus": {
+      "direction": "minimize",
+      "description": "Negative strategy consensus score",
+      "bounds": [-1, 0]
+    }
+  },
+
+  "input_variables": {
+    "spy_alloc": {
+      "type": "float",
+      "min": 0.2,
+      "max": 0.9,
+      "description": "SPY allocation (20-90%)"
+    },
+    "tlt_alloc": {
+      "type": "float",
+      "min": 0.1,
+      "max": 0.5,
+      "description": "TLT allocation (10-50%)"
+    },
+    "risk_k": {
+      "type": "float",
+      "min": 0.0,
+      "max": 0.15,
+      "description": "Risk meta-weight from k(L) formula"
+    },
+    "regime_w": {
+      "type": "float",
+      "min": -0.5,
+      "max": 0.5,
+      "description": "Volatility regime indicator"
+    }
+  },
+
+  "constraints": [
+    {
+      "name": "alloc_sum",
+      "type": "inequality_le",
+      "expression": "spy_alloc + tlt_alloc <= 1.0",
+      "description": "SPY + TLT must be <= 100% (remainder is cash)"
+    },
+    {
+      "name": "spy_min",
+      "type": "inequality_ge",
+      "expression": "spy_alloc >= 0.2",
+      "description": "Minimum 20% SPY allocation"
+    },
+    {
+      "name": "tlt_min",
+      "type": "inequality_ge",
+      "expression": "tlt_alloc >= 0.1",
+      "description": "Minimum 10% TLT allocation"
+    }
+  ],
+
+  "caching": {
+    "enabled": true,
+    "ttl_seconds": 3600,
+    "_ttl_desc": "Cache results for 1 hour"
+  },
+
+  "risk_mitigations": {
+    "optimization_theater_check": true,
+    "_optimization_theater_check_desc": "Add robustness objective to detect theater",
+    "cross_validation_splits": 5,
+    "boundary_solution_penalty": 0.1,
+    "_boundary_solution_penalty_desc": "Penalize solutions at variable bounds"
+  }
+}

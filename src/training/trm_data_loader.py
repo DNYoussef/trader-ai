@@ -48,6 +48,7 @@ class TRMDataset(Dataset):
         indices: Indices for this split (from stratified splitting)
         normalization_params: Optional dict with 'mean' and 'std' arrays
                             If None, computes from this dataset (training split)
+        binary_classification: If True, convert to binary (0=negative, 1=positive return)
     """
 
     def __init__(
@@ -55,12 +56,14 @@ class TRMDataset(Dataset):
         data_path: Path,
         split: str,
         indices: np.ndarray,
-        normalization_params: Optional[Dict[str, np.ndarray]] = None
+        normalization_params: Optional[Dict[str, np.ndarray]] = None,
+        binary_classification: bool = False
     ):
         assert split in ['train', 'val', 'test'], f"Invalid split: {split}"
 
         self.split = split
         self.data_path = Path(data_path)
+        self.binary_classification = binary_classification
 
         # Load full dataset
         logger.info(f"Loading data from {self.data_path}")
@@ -75,8 +78,17 @@ class TRMDataset(Dataset):
         self.features = np.array(features_list, dtype=np.float32)  # Shape: (n_samples, 10)
 
         # Extract labels and metadata
-        self.strategy_labels = df['strategy_idx'].values.astype(np.int64)
         self.pnl_values = df['pnl'].values.astype(np.float32)
+
+        # Convert to binary classification if requested
+        if binary_classification:
+            # 0 = negative return, 1 = positive return
+            self.strategy_labels = (self.pnl_values >= 0).astype(np.int64)
+            logger.info(f"Binary classification: converted PNL to binary labels (0=negative, 1=positive)")
+        else:
+            # Use original 8-class strategy labels
+            self.strategy_labels = df['strategy_idx'].values.astype(np.int64)
+
         self.dates = df['date'].values
         self.periods = df['period_name'].values
 
@@ -137,19 +149,23 @@ class TRMDataModule:
     - Normalization parameter computation on training split
     - DataLoader creation with adaptive batch sizing
     - Normalization parameter export for inference
+    - Binary classification mode (positive vs negative returns)
 
     Args:
         data_path: Path to parquet file with training data
         random_seed: Random seed for reproducible splitting
+        binary_classification: If True, convert to binary classification (positive vs negative return)
     """
 
     def __init__(
         self,
         data_path: Path,
-        random_seed: int = 42
+        random_seed: int = 42,
+        binary_classification: bool = False
     ):
         self.data_path = Path(data_path)
         self.random_seed = random_seed
+        self.binary_classification = binary_classification
 
         # Initialize datasets as None (lazy loading)
         self.train_dataset: Optional[TRMDataset] = None
@@ -275,7 +291,8 @@ class TRMDataModule:
             data_path=self.data_path,
             split='train',
             indices=self.train_indices,
-            normalization_params=None  # Compute from training data
+            normalization_params=None,  # Compute from training data
+            binary_classification=self.binary_classification
         )
 
         # Get normalization parameters from training dataset
@@ -286,14 +303,16 @@ class TRMDataModule:
             data_path=self.data_path,
             split='val',
             indices=self.val_indices,
-            normalization_params=norm_params
+            normalization_params=norm_params,
+            binary_classification=self.binary_classification
         )
 
         self.test_dataset = TRMDataset(
             data_path=self.data_path,
             split='test',
             indices=self.test_indices,
-            normalization_params=norm_params
+            normalization_params=norm_params,
+            binary_classification=self.binary_classification
         )
 
         logger.info("Datasets initialized successfully")
@@ -370,6 +389,58 @@ class TRMDataModule:
             self.setup_datasets()
 
         return self.train_dataset.get_normalization_params()
+
+    def compute_class_weights(
+        self,
+        num_classes: Optional[int] = None,
+        max_weight: float = 10.0,
+        use_sqrt: bool = True
+    ) -> torch.Tensor:
+        """
+        Compute class weights for imbalanced data.
+
+        Uses inverse frequency with optional sqrt dampening and capping.
+
+        Args:
+            num_classes: Number of classes (auto-detected if None)
+            max_weight: Maximum weight cap (prevents overfitting rare classes)
+            use_sqrt: If True, use sqrt of inverse frequency (dampened)
+
+        Returns:
+            weights: (num_classes,) tensor of class weights
+        """
+        if self.train_dataset is None:
+            self.setup_datasets()
+
+        # Get class distribution from training set
+        labels = self.train_dataset.strategy_labels
+
+        # Auto-detect number of classes
+        if num_classes is None:
+            num_classes = 2 if self.binary_classification else 8
+
+        # Count samples per class
+        counts = torch.zeros(num_classes, dtype=torch.float32)
+        for i in range(num_classes):
+            counts[i] = max((labels == i).sum(), 1)  # Avoid division by zero
+
+        # Compute inverse frequency
+        total = counts.sum()
+        inverse_freq = total / counts
+
+        # Optionally apply sqrt dampening
+        if use_sqrt:
+            inverse_freq = torch.sqrt(inverse_freq)
+
+        # Normalize so min weight = 1.0
+        weights = inverse_freq / inverse_freq.min()
+
+        # Cap at max_weight
+        weights = torch.clamp(weights, max=max_weight)
+
+        logger.info(f"Class weights (counts={counts.tolist()}): {weights.tolist()}")
+
+        return weights
 
     def save_normalization_params(self, filepath: Path):
         """

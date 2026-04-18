@@ -1,0 +1,91 @@
+# Railway Deployment Ignore File
+# Excludes large files and unnecessary directories from deployment
+
+# LARGE DIRECTORIES (Use Railway volumes or external storage for these)
+models/
+data/
+checkpoints/
+trained_models/
+results/
+mlruns/
+
+# Reference materials (PDFs)
+references/
+
+# Archives
+archive/
+
+# Documentation (keep only essential docs)
+docs/pre-mortems/
+
+# Development-only files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+coverage/
+*.egg-info/
+develop-eggs/
+eggs/
+.eggs/
+*.egg
+
+# Node artifacts (keep dist for frontend)
+src/dashboard/frontend/node_modules/
+
+# Git
+.git/
+
+# Tests (not needed in production)
+tests/
+
+# Local databases
+*.db
+*.sqlite3
+local_trading.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+.temp/
+tmp/
+
+# Large model files (use DATABASE_URL for model persistence)
+models/*.pth
+
+# Performance test results
+performance_results/
+
+# TypeScript source (compiled JS is included in dist)
+src/**/*.ts
+!src/**/*.d.ts
+
+# Removed modules
+.removed-modules/
+
+# Local environment files
+.env
+.env.*
+!.env.railway.example
+
+# IDE and editor files
+.DS_Store
+Thumbs.db

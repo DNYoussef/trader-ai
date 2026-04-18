@@ -1,0 +1,448 @@
+SOURCE: Filip, A non-newtonian examination of the theory of exogenous economic growth.PDF
+TOTAL PAGES: 18
+================================================================================
+
+--- PAGE 1 ---
+A non-newtonian examination of the theory of
+exogenous economic growth
+Diana Filip, Cyrille Piatecki
+To cite this version:
+Diana Filip, Cyrille Piatecki. A non-newtonian examination of the theory of exogenous economic
+growth. 2014. ￿hal-00945781￿
+HAL Id: hal-00945781
+https://hal.archives-ouvertes.fr/hal-00945781
+Submitted on 12 Feb 2014
+HAL is a multi-disciplinary open access L’archive ouverte pluridisciplinaire HAL, est
+archive for the deposit and dissemination of sci- destinée au dépôt et à la diffusion de documents
+entific research documents, whether they are pub- scientifiques de niveau recherche, publiés ou non,
+lished or not. The documents may come from émanant des établissements d’enseignement et de
+teaching and research institutions in France or recherche français ou étrangers, des laboratoires
+abroad, or from public or private research centers. publics ou privés.
+
+--- PAGE 2 ---
+MathematicaAeterna,Vol. x,2014,no. xx,xxx-xxx
+A non-newtonian examination
+of the theory of exogenous economic growth
+DianaAndradaFilip
+DepartmentofStatistics,ForcastingandMathematics
+Babes¸-BolyaiUniversityofCluj-Napoca,Romania
+LEO/CNRS—UMR7322—Orle´ans,France
+diana.filip@econ.ubbcluj.ro
+CyrillePiatecki
+LEO/CNRS—UMR7322—Orle´ans,France
+ALPTIS
+cyrille.piatecki@univ-orleans.fr
+Abstract
+Thedevelopmentofthenewtoniancalculushasunexpectedlybea
+look-ininsuchawaythattheadditivederivativeapproachofNewton
+and Leibnitz could have been replaced by a multiplicative one, more
+adaptedtogrowthphenomenon. Inthispaper,wehavetriedtopresent
+how a non-newtonian calculus could be applied to re-postulate and
+analysetheneoclassicalexogenousgrowthmodel.
+MathematicsSubjectClassification: 91B02,91B62
+Keywords: non-newtoniancalculus,theoryofeconomicgrowth
+1 Introduction
+The development of the occidental science has been an incredible success
+throughtheintroductionofthenewtoniancalculus. Onecouldsaythatuntil
+the XXth century when discontinuous methods became available, without
+thederivativenothingofgreatcouldhavebeenaccomplished.
+In the social science, for a very long time, the derivative has been the
+center of nearly all the analysis. But in an unexpected way, it appears that
+we can develop another approach which seems to threat more realistically
+growthphenomenonwhichareinvolvedinthemodelofeconomicgrowth.
+
+--- PAGE 3 ---
+2 FilipandPiatecki
+The change of paradigm is to consider that the variations are more nat-
+urallytakenintoaccountifthedeviationsaremeasuredbyratiosinsteadof
+differences. But even if Galileo has discussed briefly such an opportunity,
+it is not until 1972 that Grossman and Katz [13] imagine a non-newtonian
+calculus.
+In the first section of this paper, we will show how the newtonian cal-
+culus is a look-in in the same way as industrial economists described for
+instance the adoption of the Qwerty keyboard — see David [8] — and we
+will introduce a non-newtonian calculus of multiplicative type. In the sec-
+ond section, we will justify why the product calculus is the good way to be
+takenintoaccountforanalysegrowthphenomenon—seesection 3. Wewill
+presentsomepropertiesandderivativerulesforthiscalculus.
+In the third section, we will review the Solow-Swan exogenous growth
+modelwhichwillbemodifiedinthefourthsectioninanon-newtonianway.
+The contributions of the authors are the reformulation of the ?differential
+equation of accumulation of the capital by considering that the increase in
+thecapitalequalizestheratiobetweeninvestmentandobsolescenceandthe
+definitionofthegrowthofthelaborforce. Inthecurseofthisnewapproach,
+wewillpresentanon-newtonianEuler’stheoremforhomogeneousfunction
+usingthe ?partialderivative forwhichwewillgiveanewformula. Tofinish,
+wewillcomparethetwoODEwhichareobtainedinthetwoparadigms.
+2 An unexpected locked-in
+First of all be sure that the subject of this article is a reexamination of the
+theory of exogenous growth as exposed by Solow [18] and Swan [20]. But,
+the point of view we will adopt is so unexpected that it need a profound
+explanation before to begin to describe and analyze the model. This is be-
+cause every dynamical continuous macro-economic model rest on calculus
+andthatunexpectedlycalculusisalock-inintheverysensofDavid[8]and
+Arthur[1],thatistosaythatthepasteventsandchoiceshaveinfluencedthe
+waywethinkandmakeuseofthecalculus.
+IfwithCajori[4],onemustrecognizethatcalculusisnottheworkofalone
+individualbutthecollectiveachievementofnumerousauthorlikeCavalieri,
+Roberval,Fermat,Descartes,Wallis,andotherswhoeachcontributedtothe
+newgeometry,itstaysonthestagethatthemainachievementinthissubject
+has been accomplish nearly simultaneously by Isaac Newton in its theory
+of fluxions and by Gottfried Wilhelm von Leibnitz through its differential
+quotientandintegralwhichareaoneanduniqueconcept. AsGrabiner[11]
+remarks ”they devised a notation for these concepts which made the calculus an
+algorithm: the methods not only worked, but were easy to use. Their notations had
+
+--- PAGE 4 ---
+Non-newtonianeconomicgrowth 3
+great heuristic power, and we still use Leibniz’s dy/dx and ydx and Newton’s
+x today. Third, both men realized that the basic processes of finding tangents and
+R
+areas, that is, differentiating and integrating, are mutually inverse what we now
+calltheFundamentalTheoremofCalculus.”
+Because for the layman and even for the applied scientist, calculus is so
+hardtoacquireafterthatCauchyconstructtherigourous (cid:15) δ definitionof
+−
+continuityandderivative,it’sverydifficulttounderstandthatthedefinition
+ofthederivativeofafonction f : R R whichis:
+→
+f(t+h) f(t)
+lim − = f (t)
+0
+h 0 h
+→
+is a lock-in. In this case, there is a profound type of inertia, because for at
+least two century nobody developed any questioning about the way things
+could have done showing that even science could be characterized by a
+sociological path dependency exactly in the same way as institution are
+selectedasshownbyNorth[16],technologychosen—David[8]andArthur
+[1] — the pest where controlled — Cowan and Gunby [7] — or language
+andlawformed—Hataway[14].
+Infactnothingcouldhavepreventtheuseof
+1
+f(t+h) h
+lim = f?(t)
+h 0 f(t)
+→ !
+as a natural definition of the derivative — at least for positive functions.
+Before Volterra [22], whose definition is not this one, no mention has been
+madeofanalternativetothenewtoniancalculus. Infact,onemustacknowl-
+edge that it’s only under the effort of Grossman and Katz [13] — look also
+Grossman [12] — that such a non-newtonian calculus emerged to give a
+natural answer to many growth phenomenon. But even if it was regarded
+as a major advance by many scientist like Kenneth Arrow, this major little
+bookstaysasacuriosityintheshelvesofsomeuniversitylibraries1.
+But, in the end of the last century, some presentations of what one can
+call the product calculus or multiplicative become available if not perfectly
+publicised. For instance, we can now find Stanley [19], Campbell [5] and
+the incredibly powerful Bashirov et al. [2] which gives nearly all what is
+necessary to understand and to know about multiplicative calculus2 from
+1Longago,oneoftheauthorsofthispaper,founditintheOrle´ansUniversityeconomic
+librarywithoutevenknowingwhichcolleaguehashadthecuriositytoaskforthebook.
+2WhichisonlyoneofthemanyothercalculuswhichaccordingtoGrossmanandKatz
+[13] could have been developed as the anageometric calculus, the bigeometric calculus, the
+quadraticfamilyofcalculi,theharmonicfamilyofcalculi.... NotethatforGrossmanandKatz
+[13],whatwecallnowmultiplicativecalculuswasbetternamedgeometriccalculus.
+
+--- PAGE 5 ---
+4 FilipandPiatecki
+the basic properties to the extension of the Euler-Lagrange equation of the
+calculusofvariation.
+Up to there one can asked why to introduce a non-newtonian calculus.
+In fact, if one realised that without the standard newtonian calculus there
+will not have been the so incredible run up of all the sciences which put us
+on Newton and Leibnitz giant shoulders, we will loose the point that the
+newtonian relatively fail when we want to describe growth phenomenon
+which are essentially of a multiplicative nature and not, as they are mainly
+dealtasadditive.
+3 Some justification and properties of the product
+calculus
+Since Malthus [15], the standard way to introduce growth is to go through
+theresolutionofthelineardifferentialequation:
+x˙(t)
+= n
+x(t)
+which is universally interpreted as telling that the growth rate of the state
+variable x(t) is a constant3 equal to n. But this is an universal abuse of
+language because n is not a rate of growth. It’s a growth constant. The rate
+of growth is by nature a multiplicative phenomenon. In fact, we must start
+withalinearrecurrenceequationofthetype:
+x(t+1)
+x(t+1) = αx(t) = α
+⇐⇒ x(t)
+because it describe the ratio between the final and the initial values of the
+state variable and ask what happens if the interval of change of x(t) goes
+farbeyondtheunity. Thenewtonianprocedureistodividetheunityin1/h
+subintervals of length h in such a way to conserve the unit length and to
+attributetoeachintervalashareof αproportionaltoit— i.e. : wesubstitue
+αhto α —seetheFigure 1.
+But this procedure does not work in the intuitive structure. In fact, it is
+mandatory to redefine α as 1+α in such a way to substitute 1 +α h which
+0 0
+gives:
+x(t+h) x(t)
+x(t+h) = (1+α h)x(t) − = α x(t)
+0 0
+⇐⇒ h
+3Evenifthisapproachmaybecontroversial—lookforinstancetoVerhulst[21]—when
+welookatpopulationgrowth,it’sapparentlynotcompetedwhenwedealwithcompound
+interest.
+
+--- PAGE 6 ---
+Non-newtonianeconomicgrowth 5
+0 1
+α
+αh αh αh αh αh αh
+h h h h
+{
+h1
+h
+Figure1: Newtonianallocationof α onsub-intervals
+After the passage to limits, we find that x˙(t) = α x(t) which is not expressed
+0
+in term of α but in terms of α . So, it appears that the newtonian procedure
+0
+is not the correct one even if there is nothing particularly wrong about it.
+Thegoodprocedureistoaffecttoeachsubintervalnot αhbutαh because,in
+thatcase,wefindthat:
+1
+x(t+h) h
+x(t+h) = αhx(t) = α
+⇐⇒ x(t)
+!
+If the limit of the expression exists when h 0, we will note it by
+→
+x?(t) = α. In such a way, one have defined a continuous time multiplicative
+factorofgrowthwhichdoesnotencompassthenecessitytogofrom αtoα .
+0
+Wecanseethat
+x(t+(h +h )) = x((t+h )+h ) = αh2x(t+h ) = αh2 αh1x(t) = α(h1+h2)x(t)
+1 2 1 2 1
+(cid:16) (cid:17)
+whichdemonstratethecoherenceofthisapproach. Soourgrowthfunctionis
+continuous,positive,hasageometricchangeandbelongstotheclasscalled
+geometrically-uniformfunction4byGrossmanandKatz[13]. Acharacteristicof
+this class of functions is that for each arithmetic progression of arguments,
+the corresponding sequence of values is a geometric progression, which
+means that if we take the value of a geometrically-uniform function on the
+progression t, t + h, t + 2h..., we find the values x(t), αx(t), α2x(t)...Those
+argumentsreinforcedourchangeofperspectiveonthegrowthfunction.
+This change of perspective seems apparently harmless but in fact it
+changes the way we look at growth phenomenon. With x?(t) the prod-
+uctderivativeofx(t)inhandwemustfirstofallexplainthechangeofpoint
+of view on the nature of the calculus. For instance, where in the newtonian
+calculus the fonction with constant dot derivative was the linear one (i.e.: if
+4Thefunctionseαt+β andpαt+βforppositiveconstantbelongtothisclass.
+
+--- PAGE 7 ---
+6 FilipandPiatecki
+x(t) = at+b,thenx˙(t) = a),inthemultiplicativecalculusitisthepowerfonc-
+tionwhichgivesaconstantstarderivative(i.e. : ifx(t) = Cat,thenx?(t) = a).
+Wecanalsoseethatinadditivecalculusifx(t) = at+bthenx(t+1) = x(t)+x˙(t)
+wheninthemultiplicativecalculusif x(t) = Cat then x(t+1) = x(t)x?(t).
+Ofcourse,thenewtonianandnon-newtoniancalculusarenotcompletely
+separated.Infact,wehave:
+1 x(t) .x(t+h) x(t). 1
+x?(t) = lim h →0 x( xt (+ t)h) h = lim h →0 1+ x(t+ xh () t− )x(t) (cid:16)x(t+h) −x(t) h− x(t)
+(cid:17)
+(cid:16) (cid:17) (cid:16) x(t) (cid:17)x(t+h h) −x(t). x1 (t)
+= lim h →0 1+ x(t+ xh () t− )x(t) (cid:16)x(t+h) −x(t)
+(cid:17)
+(cid:16) (cid:17)
+!
+(cid:16) x˙(t) (cid:17)
+= ex(t) = e(ln ◦x)0(t)
+for(ln x)(t) = ln(x(t)). Ifthesecondorderderivativeof xattexists,thenby
+◦
+substitution,onewillfindthat:
+x??(t) = e(ln ◦x?)0(t) = e(ln ◦x)00(t)
+We can see that (ln x) exists because x (t) exists. If we repeat n times
+00 00
+◦
+this procedure, we can conclude that if x(t) is a positive function and x(n)(t)
+exists,
+x?(n)(t) = e(ln x)(n)(t)
+◦
+Wemustnotethatthisformulaincludesthecase n = 0aswellbecause5 :
+x(t) = e(ln x)(t)
+◦
+Itmustsignaledthatinmultiplicativecalculus?differentiabilityimplycon-
+tinuitybutcontinuitydoesn’timply?differentiability. Secondlythe?derivative
+ofapositiveconstantfunctionis1andtofixsomeresultsonehastheTable1.
+4 Non-newtonianEuler’sformulaforhomogeneous
+functions
+Asanexempleofapplicationofthenon-newtoniancalculus,wehaveshown
+what happen to the celebrated Euler’s formula for homogeneous func-
+5As we has already signaled, for a complete account of the product calculus we must
+consultBashirovetal.[2]butitmaybeusefultobeginbyStanley[19].
+
+--- PAGE 8 ---
+Non-newtonianeconomicgrowth 7
+tions6, i.e. : if we take an homogeneous function of degree r, which means
+f(μx ,...,μx ) = μrf(x ,...,x )wehave
+1 n 1 n
+rf(x ,...,x ) = x f (x ,...,x )+ +x f (x ,...,x )
+1 n 1 x0
+1
+1 n
+∙∙∙
+n x0
+n
+1 n
+whichisequivalentwith
+x f (x ,...,x ) x f (x ,...,x )
+r =
+1 x0
+1
+1 n
++ +
+n x0
+n
+1 n
+f(x ,...,x ) ∙∙∙ f(x ,...,x )
+1 n 1 n
+andbyexponentiation,weobtain:
+er = efx0 f1
+x1
+efx0 fn
+xn
+∙∙∙
+! !
+Weintroducethe ?partialderivative of f asbeing
+f? =
+efx0
+f1
+x1
+bymakingaparallelwiththedefinitionofthe ? derivativeof f:
+f? = ef f0
+We obtain the non-newtonian Euler’s formula for homogeneous func-
+tions:
+f?
+x1
+f?
+xn
+= er
+x1 ∙∙∙ x1
+(cid:16) (cid:17) (cid:16) (cid:17)
+InthecaseoftheCobb-Douglasfunction,wehave:
+F(K,L) = AKαLβ
+thenon-newtonianEuler’sformulais:
+L
+eKα K eLβ = er eα+β = er
+⇐⇒
+(cid:18) (cid:19)
+(cid:16) (cid:17)
+in such a way that if there are constant return to scale (the function is
+homogeneousofdegreeone), α+β = 1 = r.
+6ThisapproachwasalsodevelopedbyCo´rdova-Lepe[6]. Butit’sresultswasgivenfor
+anotherdefinitionofmultiplicativederivativeforpositivefunctions:
+1
+f(x 0h) ln(h)
+Qf(x )=lim , f :]0, [ ]0, [, x ]0, [, ifthislimitexists.
+0 0
+h →1 f(x 0)
+!
+∞ → ∞ ∈ ∞
+
+--- PAGE 9 ---
+8 FilipandPiatecki
+5 The Solow-Swan exogenous growth model
+In view of what has been explain in the precedent section, one can try to
+reconstruct the Solow-Swan exogenous growth model. If there is a model
+know by all macro-economists, it is certainly this one, but it is necessary to
+rememberhowitworks7. Wehave:
+I(t) = S(t) Equilibriumofthegood&servicesmarket
+S(t) = sY(t) Savingfunction
+ Y(t) = F(K(t),L(t)) Productionfunctionhomogeneousoffirstdegree
+
+
+  K˙(t) = I(t) δK(t) Theincreaseinthecapitalisequaltothe
+
+  −
+  investissementlesstheobsolescence
+
+  L˙(t)/L(t) = n Theconstantofgrowthofthelaborforce
+
+
+
+
+
+
+fo r I the investment, S the savings, Y the production, K the capital, L the
+labor force, δ the rate of obsolescence of the capital and n the constant rate
+ofgrowthofthelaborforce. Weknowthatifwedefine k(t)asthecapitalby
+head — i.e. : k(t) = K(t)/L(t) —, we will find that his accumulation is given
+bythecelebratedordinarydifferentialequation:
+˙
+k(t) = sf(k(t)) (n+δ)k(t), k(0) = k
+0
+−
+which can be further developed in postulating for instance that the pro-
+duction function is a Cobb-Douglas one Y(t) = AK(t)αL(t)1 α. This gives
+−
+BernoullifirstorderODE:
+k˙ (t) = sAkα(t) (n+δ)k(t), k(0) = k
+0
+−
+whosesolutionisgivenby:
+1
+s s 1 α
+k(t) = k(0)1 α e (1 α)(δ+n)t + −
+− − −
+− δ+n δ+n
+(cid:20)(cid:20) (cid:21) (cid:21)
+Sincetheproductionfonctionishomogeneousofdegreeone,oneknows,
+byoneofthemostusedEulertheorems,thatiftherepresentativeenterprise
+remunerate its factors to the marginal product (F = r/p and F = w/p), the
+K L
+productiscompletelyaffectedbetweenthetwotypeofcosts, i.e.:
+r w
+Y = F K+F L = K+ L
+K L
+p p
+It is know that this conduct to the fact that the profit by head π = Π/L
+couldbewritten:
+7We must apologize to present here what is elementary text book economics, but we
+thinkthat,inordertocontrastourresultswiththestandardapproachthisismandatory.
+
+--- PAGE 10 ---
+Non-newtonianeconomicgrowth 9
+π = pf(k) rk w
+− −
+which on its turn implies for a maximising firm that f (k) = r/p and that
+0
+π = 0orequivalently
+r
+f(k) = k+w
+p
+y
+f(k)
+yˆ
+w
+p
+prk
+k
+kˆ
+Figure2: Therepartitionoftheproductinthe Solow-Swanmodel
+AllthoseinformationsaresubsumedintheFigure 2. Wemustalsostress
+that in the long term when all capital adjustment has been done, that is to
+saythat,inequilibrium,wehave:
+˙
+k(t) = 0 sf(k) = (n+δ)k
+⇐⇒
+which says simply that savings sf(k) must equal the capital taken into ac-
+counttheconstantgrowthofthelaborforceandtoreplacetheobsoleteone.
+In the steady state, output per worker is constant but total output increases
+at the rate n than the labor force. One must notice that obviously we obtain
+the same results if we decide to use the ?derivative to calculate marginal
+productivity.
+ThisisforthenewtonianSolow-Swanmodel. Theproblemonefacenow
+istoconstructthenon-newtonianequivalentapproach.
+OnFigure3,wecanseethatifsavingsaregreaterthan(n+δ)k,thecapital
+byworkerswilltendtoriseand,viceversa,ifsavingsarelowerthan(n+δ)k,
+itwilltendtofall.
+Now suppose that with Phelps [17] — see also Burmeister and Dobell
+[3] — , we want to see if, in the stationary state, there is a better saving rate
+
+
+[... 8 more pages truncated ...]

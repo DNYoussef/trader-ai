@@ -1,0 +1,490 @@
+SOURCE: Filip, An overview on the non-newtonian calculus and itspotential applications to economics.pdf
+TOTAL PAGES: 21
+================================================================================
+
+--- PAGE 1 ---
+An overview on the non-newtonian calculus and its
+potential applications to economics
+Diana Filip, Cyrille Piatecki
+To cite this version:
+DianaFilip,CyrillePiatecki. Anoverviewonthenon-newtoniancalculusanditspotentialapplications
+to economics. 2014. ￿hal-00945788￿
+HAL Id: hal-00945788
+https://hal.archives-ouvertes.fr/hal-00945788
+Submitted on 17 Feb 2014
+HAL is a multi-disciplinary open access L’archive ouverte pluridisciplinaire HAL, est
+archive for the deposit and dissemination of sci- destinée au dépôt et à la diffusion de documents
+entific research documents, whether they are pub- scientifiques de niveau recherche, publiés ou non,
+lished or not. The documents may come from émanant des établissements d’enseignement et de
+teaching and research institutions in France or recherche français ou étrangers, des laboratoires
+abroad, or from public or private research centers. publics ou privés.
+
+--- PAGE 2 ---
+An overview on the non-newtonian calculus
+and its potential applications to economics
+Diana Andrada Filip and Cyrille Piatecki
+Abstract. Until now, non-newtonian calculus, multiplicative calculus in particular, has been
+presented as a curiosity and is nearly ignored for the social scientists field. In this paper, after
+a brief presentation of this calculus, we try to show how it could be used to re-explore from
+another perspective classical economic theory, more particularly the economic growth and in
+the maximum likelihood method from statistics.
+§1 Introduction
+The development of the occidental science has been an incredible success through the in-
+troduction of the newtonian calculus. One could say that until the XXth century when dis-
+continuous methods became available, without the derivative nothing of great could have been
+accomplished.
+In the social science, for a very long time, the derivative has been the center of nearly all
+the analysis. But in an unexpected way, it appears that we can develop another approach
+which seems to threat more realistically growth phenomenon which are involved in the model
+of economic growth.
+The change of paradigm is to consider that the variations are more naturally taken into
+account if the deviations are measured by ratios instead of differences. But even if Galileo has
+discussedbrieflysuchanopportunity,itisnotuntil1972thatGrossmanandKatz[11]imagine
+a non-newtonian calculus.
+Inthelasttwentyyears,anumberofreviewsofthenon-Newtoniancalculushaveappeared,
+scattered in various journals, primarily of pedagogical scope.
+We think that the works of Bashirov Bashirov et al. [1] and O¨zyapici et al. [12] has open
+a new era where non-newtonian calculus, from a mere curiosity, will become an operational
+calculus. WehaveshownelsewhereFilipandPiatecki[9]howcalculushasbeenalocked-inand
+howGrossmanandKatz[11],surfingonVolterra[16],hasbeguntounlockit. Therehavebeen
+Received: 2014-01-31.
+MRSubjectClassification: 91B02,91B62.
+Keywords: non-newtoniancalculus,growth,geometriccalculus,bigeometriccalculus.
+DigitalObjectIdentifier(DOI):10.1007/s11766-013-****-*.
+1
+
+--- PAGE 3 ---
+2 Appl. Math. J. Chinese Univ. Vol. 28, No. *
+two main reasons to this state of fact: the first one is that non-mathematician researchers are
+veryconservativeinwhatconcernthemathematicalinstrumentstheyuseanddon’tunderstand
+why they should explore other kinds of mathematics, since the classical methods are well fited
+for what they expect. The second one is that, in the particular case of the non-newtonian
+calculus, as there is a gateway between calculus and non-newtonian calculus, they doesn’t find
+any reason to adopt another type of calculus.
+Nevertheless,insideanysocialsciencemodelization,thereisalwaysanequilibriumproblem,
+based on a balance equation. Since the end of the 6th century, following Luca Paccioli, book
+accountingareuniversallybasedonanadditivealgebra. But,asEllerman[7]hasclearlyproved,
+onecouldalsodefinedamultiplicativebookkeeping. Now,ifinthestandardaccountingsystem
+resourcesarekeptthroughpositivenumbersanddeficitthroughnegativeones,givingtozerothe
+balanceroleinanadditivesystem,inamultiplicativebookkeeping,thebalanceisgivenbyone,
+resources by numbers greater than one, deficit by numbers lower than one, in a multiplicative
+system.
+So, if one adopts a multiplicative bookkeeping system, multiplicative calculus becomes the
+only way to coherently manage models, since in multiplicative calculus, as in multiplicative
+accounting system, one plays the role devoted to zero in the standard system.
+§2 Glimpses on the non-newtonian calculus
+2.1 Definition of the ⋆derivative
+Definition 2.1. Let f : R → R be a positive function. The ⋆derivative of the function f is
++
+given by:
+1
+f(t+h) h
+f⋆(t)= lim
+h 0 f(t)
+→ (cid:18) (cid:19)
+In fact, we have :
+1 ( f(t) .f(t+h)−f(t). 1 )
+f⋆(t) =lim h →0 f( ft (+ t)h) h =lim h →0 1+ f(t+ fh () t− )f(t) f(t+h)−f(t) h f(t)
+(cid:16) (cid:17) (cid:16) (cid:17) (f(t+h)−f(t). 1 )
+( f(t) ) h f(t)
+=lim h →0 1+ f(t+ fh () t− )f(t) f(t+h)−f(t)
+!
+(cid:16) (cid:17)
+=eff˙ (( tt) ) =e(ln ◦f)′(t)
+for (ln◦f)(t) = ln(f(t)). If the second order derivative of f at t exists, then by substitution,
+one will find that :
+f⋆⋆(t)=e(ln f⋆)′(t) =e(ln f)′′(t)
+◦ ◦
+We can see that (ln◦f) exists because f (t) exists. If we repeat n times this procedure, we
+′′ ′′
+can conclude that if f(t) is a positive function and f(n)(t) exists,
+
+--- PAGE 4 ---
+Filip and Piatecki. Non-newtoniancalculus 3
+f⋆(n)(t)=e(ln f)(n)(t)
+◦
+We must note that this formula includes the case n=0 as well because :
+f(t)=e(ln f)(t)
+◦
+Itmustsignaledthatinmultiplicativecalculus ⋆differentiability implycontinuitybutconti-
+nuity doesn’t imply ⋆differentiability. Secondly the ⋆derivative of a positive constant function
+is 1 and to fix some results one has the Table 1.
+InStanley[15]isstatedthatifafunctionf(t)isdifferentiable att,thenisalso⋆differentiable
+at t, and the converse affirmation is true in the following terms: if a positive function f(t) is
+⋆differentiable at t, and if f (t)6=0, then it is also differentiable at t.
+∗
+We have:
+′
+f (t)
+f ∗(t)=ef(t)
+f (t)=f(t)lnf (t)
+′ ∗
+ln(f ∗(t))=ln′(f(t))
+The commutative diagram presented in Figure 1.
+ln
+g ln(g)
+∗ d
+dt
+exp
+g
+g′
+∗ g
+Figure 1: Relationship of g and g
+′ ∗
+2.2 Interpretation of the ⋆derivative
+In order to give an interpretation of ⋆derivative, let consider f as being a function of two
+variables x and y. If c is a value in the range of the function f, then the equation f(x,y) = c
+describes a curve lying on the plane z = c called the trace of the graph of f in the plane
+z =c. If this trace is projected onto the xy-plane, the resulting curve in the xy-plane is called
+Aswehasalreadysignaled,foracompleteaccountoftheproductcalculuswemustconsultBashirovetal.
+[1]butitmaybeusefultobeginbyStanley[15].
+Stanley[15].
+FormoredetailsseeFilipandCurt[8].
+
+--- PAGE 5 ---
+4 Appl. Math. J. Chinese Univ. Vol. 28, No. *
+a level curve. Note that if the function f is an utility function, then a level curve is called an
+indifference curve.
+The slope of the line that is tangent to the level curve f(x,y) = c at a particular point is
+givenbythederivative y (x). Thisderivativeistherateofchangeof y withrespectto xonthe
+′
+level curve and hence is approximately the amount by which the y coordinate of a point on the
+level curve changes when the x coordinate is increased by 1. Since
+∆y ∆y
+y (x)= lim ≈
+′
+∆x 0∆x ∆x
+then →
+∆y ≈y (x) ∆x
+′
+which gives us the change in y needed to compensate a small change ∆x in x so that the value
+of the function f remain unchanged.
+Recall the ⋆derivative formula
+1
+f(x+h) h
+f⋆(x)= lim
+h 0 f(x)
+→ (cid:18) (cid:19)
+and consider ∆x = x −x the variation of the independent variable, and ∆ y = y2 = y(x2)
+2 1 ∗ y1 y(x1)
+the variation of the independent variable. It follows that
+1
+y ∗(x)= lim (∆ ∗y)∆x
+∆x 0
+and we consider that →
+y⋆(x)≈(∆⋆y)∆1
+x .
+By taking the ∆x power of this expression we obtain
+∆⋆y ≈[y⋆(x)]∆x
+′
+∆⋆y ≈ey y(( xx ))∆x
+which gives
+′
+y
+2
+≈y
+1ey y(( xx ))∆x.
+We can reach a similar result if we analyse the ⋆Euler’s method for solving a differential
+equation, as it can be seen in Campbell [4]. Let consider the first-order differential equation
+with initial conditions (the Cauchy problem)
+y (t)=f(t,y)
+′
+ y(t )=y
+ 0 0
+Using the limit definition
+
+
+--- PAGE 6 ---
+Filip and Piatecki. Non-newtoniancalculus 5
+y(t+∆t)−y(t)
+y (t)= lim
+′
+∆t 0 ∆t
+and considering small ∆t, we can write →
+y(t+∆t)≈y(t)+y (t)∆t
+′
+This approximation naturally induces the idea of the Euler’s method which uses an iterative
+process in order to produce approximate values for the unknown function f(t) as follows:
+t =t +∆t
+n+1 n
+ a =a +f(t ,a )∆t
+ n+1 n n n
+for n=0,1,2,... . A two-variable discrete dynamical system was obtained.
+Ifweconsidernowthe⋆calculu s,theapproximationwhichusesthe ⋆derivative hastheform:
+y(t+∆t)≈y(t)(y⋆(t))∆t
+and,byusingtherelationwhichgivesustherelationbetweenthe ⋆derivative andthederivative,
+i.e.
+′
+y⋆(t)=ey y(( tt )) =ef(t y, (y t( )t))
+the ⋆approximation will be
+y(t+∆t)≈y(t)ef(t y, (y t( )t))∆t
+which implies the two-variable dynamical system
+t =t +∆t
+n+1 n
+
+
+a
+n+1
+=a nef(tn an,an)∆t
+One can remark that the Euler’s method gives the exact solutions only in the case of linear
+
+functions,whichimpliesthatdifferentialequationsoftheform y (t)=mcanbeexactlysolved.
+′
+InCampbell[4]isstatedthat ⋆Euler’s method givesexactsolutiontothedifferentialequations
+of the form:
+y (t)=ky
+′
+
+y(0)=y
+ 0
+over the time interval 0 ≤ t ≤ T, where k is a constant, which is the case of exponential
+functions. By choosing a number of N iterations and set ∆t = T and set initial conditions
+N
+t =0 and a =y , then iterate as follows:
+0 0 0
+t =t +∆t
+n+1 n
+
+
+a
+n+1
+=a nek yy nn∆t =a nek∆t
+It can be seen that these iterations are repeated multiplications by the constant ek∆t. This
+
+implies that the closed form of this recurrence relation is
+
+--- PAGE 7 ---
+6 Appl. Math. J. Chinese Univ. Vol. 28, No. *
+a =a ek∆t N =y ekT
+N 0 0
+which is the exact solution.
+(cid:0) (cid:1)
+The connection between Euler’s method and ⋆Euler’s method can be obtained by using
+Taylor series of the function ex ex =1+ x + x2 +...+ xn +...
+1! 2! n!
+(cid:16) (cid:17)
+a
+n+1
+=a
+nef(tn an,an)∆t
+2
+f(t ,a ) 1 f(t ,a )
+n n n n
+=a 1+ ∆t+ ∆t +...
+n
+a 2! a
+" n (cid:18) n (cid:19) #
+1 [f(t ,a )]2
+=a +f(t ,a )∆t+ n n (∆t)2+...
+n n n
+2! a
+n
+from which we can see that Euler’s method is simply a truncation of ⋆Euler’s method. In addi-
+tion, when a >0 we get an answer which is greater than the answer from the Euler’s method
+n
+and when a <0 the answer is less than the Euler’s method answer. This is connected by so-
+n
+calledtheconcavityproblem. Thisproblemappearsaswellifwestudythe linearapproximation
+versus the exponential approximation, as can be seen in Campbell [4].
+2.3 Linear approximation versus exponential approximation
+AswehaveshowninFilipandPiatecki[9]anditcanbefoundaswellinStanley[15],linear
+functions of the form x(t) = at+b has constant derivative and x(t+1) = x(t)+x(t). In
+′
+addition, if any two differential functions x(t) and y(t) differ by a constant, then x(t)=y (t).
+′ ′
+Furthermore, a function x(t) differentiable at a point t=a has a linear approximation L near
+a defined as follows:
+L(t)=x(a)+x(t)(t−a)
+′
+On the other side, exponential functions of the form x(t) = abt, with b > 0, has constant
+⋆derivative and x(t+1) = x⋆(t)x(t). Moreover, the following two properties are true for all
+positive differential functions:
+1. If one positive function is a constant multiple of another, i.e. x(t)=cy(t), they have the
+same ⋆derivative. Thisisthecentralideaofthe multiplicative rate of change: ifonefunctionis
+aconstantmultipleofanother,their multiplicativerateofchange isthesame(asthe⋆derivative
+quantifiesthemultiplicativerateofchange)thatis,thetwofunctionschangebythesamefactor
+over any given interval [t,t+∆t]. In other words, for any functions x(t) and y(t) = cx(t), if
+we have x(t+∆t) = Gx(t) for some G, then y(t+∆t) = Gy(t) for the same factor G (G is
+the multiplicative rate of change).
+2. Anypositivefunctionx(t)differentiableatapointt=ahasanexponentialapproximation
+E near a defined as follows:
+Stanley[15]
+
+--- PAGE 8 ---
+Filip and Piatecki. Non-newtoniancalculus 7
+E(t)=x(a)x⋆(a)(t a).
+−
+In Stanley [15], it is stated that the graph of the exponential approximation E ”hugs” the
+graph of the function x(t) and furthermore, the graph of E is a curve that coincides with the
+graph of x at a point a in these three ways:
+• its value: E(a)=x(a)
+• its ⋆derivative: E⋆(a)=x⋆(a)
+• its additive derivative (its slope): E (a)=x(a)
+′ ′
+In order to illustrate linear and exponential approximation in Stanley [15]aut]Stanley, D. is
+taken the function x(t)= 1 and a point a=t=2. Using the rules for ⋆derivative presented in
+t
+Table 1 we have
+1 1
+x(t)= , x ′(t)=− , x⋆ =e −1 t
+t t2
+1 1
+x(2)= , x ′(t)=− , x⋆ =e −1 2
+2 4
+Linear approximation at t=2 is
+1 1 1
+L(t)=x(2)+x(2)(t−2)= − (t−2)=1− t
+′
+2 4 4
+Exponential approximation at t=2 is
+1 1
+E(t)=x(2)x⋆(2)(t −2) = e −1 2(t −2) = e −2t+1
+2 2
+For this example, the exponential approximation is a closer match that the linear one, as it
+can be seen in the Figure 2.
+x(t)
+E(t)
+L(t)
+0 2 t
+Figure 2: Linear versus exponential approximation to x(t)= 1 at the point t=2
+t
+Theproblemisthatthe⋆derivative isanexponentialfunctionwhichisaconvexfunctionand
+it cannot approximate closely any concave function. For instance (see Stanley [15]aut]Stanley,
+D.)theexponentialapproximationtoconcavefunctionsintatt= π isfarworsethanthelinear
+6
+
+--- PAGE 9 ---
+8 Appl. Math. J. Chinese Univ. Vol. 28, No. *
+one, for the function 1−sint its exponential approximation is fairly good and has about the
+same degree of closeness of match as the linear one.
+In Stanley [15]aut]Stanley, D. the ⋆mean value theorem versus the mean value theorem,
+the ⋆Rolle’s theorem versus the Rolle’s theorem and ⋆Taylor products versus Taylor series are
+presented.
+For the function x(t) = 1 at t = 1 second order polynomial and exponential approxi-
+1+e−t
+mations are computed and better results are obtained in the exponential approximation case.
+Recall the function x(t)=sint and a= π. Computing E(t), E (t), E (t), E (t) and E (t)
+6 2 3 4 5
+— Coco [5] — where
+π 1
+E(t)=x(a)[x⋆(a)]t −a = sin ecotπ 6 = e√3(t −π 6)
+6 2
+E 2(t)=x(a)[x⋆(a)]t −a
+[x⋆(cid:16) ⋆(a)](t−(cid:17)
+2a
+!(cid:2)
+)2
+=E(cid:3)
+(t) e−sin1 2π 6
+1 2(t −π 6)2
+=
+(cid:20) (cid:21)
+1
+=E(t)e −2(t −π 6)2 = e√3(t −π 6)e −2(t −π 6)2
+2
+E 3(t)=x(a)[x⋆(a)]t −a [x⋆⋆(a)](t− 2a !)2 x⋆(3)(a) (t− 3a !)3 =
+1(t π)3 h i
+=E (t) e8√3 6 −6
+2
+E 4(t)=E 3(t)
+(cid:16)
+e
+−80(cid:17) 21 4(t −π 6)4
+E (t)=E (t)
+(cid:0) e352√(cid:1)3 121 0(t −π 6)5
+5 4
+and illustrating by graphics w(cid:16)e can se(cid:17)e that by increasing the order of the exponential approx-
+imation we obtain increasingly better results.
+Onecanremarkthatthemultiplicativecalculuscanbeextendedasfollows: if ϕisabijective
+function define derivative and integral by — Coco [5]:
+§ §
+f
+§
+=ϕ ϕ −1◦f ′(x)
+(we can see that f⋆(x)=e(ln f )′(x))
+◦| | (cid:0) (cid:1)
+b
+f(x)d x=ϕ (ϕ 1◦f)(x)dx
+§ −
+Za (cid:18)Z (cid:19)
+(we can see that ab f(x)dx =eR ab(ln ◦|f |)(x)dx).
+R
+2.4 Geometric calculus and bigeometric calculus
+As we have mentioned, the multiplicative calculus or ⋆calculus was called by Grossman and
+Katz [11] geometric calculus in order to emphasize that changes in function arguments are
+measured by differences, while changes in values are measured by ratios. The entire theory
+works only for positive functions. This is why it is mandatory not to work with standard
+(additive) accounting since, in case of deficit, we should have negative numbers, while with
+
+--- PAGE 10 ---
+Filip and Piatecki. Non-newtoniancalculus 9
+multiplicative accounting, all numbers are greater than zero. In addition, a positive function
+whichiscontinuousandhasthesamegeometricchangeoveranytwointervalsofequalclassical
+extent (i.e. x(t2) = x(t4) if t −t =t −t and t ≤t , t ≤t ) is called geometrically-uniform
+x(t1) x(t3) 2 1 4 3 1 2 3 4
+function.
+The name geometric calculus comes from at least two reasons. The first one is the prop-
+erty of a geometrically-uniform function that each arithmetic progression of arguments implies
+geometric progression of corresponding values. The second one must be started by recalling
+the definition of the geometric average of n positive numbers v ,v ,...,v , that is the positive
+1 2 n
+number(v 1v 2...v n)n1. InGrossmanandKatz[11]andGrossman[10],isexplainedhowasimply
+algebraic identity let them to construct the geometric calculus as follows:
+Consider any n points (a ,v ),(a ,v )...,(a ,v ), where a < a < ... < a and a −a =
+1 1 2 2 n n 1 2 n 2 1
+a −a =...=a −a =k. Thus,k(n−1)=a −a . Connectthenpointsbylinesegments,
+3 2 n n 1 n 1
+−
+of which are n−1. The arithmetic average of their classical slopes equals the classical slope of
+the line segment containing the end points (a ,v ) and (a ,v ), that is:
+1 1 n n
+v2−kv1 + v3−kv2 +...+ vn− kvn−1
+=
+v n−v
+1
+n−1 a −a
+n 1
+If we assume that the v values are positive, the following identity is obvious:
+i
+1
+v 2
+k1
+v 3
+k1
+v n
+k1 n−1
+v n
+an−1
+a1
+... =
+v v v v
+"(cid:18) 1(cid:19) (cid:18) 2(cid:19) (cid:18) n −1(cid:19) # (cid:18) 1(cid:19)
+1
+Theleftsideofthisequalityisthegeometricaverageofthe n−1numbers vi k whichthey
+vi−1
+imagined to be the slopes of a new kind. (cid:16) (cid:17)
+Speakingabouttherepresentationofa geometrically-uniform functionxonasemi-logpaper
+(logarithmically scaled on the ordinate axis), the result is a straight line whose classical slope
+equals the natural logarithm of the geometric slope of x.
+Onecouldaskwhathappensifbothchangesinargumentsandvaluesaremeasuredbyratios?
+The theory developed by Grossman and Katz [11] and Grossman [10] works for functions with
+positive arguments and positive values and it is called bigeometric calculus.
+A positive function which is continuous and has the same geometric change over any two
+positive intervals of equal geometric extent (i.e. x(t2) = x(t4) if t2 = t4 and 0 < t ≤ t ,
+x(t1) x(t3) t1 t3 1 2
+0<t ≤t ) is called bigeometrically-uniform function. The characteristic of a bigeometrically-
+3 4
+uniform functionisthateachgeometricprogressionofargumentsimpliesgeometricprogression
+of values.
+Speakingabouttherepresentationofa bigeometrically-uniform functionxonalog-logpaper
+(logarithmically scaled on both abscise and ordinate axis), the result is a straight line whose
+classical slope equals the natural logarithm of the bigeometric slope of x.
+In the bigeometric calculus, the bigeometric derivative is defined as being
+1
+x(t) lnt−lna
+lim
+t a x(a)
+→ (cid:20) (cid:21)
+
+
+[... 11 more pages truncated ...]

@@ -49,6 +49,15 @@ except ImportError as e:
     RATE_LIMITER_AVAILABLE = False
     logging.warning(f"Rate limiter not available: {e}")
 
+# JWT Authentication middleware
+try:
+    from src.security.auth_middleware import configure_jwt_auth_middleware
+    JWT_AUTH_AVAILABLE = True
+    logging.info("JWT authentication middleware loaded - API endpoints will be protected")
+except ImportError as e:
+    JWT_AUTH_AVAILABLE = False
+    logging.warning(f"JWT authentication middleware not available: {e}")
+
 # Import AI dashboard integration
 try:
     import ai_dashboard_integration
@@ -133,13 +142,29 @@ class SimpleDashboardServer:
 
     def setup_cors(self):
         """Configure CORS for frontend access."""
+        # Explicit whitelist of allowed headers for security
+        ALLOWED_HEADERS = [
+            "authorization",
+            "content-type",
+            "accept",
+            "origin",
+            "x-requested-with",
+            "x-csrf-token",
+        ]
+
         self.app.add_middleware(
             CORSMiddleware,
             allow_origins=C.CORS_ORIGINS,
             allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
+            allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+            allow_headers=ALLOWED_HEADERS,
+            max_age=3600,  # Cache preflight for 1 hour
         )
+
+        # JWT Authentication middleware
+        if JWT_AUTH_AVAILABLE:
+            configure_jwt_auth_middleware(self.app)
+            logger.info("JWT authentication enabled for API endpoints")
 
         # ISS-024: Configure rate limiting
         if RATE_LIMITER_AVAILABLE:

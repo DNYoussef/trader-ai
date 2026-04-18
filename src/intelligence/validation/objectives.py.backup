@@ -1,0 +1,375 @@
+"""
+Objective Functions for Strategy Validation
+
+Provides objective functions used by MCPT to evaluate strategy performance.
+These functions take strategy returns and produce a single scalar score.
+
+Key functions:
+- profit_factor: Sum of gains / sum of losses
+- sharpe_ratio: Risk-adjusted return (annualized)
+- sortino_ratio: Downside-risk adjusted return
+- calmar_ratio: Return / max drawdown
+- max_drawdown: Maximum peak-to-trough decline
+"""
+
+import numpy as np
+from typing import Optional, Dict, Callable
+
+
+def profit_factor(strategy_returns: np.ndarray) -> float:
+    """
+    Calculate profit factor: sum of gains / sum of losses.
+
+    Profit factor is the primary metric for MCPT validation because:
+    1. It's robust to outliers (unlike mean return)
+    2. It captures the gain/loss asymmetry
+    3. Values > 1.5 indicate a potentially tradeable strategy
+    4. Values > 2.0 indicate strong edge
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Profit factor (inf if no losses, 0 if no gains)
+    """
+    gains = strategy_returns[strategy_returns > 0].sum()
+    losses = abs(strategy_returns[strategy_returns < 0].sum())
+
+    if losses == 0:
+        return float('inf') if gains > 0 else 0.0
+
+    return gains / losses
+
+
+def sharpe_ratio(
+    strategy_returns: np.ndarray,
+    risk_free_rate: float = 0.0,
+    annualization_factor: float = 252.0,
+) -> float:
+    """
+    Calculate annualized Sharpe ratio.
+
+    Sharpe = sqrt(252) * (mean_excess_return) / std(returns)
+
+    Args:
+        strategy_returns: Array of per-bar returns
+        risk_free_rate: Annual risk-free rate (default: 0)
+        annualization_factor: Bars per year (default: 252 for daily)
+
+    Returns:
+        Annualized Sharpe ratio
+    """
+    if len(strategy_returns) < 2:
+        return 0.0
+
+    daily_rf = risk_free_rate / annualization_factor
+    excess_returns = strategy_returns - daily_rf
+
+    mean_excess = np.mean(excess_returns)
+    std_returns = np.std(strategy_returns, ddof=1)
+
+    if std_returns == 0:
+        return 0.0
+
+    return np.sqrt(annualization_factor) * mean_excess / std_returns
+
+
+def sortino_ratio(
+    strategy_returns: np.ndarray,
+    risk_free_rate: float = 0.0,
+    annualization_factor: float = 252.0,
+) -> float:
+    """
+    Calculate Sortino ratio (downside-only volatility).
+
+    Unlike Sharpe, Sortino only penalizes downside volatility,
+    which better captures asymmetric return profiles.
+
+    Args:
+        strategy_returns: Array of per-bar returns
+        risk_free_rate: Annual risk-free rate
+        annualization_factor: Bars per year
+
+    Returns:
+        Annualized Sortino ratio
+    """
+    if len(strategy_returns) < 2:
+        return 0.0
+
+    daily_rf = risk_free_rate / annualization_factor
+    excess_returns = strategy_returns - daily_rf
+
+    mean_excess = np.mean(excess_returns)
+
+    # Downside deviation (only negative returns)
+    downside_returns = strategy_returns[strategy_returns < 0]
+    if len(downside_returns) < 2:
+        return float('inf') if mean_excess > 0 else 0.0
+
+    downside_std = np.std(downside_returns, ddof=1)
+
+    if downside_std == 0:
+        return float('inf') if mean_excess > 0 else 0.0
+
+    return np.sqrt(annualization_factor) * mean_excess / downside_std
+
+
+def max_drawdown(equity_curve: np.ndarray) -> float:
+    """
+    Calculate maximum drawdown (peak-to-trough decline).
+
+    Args:
+        equity_curve: Cumulative equity curve
+
+    Returns:
+        Maximum drawdown as positive percentage (e.g., 0.20 for 20%)
+    """
+    if len(equity_curve) < 2:
+        return 0.0
+
+    # Running maximum
+    running_max = np.maximum.accumulate(equity_curve)
+
+    # Drawdown at each point
+    drawdowns = (equity_curve - running_max) / running_max
+
+    # Maximum drawdown (most negative value)
+    return abs(np.min(drawdowns))
+
+
+def max_drawdown_from_returns(strategy_returns: np.ndarray) -> float:
+    """
+    Calculate max drawdown from returns array.
+
+    Convenience function that builds equity curve first.
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Maximum drawdown as positive percentage
+    """
+    # Build equity curve from returns
+    cumulative = np.exp(np.cumsum(strategy_returns))
+    equity = np.concatenate([[1.0], cumulative])
+
+    return max_drawdown(equity)
+
+
+def calmar_ratio(
+    strategy_returns: np.ndarray,
+    annualization_factor: float = 252.0,
+) -> float:
+    """
+    Calculate Calmar ratio: annualized return / max drawdown.
+
+    Calmar is useful for strategies with infrequent large drawdowns.
+
+    Args:
+        strategy_returns: Array of per-bar returns
+        annualization_factor: Bars per year
+
+    Returns:
+        Calmar ratio
+    """
+    if len(strategy_returns) < 2:
+        return 0.0
+
+    # Annualized return
+    total_return = np.sum(strategy_returns)
+    n_years = len(strategy_returns) / annualization_factor
+    ann_return = total_return / n_years if n_years > 0 else 0.0
+
+    # Max drawdown
+    mdd = max_drawdown_from_returns(strategy_returns)
+
+    if mdd == 0:
+        return float('inf') if ann_return > 0 else 0.0
+
+    return ann_return / mdd
+
+
+def win_rate(strategy_returns: np.ndarray) -> float:
+    """
+    Calculate win rate (percentage of positive returns).
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Win rate as percentage (0-1)
+    """
+    if len(strategy_returns) == 0:
+        return 0.0
+
+    # Only count bars with non-zero returns (actual trades)
+    active_returns = strategy_returns[strategy_returns != 0]
+
+    if len(active_returns) == 0:
+        return 0.0
+
+    wins = np.sum(active_returns > 0)
+    return wins / len(active_returns)
+
+
+def expectancy(strategy_returns: np.ndarray) -> float:
+    """
+    Calculate expectancy (average return per trade).
+
+    Expectancy = (Win_Rate * Avg_Win) - (Loss_Rate * Avg_Loss)
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Expectancy per trade
+    """
+    active_returns = strategy_returns[strategy_returns != 0]
+
+    if len(active_returns) == 0:
+        return 0.0
+
+    wins = active_returns[active_returns > 0]
+    losses = active_returns[active_returns < 0]
+
+    avg_win = np.mean(wins) if len(wins) > 0 else 0.0
+    avg_loss = np.mean(losses) if len(losses) > 0 else 0.0
+
+    wr = len(wins) / len(active_returns)
+    lr = 1 - wr
+
+    return wr * avg_win + lr * avg_loss
+
+
+def recovery_factor(strategy_returns: np.ndarray) -> float:
+    """
+    Calculate recovery factor: total return / max drawdown.
+
+    Measures how well the strategy recovers from drawdowns.
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Recovery factor
+    """
+    if len(strategy_returns) < 2:
+        return 0.0
+
+    total_return = np.sum(strategy_returns)
+    mdd = max_drawdown_from_returns(strategy_returns)
+
+    if mdd == 0:
+        return float('inf') if total_return > 0 else 0.0
+
+    return total_return / mdd
+
+
+def ulcer_index(equity_curve: np.ndarray) -> float:
+    """
+    Calculate Ulcer Index (measures magnitude and duration of drawdowns).
+
+    Lower is better. Ulcer Index < 5% is considered good.
+
+    Args:
+        equity_curve: Cumulative equity curve
+
+    Returns:
+        Ulcer Index as percentage
+    """
+    if len(equity_curve) < 2:
+        return 0.0
+
+    running_max = np.maximum.accumulate(equity_curve)
+    drawdowns = 100 * (equity_curve - running_max) / running_max
+
+    # Root mean square of drawdowns
+    ulcer = np.sqrt(np.mean(drawdowns ** 2))
+
+    return ulcer
+
+
+def get_objective_function(name: str) -> Callable[[np.ndarray], float]:
+    """
+    Get objective function by name.
+
+    Args:
+        name: One of 'profit_factor', 'sharpe', 'sortino', 'calmar', 'win_rate'
+
+    Returns:
+        Objective function that takes strategy_returns and returns float
+    """
+    objectives = {
+        'profit_factor': profit_factor,
+        'sharpe': sharpe_ratio,
+        'sharpe_ratio': sharpe_ratio,
+        'sortino': sortino_ratio,
+        'sortino_ratio': sortino_ratio,
+        'calmar': calmar_ratio,
+        'calmar_ratio': calmar_ratio,
+        'win_rate': win_rate,
+        'expectancy': expectancy,
+        'recovery_factor': recovery_factor,
+    }
+
+    if name not in objectives:
+        raise ValueError(f"Unknown objective: {name}. Available: {list(objectives.keys())}")
+
+    return objectives[name]
+
+
+def compute_all_metrics(strategy_returns: np.ndarray) -> Dict[str, float]:
+    """
+    Compute all performance metrics for a strategy.
+
+    Args:
+        strategy_returns: Array of per-bar returns
+
+    Returns:
+        Dict with all metrics
+    """
+    # Build equity curve
+    cumulative = np.exp(np.cumsum(strategy_returns))
+    equity = np.concatenate([[1.0], cumulative])
+
+    return {
+        'total_return': float(np.sum(strategy_returns)),
+        'profit_factor': float(profit_factor(strategy_returns)),
+        'sharpe_ratio': float(sharpe_ratio(strategy_returns)),
+        'sortino_ratio': float(sortino_ratio(strategy_returns)),
+        'calmar_ratio': float(calmar_ratio(strategy_returns)),
+        'max_drawdown': float(max_drawdown(equity)),
+        'win_rate': float(win_rate(strategy_returns)),
+        'expectancy': float(expectancy(strategy_returns)),
+        'recovery_factor': float(recovery_factor(strategy_returns)),
+        'ulcer_index': float(ulcer_index(equity)),
+        'n_trades': int(np.sum(strategy_returns != 0)),
+    }
+
+
+if __name__ == "__main__":
+    # Test objective functions
+    print("=== Objective Functions Test ===")
+
+    np.random.seed(42)
+
+    # Simulate strategy returns
+    n_bars = 252  # 1 year of daily data
+
+    # Strategy with edge (slight positive bias)
+    returns_with_edge = np.random.randn(n_bars) * 0.01 + 0.0002  # 0.02% daily edge
+
+    # Random strategy (no edge)
+    returns_random = np.random.randn(n_bars) * 0.01
+
+    print("\nStrategy with edge:")
+    metrics = compute_all_metrics(returns_with_edge)
+    for k, v in metrics.items():
+        print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
+
+    print("\nRandom strategy:")
+    metrics = compute_all_metrics(returns_random)
+    for k, v in metrics.items():
+        print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
+
+    print("\n=== Test Complete ===")

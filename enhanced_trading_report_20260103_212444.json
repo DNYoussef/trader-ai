@@ -1,0 +1,29 @@
+{
+  "session_summary": {
+    "initial_capital": 200.0,
+    "final_capital": 199.3791779619724,
+    "total_return_pct": -0.31041101901379875,
+    "total_pnl": -0.6208220380275937,
+    "total_trades": 1,
+    "winning_trades": 0,
+    "win_rate_pct": 0.0,
+    "avg_trade_pnl": -0.6208220380275937
+  },
+  "phase5_enhancements": {
+    "ng_enhanced_trades": 1,
+    "avg_ng_multiplier": 1.090078996091457,
+    "avg_brier_adjustment": 0.5,
+    "avg_dpi_enhancement": 1.4894710446951134,
+    "final_brier_score": 0.81
+  },
+  "monitoring_status": {
+    "monitoring_active": true,
+    "ng_signals_last_hour": 359,
+    "current_brier_score": 0.81,
+    "brier_alert_level": "critical",
+    "current_enhanced_dpi": 0.6704729689306088,
+    "active_alerts": 364,
+    "total_ng_signals": 359,
+    "total_brier_updates": 359
+  }
+}

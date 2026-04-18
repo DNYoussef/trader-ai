@@ -1,0 +1,38 @@
+{
+  "total_samples": 3753,
+  "lookahead_windows": [
+    5,
+    10,
+    20
+  ],
+  "black_swan_events": [
+    "flash_crash_2010",
+    "us_downgrade_2011",
+    "china_deval_2015",
+    "volmageddon_2018",
+    "q4_selloff_2018",
+    "covid_crash_2020",
+    "svb_collapse_2023"
+  ],
+  "strategy_distribution": {
+    "3": 1096,
+    "4": 1071,
+    "0": 367,
+    "7": 329,
+    "2": 269,
+    "5": 269,
+    "1": 268,
+    "6": 84
+  },
+  "transition_distribution": {
+    "none": 2805,
+    "go_defensive": 484,
+    "go_aggressive": 464
+  },
+  "reward_stats": {
+    "min": 0.0,
+    "max": 5.0,
+    "mean": 0.2809858779642952
+  },
+  "created": "2025-12-10T18:22:59.192208"
+}

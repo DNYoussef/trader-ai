@@ -1,0 +1,363 @@
+SOURCE: Cevikel, A new solution concept for solvig multiobjective fractional programming problems.pdf
+TOTAL PAGES: 6
+================================================================================
+
+--- PAGE 1 ---
+Sigma J Eng & Nat Sci 10 (2), 2019, 165-170
+P u b l i c a t i o n s P r e p a r e d f o r t h e S i g m a J o u r n a l o f E n g i n e e r i n g a n d N atural Sciences
+Publications Prepared for the ICOMAA 2019 - International Conference on
+Mathematical Advan ces and Applications
+Special Issue was published by reviewing extended papers
+Research Article
+A NEW SOLUTION CONCEPT FOR SOLVING MULTIOBJECTIVE
+FRACTIONAL PROGRAMMING PROBLEM
+Adem Cengiz CEVIKEL*1
+1Yildiz Technical University, Dept. of Mathematics Education, ISTANBUL; ORCID:0000-0002-7359-3156
+Received: 02.07.2019 Revised: 30.09.2019 Accepted: 11.11.2019
+ABSTRACT
+In this work, we have proposed a solution to multiobjective fractional programming problems (MFPPs) by
+using the first-order Multiplicative Taylor expansion of these objective functions at optimal points of each
+fractional objective functions in feasible region. MFPP reduces to an equivalent Multiobjective Linear
+Programming Problem (MLPP). The resulting MLPP is solved assuming that weights of these linear objective
+functions are equal and considering the sum of the these linear objective functions. Thus, the problem is
+reduced to a single objective. The proposed solution to MFPP always yields efficient solution. Therefore, the
+complexity in solving MFPP has reduced easy computational and to show the efficiency of the Multiplicative
+Taylor series method, we applied the method to some problems.
+Keywords: Fractional programming, multiobjective fractional programming, multiplicative derivation.
+1. INTRODUCTION
+The multiobjective fractional programming problems (MOFPPs) have received of much
+interest in recent past. This problems are applied to different disciplines such as engineering,
+business, finance, economics, etc. MOFPPs are generally used for modeling real life problems
+with one or more objectives such as profit/cost, inventory/sales, actual cost/ standart cost,
+output/employee etc. (see, for example, [1-8]).
+Multiobjective Fractional Programming Problems (MFPPs) pose some computational
+difficulties, so they are converted into single objective programming problems and then solved
+using the method of Bitran and Novaes [9] or Charnes and Cooper [10].
+Michael Grossman and Robert Katz gave definitions of a new kind of derivative and integral,
+moving the roles of subtraction and addition to division and multiplication, and thus established a
+new calculus, called multiplicative calculus [11].
+In this paper, we proposed a solution to Multiobjective Fractional Programming Problems
+using the first order Multiplicative Taylor polynomial series method at optimal point of each
+fractional objective function in feasible region.
+* Corresponding Author: e-mail: acevikel@yildiz.edu.tr, tel: (212) 383 48 93
+165
+
+--- PAGE 2 ---
+A.C. Cevikel / Sigma J Eng & Nat Sci 10 (2), 165-170, 2019
+2. PRELIMINARIES
+Definition: If the nu merator and denominator in the objective function as well as the constraints
+are linear, we have a linear fractional programming problem (LFPP) as follows:
+cx
+Optimize ,
+dx
+(1)
+  
+   
+s.t.: xS =x| Ax  b, x0
+ 
+   
+
+   
+where A is a real mn matrix, bRm, xRn and S is a nonempty and bounded
+set. For some values of x, dx may be equal to zero. To avoid such cases, is generally set
+to be greater than zero.
+Charnes and Cooper [10] showed that if the denominator is constant in sign on the feasible
+region, the LFPP can be optimized by solving a linear programming problem. However, in many
+applications, there are two or more conflicting objective functions which are relevant, and some
+compromise must be bought between them. Such types of problems are inherently multiobjective
+linear fractional programming problems and can be written as:
+c x
+Optimize Z (x) k k , k 1,...,K (2)
+k d x
+k k
+  
+   
+s.t.: xS =x| Ax  b, x0
+ 
+   
+
+   
+where S,A,b and x are as defined in problem (1), and
+xS, d x 0 (k=1,...,K).
+k k
+Definition 1 Let f be a positive function on A⊆R, and it is derivative at x exists. The
+multiplicative derivation of f is given by
+1
+𝑓⊛(𝑥)=lim(𝑓(𝑥+ℎ) )ℎ=𝑒(ln∘𝑓) ′ (𝑥) (3)
+ℎ→0 𝑓(𝑥)
+where (ln∘𝑓)(𝑥)=ln𝑓(𝑥). If, additionaly, 𝑓 is a smooth function. then the higher order
+multiplicative derivation is given by the following formula [12]
+𝑓⊛(𝑛)(𝑥)=𝑒(ln∘𝑓)(𝑛)(𝑥),𝑛=0,1,... (4)
+The multiplicative derivation has the following rules:
+(a)(𝑐𝑓)⊛(𝑥)=𝑓⊛(𝑥)
+(b)(𝑓𝑔)⊛(𝑥)=𝑓⊛(𝑥).𝑔⊛(𝑥)
+(c)(𝑓/𝑔)⊛(𝑥)=𝑓⊛(𝑥)/𝑔⊛(𝑥) (5)
+(d)(𝑓ℎ)⊛(𝑥)=𝑓⊛(𝑥)ℎ(𝑥).𝑓(𝑥)ℎ
+′
+(𝑥)
+(e)(𝑓∘ℎ)⊛(𝑥)=𝑓⊛(ℎ(𝑥))ℎ
+′
+(𝑥)
+166
+
+--- PAGE 3 ---
+A New Solution Concept for Solving Multiobjective … / Sigma J Eng & Nat Sci 10 (2), 165-170, 2019
+𝑓(𝑥) 𝑔(𝑥)
+(f)(𝑓+𝑔)⊛(𝑥)=𝑓⊛(𝑥)𝑓(𝑥)+𝑔(𝑥).𝑔⊛(𝑥)𝑓(𝑥)+𝑔(𝑥).
+where 𝑐 is a positive c onstant, 𝑓 and 𝑔 are ⊛ differentiable, ℎ is differentiable and 𝑓∘ℎ in
+part (e) is defined[12].
+Theorem 2 (Multiplicative Taylor’s Theorem for One Variable)[12]. Let A be an open interval
+and let
+f:A→R be n+1 times ⊛ differentiable on A. Then for any x,x+h∈A, there exists a
+number θ∈(0,1) such that
+ℎ𝑚 ℎ𝑛+1
+𝑓(𝑥+ℎ)=𝑛 (𝑓⊛(𝑚)(𝑥))𝑚!.((𝑓⊛(𝑛+1)(𝑥+𝜃ℎ))(𝑛+1)!). (6)
+𝑚=0
+The above result can be extended to functions of several variables as well. For simplicity,
+consider the function 𝑓(𝑥,𝑦) of two variables defined on some open subset of 𝑅2(=𝑅×𝑅). We
+can define partial ⊛ derivative of 𝑓 in 𝑥, considering 𝑦 as fixed, which is denoted by 𝑓⊛ or
+𝑥
+𝜕⊛𝑓/𝜕𝑦. One can go on and define higher-order partial ⊛ derivatives of 𝑓 for which the
+respective ⊛ notations are used.
+Two results, generalizing the property (e) of ⊛ differentiation and Multiplicative Taylor’s
+Theorem for One Variable, are as follows. They can also be proved by application of the
+respective results of Newtonian calculus to the function ln∘𝑓.
+Theorem 3 (Multiplicative Chain Rule). Let f be a function of two variables y and z with
+continuous partial ⊛ derivatives. If y and z are differentiable functions on (a,b) such that
+f(y(x),z(x)) is defined for every x∈(a,b), then
+𝑑⊛𝑓(𝑦(𝑥),𝑧(𝑥)) =𝑓⊛(𝑦(𝑥),𝑧(𝑥))𝑦′(𝑥).𝑓⊛(𝑦(𝑥),𝑧(𝑥))𝑧′(𝑥). (7)
+𝑑𝑥 𝑦 𝑧
+Theorem 4 (Multiplicative Taylor’s Theorem for Two Variables)[13]. Let A be an open subset of
+R2. Assume that the function f:A→R has all partial ⊛ derivatives of order n+1 on A. Then for
+every (x,y),(x+h,y+k)∈A so that the line segment connecting these two points belongs to A,
+there exits a number θ∈(0,1), such that
+ℎ𝑖𝑘𝑚−𝑖𝑛+1 ℎ𝑖𝑘𝑛+1−𝑖
+𝑓(𝑥+ℎ,𝑦+𝑘)=𝑛 𝑚 (𝑓⊛(𝑚)(𝑥,𝑦))𝑖!(𝑚−𝑖)! ((𝑓⊛(𝑛+1)(𝑥+𝜃ℎ,𝑦+𝜃𝑘))𝑖!(𝑛+1−𝑖)!). (8)
+𝑚=0𝑖=0 𝑥𝑖𝑦𝑚−𝑖
+𝑖=0
+𝑥𝑖𝑦𝑛+1−𝑖
+3. MULTIPLICATIVE TAYLOR METHOD
+In this section, we consider the Multiobjective Fractional Programming Problem (MFPP). If
+𝑍(𝑥)=𝑐𝑖𝑥+𝛼𝑖
+then,
+𝑖 𝑑𝑖𝑥+𝛽𝑖
+𝑀𝑎𝑥 𝑍(𝑥)=(𝑍 (𝑥),𝑍 (𝑥),...,𝑍 (𝑥)),
+1 2 𝑘
+𝑠.𝑡. 𝑥∈𝑋={𝑥∈𝑅𝑛,𝐴𝑥≤𝑏,𝑥≥0} (9)
+𝐴∈𝑅𝑚×𝑛, 𝑏,𝑐,𝑑 ∈𝑅𝑛,𝛼,𝛽 ∈𝑅
+𝑖 𝑖 𝑖 𝑖
+We will transform the model (9) to a new model obtained by the following three steps:
+Step 1 : Determine 𝑥∗=(𝑥∗,𝑥∗,...,𝑥∗ ) which is the value(s) that is used to maximize the 𝑖th
+𝑖 𝑖1 𝑖2 𝑖𝑛
+objective function 𝑍(𝑥) (𝑖=1,...𝑘) where 𝑛 is the number of the variable.
+𝑖
+Step 2: Transform each objective functions by using first-order Multiplicative Taylor polynomial
+series as follows:
+𝑍(𝑥)≅𝐿 (𝑥)=𝑍(𝑥∗)⋅[(𝑥
+−𝑥∗)𝑑⊛𝑍𝑖(𝑥𝑖∗)
+⋅...⋅(𝑥 −𝑥∗
+)𝑑⊛𝑍𝑖(𝑥𝑖∗)
+)]⋅𝑂(ℎ2) (10)
+𝑖 𝑖1 𝑖 𝑖 1 𝑖1 𝑑𝑥1 𝑛 𝑖𝑛 𝑑𝑥𝑛
+Step 3: Find 𝑥∗=(𝑥∗,𝑥∗,...,𝑥∗) by solving the reduced problem to a single objective.
+1 2 𝑛
+167
+
+--- PAGE 4 ---
+A.C. Cevikel / Sigma J Eng & Nat Sci 10 (2), 165-170, 2019
+Thus, MFPP (9) reduces the following MLPP (11) :
+max{𝐿 (𝑥),𝐿 (𝑥),..,𝐿 (𝑥)} (11)
+1 2 𝑘
+𝑥∈𝑋={𝑥∈𝑅𝑛,𝐴𝑥≤𝑏,𝑥≥0}
+if we assume that the weights of objective functions in problem (11) are equal, then the
+problem (11) is transformed to the following linear programming problem:
+max{𝐿 (𝑥)+𝐿 (𝑥)+...+𝐿 (𝑥)} (12)
+1 2 𝑘
+𝑥∈𝑋={𝑥∈𝑅𝑛,𝐴𝑥≤𝑏,𝑥≥0}
+In problem (12), set 𝑋 is non-empty convex set having feasible points. The optimal solution
+of the problem (12) gives the efficient solution of the MFPP (9).
+4. NUMERICAL EXAMPLES
+Example 1 We consider the example studied by [4]
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝑍
+(𝑥)=−3𝑥1+2𝑥2
+1 𝑥1+𝑥2+3
+and
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝑍 (𝑥)=
+7𝑥1+𝑥2
+(13)
+2 5𝑥1+2𝑥2+1
+𝑆𝑢𝑏𝑗𝑒𝑐𝑡𝑡𝑜𝑥 −𝑥 ≥1
+1 2
+2𝑥 +3𝑥 ≤15
+1 2
+𝑥 ≥3
+1
+𝑥 ,𝑥 ≥0
+1 2
+It is observed that 𝑍 <0, 𝑍 ≥0, for each 𝑥 in the feasible region. If the problem is solved
+1 2
+for each of objectives one by one 𝑍∗(3.6,2.6)=−14/23, and 𝑍∗(7.5,0)=15/11, By expanding
+1 2
+the first-order Multiplicative Taylor polynomial series for objective functions 𝑍 (𝑥) and 𝑍 (𝑥)
+1 2
+about points (3.6,2.6) and (7.5,0) in feasible region, respectively are obtained from
+𝑍 (𝑥)=𝑍 (3.6,2.6).[(𝑥
+−3.6)𝑑⊛𝑍1(3.6,2.6)
+.(𝑥
+−2.6)𝑑⊛𝑍1(3.6,2.6)
+] (14)
+1 1 1 𝑑𝑥1 2 𝑑𝑥2
+=−0.60869565.𝑒0.427(𝑥1−3.6)−0.4658385(𝑥2−2.6)
+𝑍 (𝑥)=𝑍 (7.5,0).[(𝑥
+−7.5)𝑑⊛𝑍2(7.5,0)
+.(𝑥
+−0)𝑑⊛𝑍2(7.5,0)
+] (15)
+2 2 1 𝑑𝑥1 2 𝑑𝑥2
+=1.363636.𝑒0.0034632(𝑥1−7.5)−0.0329𝑥2
+we get
+𝐿(𝑥)=𝑍 (𝑥)+𝑍 (𝑥)
+1 2
+=−0.60869565.𝑒0.427(𝑥1−3.6)−0.4658385(𝑥2−2.6)
++1.363636.𝑒0.0034632(𝑥1−7.5)−0.0329𝑥2
+Thus, the final form of the MLFP problem is obtained as follows:
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝐿(𝑥)
+𝑠.𝑡.𝑥 −𝑥 ≥1
+1 2
+2𝑥 +3𝑥 ≤15
+1 2
+𝑥 ≥3
+1
+𝑥 ,𝑥 ≥0
+1 2
+Optimal solution of the problem (13) is at point (3,2) and maximum value 0.634. The point
+(3,2) is efficient solution of the given problem in the feasible region. The solution for the
+problem (13) is obtained as:
+168
+
+--- PAGE 5 ---
+A New Solution Concept for Solving Multiobjective … / Sigma J Eng & Nat Sci 10 (2), 165-170, 2019
+𝑥 =3,𝑥 =2,𝑍 (𝑥)=−5/8,𝑍 (𝑥)=23/20
+1 2 1 2
+Comparing our results and Guzel’s results [4] then it can be seen that the results are same.
+Example 2 We consider the example studied by [13]
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝑍
+(𝑥)=−3𝑥1+2𝑥2
+1 𝑥1+𝑥2+3
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝑍 (𝑥)=
+7𝑥1+2𝑥2
+2 5𝑥1+2𝑥2+1
+and
+𝑥 +4𝑥
+1 2
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝑍 (𝑥)=
+3 2𝑥 +3𝑥 +2
+1 2
+𝑆𝑢𝑏𝑗𝑒𝑐𝑡𝑡𝑜𝑥 −𝑥 ≥1
+1 2
+2𝑥 +3𝑥 ≤15
+1 2
+𝑥 ≥3
+1
+𝑥 +9𝑥 ≥9
+1 2
+𝑥 ,𝑥 ≥0
+1 2
+It is observed that 𝑍 <0, 𝑍 ≥0, 𝑍 ≥0, for each 𝑥 in the feasible region. If the problem is
+1 2 3
+solved for each of objectives one by one 𝑍∗(3.6,2.6)=−0.608695652, 𝑍∗(7.2,0.2)=
+1 2
+1.35828877 and 𝑍∗(3.6,2.6)=0.8235294. By expanding the first-order Multiplicative Taylor
+3
+polynomial series for objective functions 𝑍 (𝑥), 𝑍 (𝑥) and 𝑍 (𝑥) about points (3.6,2.6),(7.2,0.2)
+1 2 3
+and (3.6,2.6) in feasible region, respectively are obtained from
+𝑍 (𝑥)=𝑍 (3.6,2.6).[(𝑥
+−3.6)𝑑⊛𝑍1(3.6,2.6)
+.(𝑥
+−2.6)𝑑⊛𝑍1(3.6,2.6)
+] (16)
+1 1 1 𝑑𝑥1 2 𝑑𝑥2
+=−0.60869565.𝑒0.427(𝑥1−3.6)−0.4658(𝑥2−2.6)
+𝑍 (𝑥)=𝑍 (7.2,0.2).[(𝑥
+−7.2)𝑑⊛𝑍2(7.2,0.2)
+.(𝑥
+−0.2)𝑑⊛𝑍2(7.2,0.2)
+] (17)
+2 2 1 𝑑𝑥1 2 𝑑𝑥2
+=1.35828877.𝑒0.0041(𝑥1−7.2)−0.0141(𝑥2−0.2)
+𝑍 (𝑥)=𝑍 (3.6,2.6).[(𝑥
+−3.6)𝑑⊛𝑍3(3.6,2.6)
+.(𝑥
+−2.6)𝑑⊛𝑍3(3.6,2.6)
+] (18)
+3 3 1 𝑑𝑥1 2 𝑑𝑥2
+=0.8235294.𝑒−0.0462(𝑥1−3.6)+0.1092(𝑥2−2.6)
+we get
+𝐿(𝑥)=𝑍 (𝑥)+𝑍 (𝑥)+𝑍 (𝑥)
+1 2 3
+Thus, the final form of the MLFP problem is obtained as follows:
+𝑀𝑎𝑥𝑖𝑚𝑖𝑧𝑒𝐿(𝑥)
+𝑆𝑢𝑏𝑗𝑒𝑐𝑡𝑡𝑜𝑥 −𝑥 ≥1
+1 2
+2𝑥 +3𝑥 ≤15
+1 2
+𝑥 ≥3
+1
+𝑥 +9𝑥 ≥9
+1 2
+𝑥 ,𝑥 ≥0
+1 2
+The problem is solved and the solution of the problem above is as follows:
+𝑥 =3.6,𝑥 =2.6,𝑍 (𝑥)=−0.60869565,𝑍 (𝑥)=1.29385437,𝑍 (𝑥)=0.8235294
+1 2 1 2 3
+and maximum value is 1.508688.
+Comparing our results and Gupta’s results (𝑥 =3, 𝑥 =2, 𝑍 (𝑥)=−0.625, 𝑍 (𝑥)=1.15,
+1 2 1 2
+𝑍 (𝑥)=0.7857) then it can be seen that our the results are very effective.
+3
+169
+
+--- PAGE 6 ---
+A.C. Cevikel / Sigma J Eng & Nat Sci 10 (2), 165-170, 2019
+5. CONCLUSIONS
+I has been made in this paper to explore a procedure to solve Multiobjective Fractional
+Programming Problems (MFPPs) based on first-order Multiplicative Taylor series. With the help
+of first-order Multiplicative Taylor polynomial series at optimal points of each fractional
+objective function in feasible region. We assumed that the weights of the objective are equal.
+Then, the proposed solution method was applied to two numerical examples to test the effect of
+first-order Multiplicative Taylor series method and the results show that the proposed method is
+more effective when compared to the previous methods. This method is applied to different
+disciplines such as engineering, business, finance, economics, etc.
+REFERENCES
+[1] Cevikel, A.C and Ahlatcioglu, M., (2010) Solutions for fuzzy matrix games, Computers
+and Mathematics with Applications 60, 399-410.
+[2] Cevikel, A.C and Ahlatcioglu, M., (2018) A Transition from two-person zero-sum games
+to cooperative games with fuzzy payoffs, Iranian Journal of Fuzzy Systems 15, 121-131.
+[3] Cevikel, AC and Ozavsar, M., (2019) Q-Taylor method for multiobjective fractional
+programming problem, European Journal of Sciences and Technology 16, 26-31.
+[4] Guzel N. and Sivri M., (2005) Taylor series solution of multi objective linear fractional
+programming problem, Trakya University Journal Science 6, 80–87.
+[5] Kornbluth J.S.H. and Steuer R.E., (1981) Multiple objective linear fractional
+programming, Management Science 27, 1024–1039.
+[6] Nykowski I. and Zolkiski Z., (1985) A compromise procedure for the multiple objective
+linear fractional programming problem, European Journal of Operational Research 19,
+91–97.
+[7] Saad O., (2007) On stability of proper efficient solutions in multiobjective fractional
+programming problems under fuzziness, Mathematical and Computer Modelling 45, 221–
+231.
+[8] Cevikel, A.C., (2019) Q-Taylor series method for solving fuzzy multiobjective linear
+fractional programming problem, European Journal of Science and Technology 15, 10-
+17.
+[9] Bitran G.R. and Novaes A.G., (1973) Linear programming with a fractional objective
+function, Operation Research 21, 22–29.
+[10] Charnes A. and Cooper W.W., (1962) Programming with linear fractional functions,
+Naval Research Logistics Quaterly 9, 181–186.
+[11] Grossman M.and Katz R., (1972) Non-Newtonian Calculus, Lee Press, Pigeon Cove, MA,
+USA.
+[12] Bashirov A.E., Kurpinar E.M.and Ozyapici A., (2008) Multiplicative calculus and its
+applications, Journal of Mathematical Analysis and Applications 337, 36-48.
+[13] Chakraborty M. and Gupta S., (2002) Fuzzy mathematical programming for
+multiobjective linear fractional programming problem, Fuzzy sets and systems 125 335-
+342.
+170

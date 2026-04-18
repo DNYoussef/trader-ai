@@ -1,0 +1,211 @@
+================================================================================
+PIVOT CONFIRMATION LOOKAHEAD BIAS - VISUAL FIX DIAGRAM
+================================================================================
+
+SCENARIO: Window = 7 bars, detecting pivot high at bar 100
+
+--------------------------------------------------------------------------------
+TIMELINE VIEW
+--------------------------------------------------------------------------------
+
+Bar Index:  93  94  95  96  97  98  99 [100] 101 102 103 104 105 106 107 108
+            |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+Price:      48  49  50  51  52  53  54  55  54  53  52  51  50  49  48  47
+                                        ^
+                                        |
+                                 PIVOT HIGH (bar 100)
+
+Left Window:  [93-99]  <- 7 bars before bar 100
+Right Window: [101-107] <- 7 bars after bar 100
+
+
+================================================================================
+BEFORE FIX (WRONG - LOOKAHEAD BIAS)
+================================================================================
+
+AT BAR 100 (when pivot occurs):
+--------------------------------
+Loop iteration: i = 100
+Check left window:  bars 93-99   (PAST - OK)
+Check right window: bars 101-107 (FUTURE - BAD!)
+                    ^^^^^^^^^^^
+                    These bars don't exist at bar 100!
+
+Decision: Yes, bar 100 is a pivot high
+
+Action: confirm_idx = 100 + 7 = 107
+        pivots.iloc[107] = 1
+
+Result: PIVOT MARKED AT BAR 107 (wrong location!)
+
+
+PIVOT SERIES (BEFORE FIX):
+Bar:    93  94  95  96  97  98  99 100 101 102 103 104 105 106 [107] 108
+Pivot:   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1    0
+                                                                 ^
+                                                                 |
+                                                    Marked here (WRONG!)
+
+
+PROBLEM: At bar 107, when signal fires:
+- System "knows" about pivot at bar 100
+- But this knowledge used bars 101-107 which didn't exist at bar 100
+- In live trading, at bar 100, you can't see bars 101-107
+- This is LOOKAHEAD BIAS!
+
+
+================================================================================
+AFTER FIX (CORRECT - NO LOOKAHEAD)
+================================================================================
+
+AT BAR 107 (when we have enough data):
+---------------------------------------
+Loop iteration: i = 100
+Check left window:  bars 93-99   (PAST - OK, now at bar 107)
+Check right window: bars 101-107 (PAST - OK, now at bar 107)
+                    ^^^^^^^^^^^
+                    These bars NOW exist (we're at bar 107)
+
+Decision: Yes, bar 100 is a pivot high
+
+Action: pivots.iloc[100] = 1  (mark at actual index)
+
+Result: PIVOT MARKED AT BAR 100 (correct location!)
+        Only visible at bar 107+ (natural lag)
+
+
+PIVOT SERIES (AFTER FIX):
+Bar:    93  94  95  96  97  98  99 [100] 101 102 103 104 105 106 107 108
+Pivot:   0   0   0   0   0   0   0   1    0   0   0   0   0   0   0   0
+                                    ^
+                                    |
+                            Marked here (CORRECT!)
+                            Visible at bar 107+
+
+
+CONFIRMATION LAG ENFORCEMENT:
+At bar 100: Pivot marked at 100, but i+7=107 > 100, so NOT visible yet
+At bar 101: i+7=107 > 101, still NOT visible
+At bar 102: i+7=107 > 102, still NOT visible
+At bar 103: i+7=107 > 103, still NOT visible
+At bar 104: i+7=107 > 104, still NOT visible
+At bar 105: i+7=107 > 105, still NOT visible
+At bar 106: i+7=107 > 106, still NOT visible
+At bar 107: i+7=107 <= 107, NOW VISIBLE! (confirmed)
+
+
+SOLUTION: At bar 107, when signal fires:
+- System knows about pivot at bar 100
+- This knowledge used bars 93-107 which all exist at bar 107
+- In live trading, at bar 107, you can see bars 93-107
+- NO LOOKAHEAD BIAS!
+
+
+================================================================================
+CODE COMPARISON
+================================================================================
+
+BEFORE FIX:
+-----------
+for i in range(window, len(df) - window):
+    # Check conditions...
+
+    confirm_idx = i + window        <- Shifts index by window
+    if confirm_idx < len(df):
+        pivots.iloc[confirm_idx] = 1  <- Marks at wrong location
+
+
+AFTER FIX:
+----------
+for i in range(window, len(df) - window):
+    # Check conditions...
+
+    pivots.iloc[i] = 1              <- Marks at correct location
+
+    # Lag enforced in get_confirmed_pivot_levels():
+    if i + window > current_idx:    <- Checks confirmation
+        continue                    <- Skips if not confirmed yet
+
+
+================================================================================
+TEMPORAL LOGIC SUMMARY
+================================================================================
+
+KEY INSIGHT: At bar i, we need bars [i-window, i+window] to confirm a pivot
+
+CORRECT INTERPRETATION:
+- The pivot OCCURS at bar i
+- The pivot is CONFIRMED at bar i+window (natural lag)
+- We MARK the pivot at bar i (actual location)
+- We only USE the pivot after bar i+window (enforced lag)
+
+WRONG INTERPRETATION (before fix):
+- The pivot OCCURS at bar i
+- We MARK the pivot at bar i+window (shifted location)
+- We USE the pivot at bar i+window (no lag)
+- This creates lookahead bias!
+
+
+================================================================================
+TRADING EXAMPLE
+================================================================================
+
+SETUP:
+- Pivot low at bar 100: $50.00
+- Window = 7 bars
+- Current bar = 120
+- Price action: sweep to $49.50, close at $50.50
+
+
+BEFORE FIX (UNREALISTIC):
+-------------------------
+Bar 107: System "knows" pivot at bar 100
+         (but used future bars 101-107 at bar 100 - CHEATING!)
+
+Bar 120: Sweep detected, signal fires
+         Entry: $50.50
+
+Result: Looks profitable in backtest, FAILS in live trading
+        (because at bar 100, bars 101-107 didn't exist)
+
+
+AFTER FIX (REALISTIC):
+----------------------
+Bar 107: System knows pivot at bar 100
+         (used bars 93-107 which all exist at bar 107 - VALID!)
+
+Bar 120: Sweep detected, signal fires
+         Entry: $50.50
+
+Result: Same result in backtest AND live trading
+        (natural 7-bar confirmation lag preserved)
+
+
+================================================================================
+VALIDATION CHECKLIST
+================================================================================
+
+[X] Pivots marked at actual index i (not i+window)
+[X] Confirmation requires i+window bars
+[X] Lag enforced: if i+window > current_idx: continue
+[X] No future data accessed
+[X] Backtest uses only historical data
+[X] Live trading will work correctly
+
+
+================================================================================
+FIX STATUS: COMPLETE
+================================================================================
+
+Files Modified:
+1. src/intelligence/breakout_sweep_signal.py
+   - mark_pivots() - Fixed pivot marking
+   - get_confirmed_pivot_levels() - Added lag enforcement
+
+Critical Fix Points:
+1. Line 69: pivots.iloc[i] = 1 (was: pivots.iloc[confirm_idx] = 1)
+2. Line 134: if i + window > current_idx: continue (NEW)
+
+This fix is CRITICAL for production deployment!
+
+================================================================================

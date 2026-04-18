@@ -1,0 +1,13 @@
+fix: Fix white screen by adding Redux Provider and using relative API URLs
+
+- Add Redux Provider wrapper in main.tsx (was missing, causing useAppDispatch crash)
+- Create API config with relative URLs for production compatibility
+- Update useTradingData hook to use relative API endpoints
+- Fix WebSocket URL to use current host instead of hardcoded localhost
+
+The dashboard was crashing because useWebSocket hook uses Redux hooks
+without the Provider being present in the component tree.
+
+Generated with Claude Code
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>

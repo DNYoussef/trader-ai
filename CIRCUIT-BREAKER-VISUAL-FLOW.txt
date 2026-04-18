@@ -1,0 +1,210 @@
+=============================================================================
+              CIRCUIT BREAKER TRADE EXECUTION SAFETY FLOW
+=============================================================================
+
+BEFORE FIX:
+-----------
+Trade Request --> Order Validation --> Trade Execution
+                                            |
+                                            v
+                  (Circuit breakers monitoring but NOT blocking)
+
+
+AFTER FIX:
+----------
+Trade Request
+     |
+     v
+Kill Switch Check
+     |
+     v
++------------------+
+| CIRCUIT BREAKER  |  <--- NEW SAFETY GATE
+|      CHECK       |
++------------------+
+     |
+     +--- Open breakers > 0? ----> BLOCK TRADE (Log + Exception)
+     |
+     +--- Trading Loss Open? ----> BLOCK TRADE (Log + Exception)
+     |
+     v
+Order Validation
+     |
+     v
+Trade Execution
+     |
+     v
+SUCCESS
+
+
+=============================================================================
+                        CIRCUIT BREAKER TYPES
+=============================================================================
+
+1. TRADING LOSS PROTECTION
+   Threshold: 3 failures or 80% failure rate
+   Timeout: 5 minutes (with exponential backoff)
+   Triggers: Excessive trading losses
+
+2. CONNECTION FAILURE PROTECTION
+   Threshold: 5 failures or 50% failure rate
+   Timeout: 1 minute
+   Triggers: Broker disconnections
+
+3. PERFORMANCE LATENCY PROTECTION
+   Threshold: 10 failures or 30% failure rate
+   Timeout: 30 seconds
+   Triggers: System performance degradation
+
+
+=============================================================================
+                    IMPLEMENTATION LOCATIONS
+=============================================================================
+
+1. src/trading/trade_executor.py
+
+   async def buy_market_order(...):
+       try:
+           # CHECK CIRCUIT BREAKERS (NEW - Line 83-95)
+           if hasattr(self, 'circuit_manager') and self.circuit_manager:
+               system_status = self.circuit_manager.get_system_status()
+               if system_status.get('open_breakers', 0) > 0:
+                   BLOCK TRADE
+               if trading_cb.get('state') == 'open':
+                   BLOCK TRADE
+
+           # Existing validation...
+           await self._validate_order_params(...)
+           # Execute trade...
+
+   async def sell_market_order(...):
+       try:
+           # CHECK CIRCUIT BREAKERS (NEW - Line 219-231)
+           [Same checks as buy_market_order]
+
+           # Existing validation...
+           # Execute trade...
+
+
+2. src/trading_engine.py
+
+   async def initialize(self):
+       # Create trade executor
+       self.trade_executor = TradeExecutor(...)
+
+       # Initialize safety integration
+       self.safety_integration = TradingSafetyIntegration(...)
+       await self.safety_integration.initialize(self)
+
+       # ATTACH CIRCUIT MANAGER (NEW - Line 221-224)
+       if self.safety_integration.circuit_manager:
+           self.trade_executor.circuit_manager = self.safety_integration.circuit_manager
+
+   async def execute_manual_trade(...):
+       # Check kill switch
+       if self.kill_switch_activated:
+           raise Exception("Kill switch active")
+
+       # CHECK CIRCUIT BREAKERS (NEW - Line 581-594)
+       if self.safety_integration and self.safety_integration.circuit_manager:
+           system_status = self.safety_integration.circuit_manager.get_system_status()
+           if system_status.get('open_breakers', 0) > 0:
+               BLOCK TRADE
+           if trading_cb.get('state') == 'open':
+               BLOCK TRADE
+
+       # Execute trade...
+
+
+=============================================================================
+                        SAFETY DECISION TREE
+=============================================================================
+
+                         [Trade Request]
+                               |
+                               v
+                    [Kill Switch Active?] --Yes--> BLOCK (Critical State)
+                               |
+                              No
+                               v
+                    [Circuit Manager Available?] --No--> ALLOW (Degraded Mode)
+                               |
+                              Yes
+                               v
+                    [Get Circuit Breaker Status]
+                               |
+                               v
+                    [Any Breakers Open?] --Yes--> BLOCK (Safety Limit)
+                               |
+                              No
+                               v
+                    [Trading Loss Breaker Open?] --Yes--> BLOCK (Loss Limit)
+                               |
+                              No
+                               v
+                    [Order Validation] --Fail--> BLOCK (Invalid Order)
+                               |
+                             Pass
+                               v
+                    [EXECUTE TRADE]
+
+
+=============================================================================
+                          ERROR MESSAGES
+=============================================================================
+
+Circuit Breaker Blocked:
+------------------------
+CRITICAL: Trade blocked: 1 circuit breakers OPEN
+Exception: Trading halted: Circuit breakers active
+
+Trading Loss Blocked:
+--------------------
+CRITICAL: Trade blocked: 1 circuit breakers OPEN
+Exception: Trading halted: Loss limit circuit breaker OPEN - Daily loss limit of -5% exceeded
+
+
+=============================================================================
+                          TEST RESULTS
+=============================================================================
+
+Test Case                                           Result
+----------------------------------------------------------
+Buy order blocked when circuit breaker open         PASSED
+Sell order blocked when circuit breaker open        PASSED
+Trade allowed when circuit breakers closed          PASSED
+Specific trading loss breaker blocks trade          PASSED
+Trade proceeds without circuit_manager              PASSED
+
+Overall: 5/5 tests passed (100% success rate)
+
+
+=============================================================================
+                        SAFETY GUARANTEE
+=============================================================================
+
+  NO TRADE CAN EXECUTE WHEN:
+
+  1. Any circuit breaker is in OPEN state
+  2. Trading loss limit breaker is OPEN
+  3. Kill switch is activated
+  4. Order validation fails
+
+  ALL TRADES ARE PROTECTED BY:
+
+  - Circuit breaker checks (NEW)
+  - Kill switch monitoring
+  - Daily loss limits
+  - Position size limits
+  - Gate validation
+  - Order validation
+
+  MONITORED VIA:
+
+  - Critical logs
+  - Audit trail entries
+  - System health metrics
+  - Circuit breaker status API
+
+
+=============================================================================

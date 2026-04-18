@@ -1,0 +1,423 @@
+SOURCE: Cordova-Lepe, The multiplicative derivative as a measure of elasticity in economics.pdf
+TOTAL PAGES: 9
+================================================================================
+
+--- PAGE 1 ---
+See discussions, stats, and author profiles for this publication at: https://www.researchgate.net/publication/278849507
+The multiplicative derivative as a measure of elasticity in economics
+Article · January 2006
+CITATIONS READS
+23 638
+1 author:
+Fernando Córdova-Lepe
+Universidad Católica del Maule
+41 PUBLICATIONS 131 CITATIONS
+SEE PROFILE
+Some of the authors of this publication are also working on these related projects:
+Impulsive equations and biological systems View project
+All content following this page was uploaded by Fernando Córdova-Lepe on 22 June 2015.
+The user has requested enhancement of the downloaded file.
+
+--- PAGE 2 ---
+The Multiplicative Derivative as a Measure of Elasticity in Economics
+Fernando Córdova-Lepe
+Instituto de Ciencias Básicas
+Universidad Católica del Maule
+fcordova@ucm.cl
+1.- Introduction
+In [1] it was introduced a kind of derivative of multiplicative type. This derivative permits
+to compare relative changes between a dependent positive variable and the independent
+respective variable that it is also positive. There we defined a new operation on the positive
+real numbers that makes commutative the raise to a power operation. Given a and bin
+]0,∞[, introducing a⊗b=aln(b), as a second operation, this is, after the usual
+multiplication, we do of the positive real numbers an ordered and complete field, i.e., a
+model of the real numbers field that lives in its interior. For a function f :]0,∞[→]0,∞[ we
+define the multiplicative derivative of f in x ∈]0,∞[, as the limit
+0
+1
+Qf(x 0)=lim h→1⎜⎜
+⎝⎛ f f( (x
+x0
+0h ))
+⎟⎟
+⎠⎞ln(h)
+, (1)
+if it exists.
+Some of the principal properties that characterize the calculus induced with this new
+derivative are listed in the following theorem.
+Theorem 1: Let f,g:]0,∞[→]0,∞[ be functions such that the derivatives Qf(x ) and
+0
+Qg(x ) exist for somex ∈]0,∞[, then:
+0 0
+( i) If f is a constant function, then Qf(x )=1.
+0
+( ii) If f(x)= xα, with α a real number, then Qf(x )=eα.
+0
+(iii) We have
+Q(fα⋅gβ)(x )=(Qf(x ))α(Qg(x ))β,
+0 0 0
+for all α and βreal numbers.
+(iv) We have
+Q(gf)=(Qg)f(Qf)⊗(gf).
+So if a > 0, then Q(ax)=ax.
+( v) We have
+f g
+Q(f + g)=(Qf)f+g(Qg)f+g.
+So if a > 0, then
+f
+Q(f +a)=(Qf)f+a.
+
+--- PAGE 3 ---
+Other important result that permits to calculate the multiplicative derivative for
+compounded functions is the analogous of the Chain Rule; it is the theorem that follows.
+Theorem 2: Let f,g:]0,∞[→]0,∞[ be functions such that the derivatives Qf(g(x )) and
+0
+Qg(x ) exist for somex ∈]0,∞[, then:
+0 0
+Q(f g)=( Qf(g)) ⊗Qg =(Qf(g))ln(Qg).
+o
+This derivative generates a calculus that we called Proportional Calculus, PC. There is an
+isomorphism between PC and the Differential Calculus, DC. This identification puts the PC
+into de Newton’s Calculus. It is hoped then that the new derivative that correspond to a
+multiplicative point of view of the variation's representations (in contrast to the additive
+one, which is the usual perspective) will help in the solution of problems of the traditional
+derivative. Since what it was said, we can infer that if the PC is an image, that keeps the
+structure of the DC, the new calculus also is a whole that contains another calculus in its
+interior, generating in this manner a infinite chain of derivatives and its respective calculus.
+We cite the following result that is very useful technically, because it ties both derivatives.
+Theorem 3: Let f :]0,∞[→]0,∞[ and x some positive real numbers. Then Qf(x )exists if
+0 0
+only if Df(x )exists, in that case
+0
+f(x )
+Df(x ) = 0 ln(Qf(x )). (2)
+0 x 0
+0
+The multiplicative derivative has in some cases technical advantages of calculus,
+principally in the treatment of functions constructed by mix of powers, multiplications and
+their inverse operations.
+In this work we pretend to show some possible and explicit applications of the PC in
+Economics. More precisely, in section 2, we introduce a relation that appears between the
+multiplicative derivative and the known concept of the elasticity. The elasticity concept is
+too much extended and useful, a short glossary considers: Cross-price elasticity of demand,
+Cross-price elasticity of supply, Elastic (elasticity > 1), Income elasticity of demand,
+Inelastic (elasticity < 1), Inferior goods (income elasticity < 0), Luxuries (income elasticity
+> 1), Necessity (income elasticity < 1), Normal goods (income elasticity > 0), Perfectly
+elastic curves, Perfectly inelastic curves, Price elasticity of demand, Price elasticity of
+supply, Price elasticity and Unit elastic (elasticity = 1). We think that the concept of
+elasticity deserves to have in property an associate calculus, and the PC is a good candidate.
+In section 3, we connect the new derivative with the homogeneous functions, essentially we
+presents a new representation for the Euler Theorem. Moreover, we do some special
+remarks of two important classes of these functions, we represent the Cobb Douglas
+Functions as linear transformations, and for Constant Elasticity of Substitution Functions
+(for to calculate the substitution elasticity) we get a formula that is easy to remember.
+
+--- PAGE 4 ---
+2.- The Elasticity
+Elasticity can be thought as the concept that measures the responsiveness of one variable in
+response to another variable. In economics the best measure of this responsiveness is the
+proportional or the percent change in one variable relative to the proportional change in
+another variable, here we refer to positive variables.
+If f :]0,∞[→]0,∞[ is a function that relates two variables x and y byy = f(x), so that
+x >0 and y >0 are given such thaty = f(x ), then the proportional changes in
+0 0 0 0
+independent and dependent variables are ∆x/x and ∆y/y respectively, where
+0 0
+∆x = x−x and ∆y = y− y . The comparisons between these proportional changes,
+0 0
+dependent versus independent, are usually got by the quotient operation
+∆y/ y
+. (3)
+∆x/x
+Fixingx >0, this number is a function of∆x, so that, it determines an average elasticity of
+0
+f on the interval [x ,x +∆x] if ∆x >0 or [x +∆x,x ] if∆x<0. For to obtain an
+0 0 0 0
+instantaneous elasticity (point elasticity) of f at x , it is necessary to do∆x→0.
+0
+Expression (3) in this case converts to:
+x dy x ⋅ f'(x )
+η = 0 (x )= 0 0 . (4)
+f,x 0 y dx 0 f(x )
+0 0
+Letx be positive, if η has been calculated, then the linearization of f at x , this is
+0 f,x 0
+0
+∆y/∆x ≈ f'(x ) if ∆x ≈0, allows us to estimate the percent change, ∆y/y , given a
+0 0
+percent change ∆x/x , with the formula
+0
+∆y ∆x
+≈η ⋅ . (5)
+y f,x 0 x
+0 0
+For example, suppose than in a country f is the function that relates the quantity
+demanded of meat (y) with the income (x), if in some x >0 the income elasticity of
+0
+demand is 1.8 and the percentage change in income is 5%. What can we hope in the
+percentage change in demand? The answer is
+∆y ∆x
+≈η ⋅ =1.8⋅5%=9%.
+y f,x 0 x
+0 0
+We can connect expression (4) with (2) to write the instantaneous elasticity of f at x , this
+0
+is,
+η =ln(Qf(x )). (6)
+f,x 0
+0
+So the elasticity is the natural logarithm of the multiplicative derivative of f at x . A
+0
+direct application of (6) and the five items of Theorem 1 is that they permit to get quickly
+
+--- PAGE 5 ---
+the following relations among the elasticity of a function and the elasticity of its
+components.
+Theorem 4: Let f,g:]0,∞[→]0,∞[ be functions such that η and η exist for
+f,x g,x
+0 0
+somex ∈]0,∞[, then:
+0
+( i) If f is a constant function, then
+η =ln(Qf(x ))=ln(1)=0.
+f,x 0
+0
+( ii) If f(x)= xα, with α a real number, then
+η =ln(Qf(x ))=ln(eα)=α.
+f,x 0
+0
+(iii) We have
+η =ln[(Qf(x ))α(Qg(x ))β]=α⋅η +β⋅η ,
+fα⋅gβ,x
+0
+0 0 f,x
+0
+g,x
+0
+for all α and βreal numbers.
+(iv) We have
+η =ln[(Qg)f ⋅(Qf)⊗(gf)]= f(x )⋅[η +η ⊗g(x )].
+gf,x
+0
+0 g,x
+0
+f,x
+0
+0
+So if a > 0, then η =ln(Q(ax))=ln(ax)= x⋅ln(a).
+ax,x
+0
+( v) We have
+f g
+η =ln[(Qf)f+g(Qg)f+g]= f ⋅η + g ⋅η .
+f+g,x 0 f+g f,x 0 f+g g,x 0
+So if a > 0, then
+f
+η =ln[(Qf)f+a]= f ⋅η .
+f+a,x 0 f+a f,x 0
+The relation for the chain rule for to calculate elasticity has the form
+η =ln[(Qf(g))ln(Qg)]=η ⋅η .
+fog,x
+0
+f,g(x 0) g,x
+0
+All these formulas, the Theorem 4 and the chain rule, are well known; here we do not want
+to show an unfolding originality, only to remark the facility in manner of to do the
+calculations, the immediateness for to obtain them knowing well the calculus rules of the
+PC, which is the cost that we must pay.
+In the PC, if y = f(x), where f :]0,∞[→]0,∞[, then the relative change in the independent
+variable from x to x can be measured by x , similarly for the independent variable this
+0 x 0
+is y , with y = f(x ). These magnitudes can be compared using the inverse of the second
+y 0 0 0
+operation of the field (]0,∞[,⋅,⊗), so we get
+1
+⎛ y ⎞ln(x/x )
+0
+⎜ ⎟ .
+⎜ ⎟
+y
+⎝ ⎠
+0
+
+--- PAGE 6 ---
+Expression that in the limit when x→ x is denoted by Qf(x ). Clearly it also measure the
+0 0
+responsiveness of variable y in response to the variablex; so we permit us to call it PC-
+elasticity.
+Let y = f(x) be the demand function of meat at an incomex, if in some x >0 the
+0
+income PC-elasticity of demand is 6.05, and the income growth is 5%, then for to estimate
+the relative change of the demand we use
+y x
+≈Qf(x )⊗ =6.05ln(1.05) =1.05ln(6.05) ≈1.09.
+y 0 x
+0 0
+So we conclude that the demand increase in 9%. Therefore, now the elasticity is a kind of
+derivative, we do not need to learn a formula to calculate it.
+A classic exercise is to find what functions f :]0,∞[→]0,∞[have constant elasticityη. With
+the additive derivative this problem passes for solving the ordinary differential equation
+x⋅ f'(x)+η⋅ f(x)=0. (7)
+With our derivative the respective problem is to solve
+Qf(x)=eη. (8)
+It is very easy to get the solution of (7) by the method of separated variables, but for
+solving (8) it is enough to think in functions with multiplicative constant derivative, seeing
+the first three properties in Theorem 1, we have f(x)=α⋅xη, α>0.
+3.- Homogeneous Functions
+A function f :]0,∞[→]0,∞[is a homogeneous function of order (degree) r, if it satisfies the
+relation:
+f(tx)=tr f(x), for all t,x>0. (9)
+It is easy to prove than then f(x)=k⋅xr, moreover η =r, this is equivalent to
+f,x
+Qf(x)=Q(k)⋅Q(xr)=er.
+When we work with functions of several variables, this is f :]0,∞[n→]0,∞[, then the
+corresponding definition is the same expression (9), but with x a vector in ]0,∞[n. The
+Euler’s Homogeneous Function Theorem that relates the degree of homogeneity with the
+partial derivatives affirms that:
+x f' (x)+x f' (x)+ +x f' (x) = ∑x f' (x) = r . (10)
+L
+1 1 2 2 n n i i
+In terms of the multiplicative derivative, the relation (10) takes the form:
+Q f(x)⋅Q f(x)⋅ ⋅Q f(x)=er. (11)
+K
+1 2 n
+
+--- PAGE 7 ---
+Where Q f(x), with i =1, ,n, is the partial multiplicative derivative of f at x, this is,
+K
+i
+[f(x , ,xh, ,x )/ f(x)]1/ln(h) as h→1.
+K K
+1 i n
+We can note some simple advantages of (11) confronted with (10), for instance: the
+autonomy of this expression with respect to the independent variable, the possibility of
+verbalizing as “a homogeneous function has constant the product of all its partial
+elasticities”. This sentence is not difficult to memorize.
+There are two classical families with high utility in economic theory of homogeneous
+functions, they are:
+a) The Cobb-Douglas Functions, and
+b) The C.E.S. (Constant Elasticity of Substitution) Functions.
+A function f :]0,∞[n→]0,∞[ is a Cobb Douglas Function (CD-function) if
+f(x , L,x )=k⋅xα 1Lx α n ,
+1 n 1 n
+where k,α >0, for all i =1, ,n. The relation (11) for a CD-function takes the form
+L
+i
+eα 1 ⋅ K⋅eα n =er, so it is immediate that α + L+α =r .
+1 n
+The way for to think and characterize a concept, in its relation with others, has direct
+connection with the context where it is thought. For instance, we can affirm that a CD-
+function is a linear transformation between vector spaces defined on the field
+(]0,∞[,⋅,⊗)⊂ (ℜ,+,⋅). It is here the behind reason of to speak sometimes of the logarithmic-
+linear model. For that we define over the set ]0,∞[n, the product
+(x , ,x )⋅(y , ,y )=(x y , ,x y ). It is trivial to prove that we have a commutative
+L L L
+1 n 1 n 1 1 n n
+group and in this group the neutral element take the form (1, ,1) and the inverse of an
+L
+element (x , ,x ) is (x−1, ,x−1). It is also possible to define the scalar product of an
+L L
+1 n 1 n
+element (x , ,x ) by a positive real number α∈]0,∞[ by the equality
+L
+1 n
+α⊗(x , ,x )=(x ln(α), ,x ln(α)). This new scalar product satisfies:
+L L
+1 n n
+1
+(α⊗β)⊗x=α⊗(β⊗x), α⊗(x⋅y)=(α⊗x)⋅(α⊗ y), (α⋅β)⊗x =(α⊗x)⋅(β⊗x)
+and e⊗x = x, for all α,β>0 and x,y∈]0,∞[n. All these properties permit us to claim
+that (]0,∞[n,⋅,⊗) is a vector space over the introduced field of the positive real numbers.
+With the sets ]0,∞[n and ]0,∞[ thought as vector spaces on (]0,∞[,⋅,⊗), each linear
+transformation T :]0,∞[n→]0,∞[ is such that T[(α⊗x)⋅(β⊗ y)]=(α⊗T(x))⋅(β⊗T(y)),
+this is, the image of a linear combination of vectors is the linear combination of the images
+of such vectors. Since x=[x ⊗(e,1, ,1)]⋅[x ⊗(1,e, ,1)] [x ⊗(1, ,1,e)], to define T
+L L L L
+1 2 n
+in a unique manner it is sufficient to define the images of the base formed by (e,1, ,1),
+L
+(1,e, ,1), …(1, ,1,e), if their images are respectively α,α, ,α, then we have
+L L L
+1 2 n
+r
+T(x)=(x ⊗α)⋅(x ⊗α) (x ⊗α),
+L
+1 1 2 2 n n
+
+--- PAGE 8 ---
+i.e., T(xr )= xβ 1 ⋅x β 2 ⋅ L⋅x β n , where β =ln(α),∀i =1, K,n. So that a CD-function can be
+1 2 n i i
+seen, in this context, as a linear transformation.
+Perhaps could be interesting the study, in the economic field, of the matrix representation of
+a linear transformation between spaces of the form]0,∞[n, principally in relation with the
+transcendental logarithm functional.
+5.- C.E.S. Functions
+For a CD-function of two variables f(x ,x ) = xβ 1 ⋅xβ 2 , β >0, x >0, it is defined for
+1 2 1 2 i i
+{ }
+each y >0 the contour of f at this value as the set C (y)= (x ,x )∈]0,∞[2: f(x ,x )= y .
+f 1 2 1 2
+The graph of this contour is a concave level curve, when we put the variable x in function
+1
+of the variablex . For to obtain the slopes we calculates implicit additive derivatives in the
+2
+relation that define the contour as a function ofx , getting the equality
+2
+∂f
+∂x ∂x
+1 =− 2 .
+∂x ∂f
+2
+∂x
+1
+In Economics the people is interesting in to know how this slope varies along of the curve,
+for that, it is studied its intersection with the straight linex =C⋅x , and it is studied the
+1 2
+variation of such slope when C varies. For a better measure of the sensibility to the
+changes, and obviating the sign, it is considered the elasticity, this is,
+x
+1
+x ∂ ⎛ f' ⎞
+η= 2 ⋅ ⎜ 2 ⎟ .
+f' x ⎝ f' ⎠
+2 ∂( 1 ) 1
+f' x
+1 2
+The elasticity of substitution is defined asσ= 1 . An example of a function with constant
+η
+elasticity of substitution is
+k
+f(x ,x )= . (12)
+1 2 v
+⎡δ δ ⎤ ρ
+⎢ 1 + 2 ⎥
+xρ x ρ
+⎣ ⎦
+1 2
+It can be proved that this function has constant elasticity of substitution
+1
+σ= . (13)
+1+ρ
+If in the given definition of substitution elasticity we express the Newtonians derivatives in
+terms of the analogous multiplicative derivatives we have:
+1
+σ=
+⎡ ⎛ln(Q f)⎞⎤
+1+ln⎢ ⎣Q
+(x 1/x
+2)⎜⎜
+⎝ln(Q
+12 f)⎟⎟ ⎠⎥
+⎦
+
+--- PAGE 9 ---
+Note the similarity of this last expression, which is satisfied for any homogeneous function,
+with the expression (13) that was obtained for a particular case of C.E.S. function, the
+function defined in (12). It is also possible to combine both derivatives to measure some
+different kinds of responsiveness.
+6.- References
+Córdova-Lepe, F. From quotient operation toward a proportional calculus. Journal of
+Mathematics, Game Theory and Algebra. (2004) Accepted.
+Madden, P. Concavidad y optimización en microeconomía. Alianza Editorial S. A., Madrid
+(1987).
+VViieeww ppuubblliiccaattiioonn ssttaattss

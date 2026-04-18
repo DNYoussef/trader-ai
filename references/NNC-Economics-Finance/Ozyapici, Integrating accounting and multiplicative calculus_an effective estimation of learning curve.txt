@@ -1,0 +1,451 @@
+SOURCE: Ozyapici, Integrating accounting and multiplicative calculus_an effective estimation of learning curve.pdf
+TOTAL PAGES: 13
+================================================================================
+
+--- PAGE 1 ---
+ComputMathOrganTheory
+DOI10.1007/s10588-016-9225-1
+MANUSCRIPT
+Integrating accounting and multiplicative calculus:
+an effective estimation of learning curve
+Hasan O¨zyapıcı1 • I˙lhan Dalcı2 • Ali O¨zyapıcı3
+(cid:2)SpringerScience+BusinessMediaNewYork2016
+Abstract Numerical interpolation methods are essential for the estimation of
+nonlinear functions and they have a wide range of applications in economics and
+accounting. In this regard, the idea of using interpolation methods based on mul-
+tiplicativecalculusforsuitableaccountingproblemsisself-evident.Thepurposeof
+thisstudy,therefore,istodevelopawaytobetterestimatethelearningcurve,which
+is an exponentially decreasing function, based on multiplicative Lagrange inter-
+polation. The results of this study show that the proposed multiplicative method of
+learning curve provides more accurate estimates of labour costs when compared to
+the conventional methods. This is because the exponential functions are linear in
+multiplicative calculus. Furthermore, the results reveal that using the proposed
+method enables cost and managerial accountants to better calculate both cost of
+unused capacity and product cost in a cumulative production represented by a
+nonlinear function. The results of this study are also expected to help researchers,
+practitioners, economists, business managers, and cost and managerial accountants
+to understand how to construct a multiplicative based learning curve to improve
+such decisions as pricing, profit planning, capacity management, and budgeting.
+& HasanO¨zyapıcı
+hasan.ozyapici@emu.edu.tr
+I˙lhanDalcı
+ilhan.dalci@emu.edu.tr
+AliO¨zyapıcı
+aozyapici@ciu.edu.tr
+1 DepartmentofBusinessAdministration,FacultyofBusinessandEconomics,Eastern
+MediterraneanUniversity,Famagusta,Mersin10,Turkey
+2 FacultyofBusinessandEconomics,EasternMediterraneanUniversity,Famagusta,Mersin10,
+Turkey
+3 FacultyofEngineering,CyprusInternationalUniversity,Nicosia,Mersin10,Turkey
+123
+
+--- PAGE 2 ---
+H.O¨zyapıcıetal.
+Keywords Learning curve (cid:2) Learning curve estimation (cid:2) Multiplicative calculus (cid:2)
+Multiplicative Lagrange interpolation (cid:2) Nonlinear estimation
+1 Introduction
+Alearningcurveisamathematicalfunctionthatmeasureshowtheamountofinput,
+whichismainlydirectlabourhoursneededtoproduceoneunitofoutput,decreases
+as quantity of output produced increases (Nadeau et al. 2010). The learning curve,
+which emphasizes thatindividualsbecomemoreefficient atdoingataskwhenitis
+performed repeatedly, is one of the most popular and generally accepted cost
+estimation theories (Womer and Patterson 1983; Jarkas and Horner 2011).
+Identifying how costs vary in accordance with the output level is essential in a
+decision making process. However, since the costs act in different patterns under
+different conditions, predicting them is a very difficult task. Managers can use the
+past data to predict the costs that are expected to be incurred. An increase in
+efficiency of the labour force, on the other hand, may result in misleading cost
+predictions. This effect, in the literature, is known as the ‘Learning Effect’ (Drury
+2012). Thus, the learning effect is a vital concept for understanding and estimating
+the costs in an accurate way. In this regard, with better understanding of learning
+effect,directlabourandproductioncostscanbecomputedmoreaccurately.This,in
+turn, helps managers to make business decisions, such as cost and capacity
+management, pricing, and human resource planning, more efficiently.
+There has been an increasing interest in the application of the learning effect in
+accounting and industrial settings (Liao 1982; Jaber and Guiffrida 2008). The
+learning effect can be applied to various industries, such as aircraft, aerospace,
+assembly, automotive, electronics, shipbuilding, construction, defence, and
+petroleum refining, in which the activities are repetitious and identical (Steven
+1999; Jarkas and Horner 2011).
+Thelearningcurve,whichhasagreatpracticalimportance,couldbeausefultool
+for decision makers (Fioretti 2007a, b). Accordingly, there has been a stream of
+researchinvestigatingthelearningeffectinproductcostevaluation,productpricing,
+profit planning, and control (e.g. Wright 1936; Harvey 1976; Mclntyre 1977; Liao
+1982). To illustrate, Lieberman (1984) used the data on 37 chemical products and
+found a strong and consistent learning effect in the chemical industry. In another
+study, O¨ren and Erol (2009) analyzed the role of learning in reducing the cost of
+production and concluded that learning should be considered as a tool that reduces
+the cost of a product or service. Additionally, McKee and McKee (2013) explored
+theeffectofthelearningonrevenuerecognition.Theauthorsnotethatthedifferent
+amounts of revenue might be recognized when the learning effect is taken into
+account under the revenue recognition standard. Togo (2001), on the other hand,
+emphasized that the log-linear function should be used for learning curve because
+all cost behaviour is not linear. Apart from these studies, others have investigated
+the applicability of the learning curve in various sectors ranging from the aircraft
+industry to the food industry (e.g. Hartley 1965; Reis 1991; Liao 2009; Jarkas and
+123
+
+--- PAGE 3 ---
+Integratingaccountingandmultiplicativecalculus:an…
+Horner2011;Omahetal.2012).Theresultsfoundinthosestudiesdemonstratethat
+the learning curve phenomenon can be beneficially applied as a management tool.
+Learning curves are key elements of strategies of some big companies such as
+Dell Computer, Wal-Mart, McDonald’s, and Boeing. This is because these
+companies utilize the learning curves to decrease their costs, plan resource
+requirements, and increase profitability (Lanen et al. 2011; Horngren et al. 2012).
+According to Horngren et al. (2012), many companies such as Pizza Hut, Home
+Depot, and The Nissan Motor Company benefit from the learning curve in
+performance evaluation.
+Apart from these considerations, managersuse cost functions to understand cost
+behaviours. Cost functions are classified as linear and nonlinear cost functions
+(Horngrenetal.2012).Oneofthemainreasonsforacostfunctiontobenonlinearis
+the learning effect. According to the learning effect, employees are learning and
+becoming more familiar with their jobs which enable them to increase their
+efficiency. Improved efficiency, in turn, decreases unit cost. In this context,
+nonlinearity should be considered in the process of predicting unit costs (Horngren
+etal.2012).However,itisconventionallyassumedthatthelearningrateusedinthe
+learningcurveisconstant(Blocheretal.2010).Therefore,itcanbeconcludedthat
+conventional learning curve model may not meet the needs of managers especially
+when the data have nonlinear characteristics. The conventional learning curve
+modelmayalsofailtopredicttheintermediatevaluesaccurately.Accordingly,this
+paper is using multiplicative calculus to estimate the parameters of the learning
+curve.Tothebestofourknowledge,thereisnostudyusingmultiplicativecalculus
+in the learning curve model. Thus, the current study is expected tofill this gap and
+provide comparableresultstothe studiesthat have been carriedoutconcerning the
+conventional learning curve. Moreover, the results of this study are expected to be
+useful for managers, and cost and managerial accountants of companies using the
+learning effect in making decisions.
+The remainder of this paper is organized as follows. Section 2 introduces
+multiplicative calculus and its applications to economics and finance. Section 3
+presentsabackgroundfortheproposedmethod.Section 4containstheestimationof
+learning curve via multiplicative calculus. Finally, Sect. 5 presents concluding
+remarks and implications of the research.
+2 Multiplicative calculus and its applications to economics and finance
+In this section, important applications of multiplicative calculus to economics and
+finance are outlined in order to support the idea of integrating multiplicative
+calculusintothelearningcurve.Inlightofthecompletedapplicationsineconomics
+and finance, the possible impact of learning curve estimation via multiplicative
+based methods can be clarified.
+Accordingly,itisimportanttostartwithformationofmultiplicativederivativeas
+follows: Let f with respect to x be a real positive-valued function defined in open
+interval(a,b).Supposethatthevaluechangesfromxtox ? hinthegiveninterval.
+123
+
+--- PAGE 4 ---
+H.O¨zyapıcıetal.
+Then,thefunctionf changesfromfðxÞtofðxþhÞ.Consequently,themultiplicative
+forward operator D(cid:3), which represents the rate of change of f, can be defined as
+fðxþhÞ
+D(cid:3)fðxÞ¼
+fðxÞ
+Multiplicative derivative, if exists, can be represented over multiplicative
+forward operator by
+f(cid:3)ðxÞ¼ limðD(cid:3)fÞ1=h
+h!0
+where x[dom(f). From the formation of multiplicative forward operator D(cid:3), multi-
+plicative derivative represents rate of change. Since multiplicative derivative is
+scale free, it can efficiently be used for representing growth related problems.
+Hence, multiplicative derivative provides a natural representation of growth phe-
+nomena.Forinstance,wereferthestudyofBashirovetal.(2008)forthefollowing
+problem: Assume that a deposit of $(a) in a bank account grows to $(a ? d) after
+one day, to $(a ? m) after one month, and to $(a ? y) after one year. Then, the
+average daily growth factor is (a ? d)/a, the average monthly growth factor is
+(a ? m)/a, and the average annual growth factor is (a ? y)/a. Also, let the
+instantaneous annual growth factor be p at the initial time moment. If the factor p
+remains constant at all-time moments during one year, then p = (a ? y)/
+a = [(a ? m)/a]12 = [(a ? d)/a]365, assuming that there are 365 days in a year
+and all months have equal number of days, or
+p¼ðaþyÞ=a¼½ðaþmÞ=a(cid:4)ð1=ð1=12ÞÞ¼½ðaþdÞ=a(cid:4)ð1=ð1=365ÞÞ
+Butifitistimedependent,thentheaboveequalitiesbecomeinequalitiesinwhich
+the expression [(a ? d)/a]365 approximates p better than [(a ? m)/a]12, and also
+[(a ? m)/a]12 approximates better than (a ? y)/a. Therefore, if fðxÞ expresses the
+valueofmoneyinthebankaccountatthetimemomentx,thentofindtheinstantaneous
+growthrateatthetimexwehavetoconsidermultiplicativeforwardoperator
+limðD(cid:3)fÞ1=h
+h!0
+Additionally, the geometric average of numerical data set (a , a ,…, a )
+1 2 n
+p
+nffiaffiffiffiffiffi (cid:2)ffiffiaffiffiffiffiffiffi (cid:2)ffiffi.ffiffi.ffiffi.ffiffiffi (cid:2)ffiffiaffiffiffiffi
+1 2 n
+is multiplicative analogue of well-known average. Chestnut (1983) also states that
+thegeometricaverageisthebestaveragingmethodforstockpricesbecauseitgives
+excellent reasons. This shows that multiplicative (geometric) average is a natural
+representation of the average of stock prices. For more detailed information, we
+refer Bashirov et al. (2011) and Grossman (1983).
+It is also important to note that elasticity can be more visible by using
+multiplicative derivatives. Bashirov et al. (2011, p. 428) show that the point
+elasticity in terms of multiplicative derivatives can be expressed as
+123
+
+--- PAGE 5 ---
+Integratingaccountingandmultiplicativecalculus:an…
+f(cid:3)ðxÞ¼eEy;x xðxÞ
+whereE ðxÞisxarcelasticityofy.Themultiplicativerepresentationofelasticityis
+y;x
+a very simple multiplicative differential equation. Moreover, Bashirovet al. (2011,
+p. 428) state that multiplicative derivative is a good tool for operating with x elas-
+ticityofywhenbothxandyarerelatedtothethirdvariable. Hence,multiplicative
+derivative provides a natural representationof elasticity. Formoredetails, we refer
+to Bashirov et al. (2011), Cordova-Lepe (2006) and Filip and Piatecki (2014).
+The function of the form
+LðxÞ¼ax(cid:5)b; b[0
+is considered as the conventional learning function. However, this function is not
+linearintheclassicalcalculus.Therefore,naturallogarithmoffunctionLðxÞshould
+be considered in the estimation process. To illustrate, Peles (1991, p. 356) trans-
+formed this function into a logarithmic form in order to estimate parameters of
+learningcurves.Itisimportanttoemphasizethattheconventionallearningfunction
+LðxÞ is linear in the multiplicative calculus so it does not need logarithmic trans-
+formation. Hence, the methods based on multiplicative calculus could be appro-
+priate for analyzing learning curve which is exponential function.
+If we also consider the classical least square method
+n
+SðxÞ¼X(cid:3)
+y
+(cid:5)ax(cid:5)b(cid:4)
+;
+i i
+i¼0
+fortheestimationofaandbinLðxÞ,naturallogarithmtransformationisnecessary.
+Therefore, Peles (1991), for example, followed this transformation in his study.
+However, this transformation increases time consumption and complexity. On the
+other hand, the multiplicative least square method, which was introduced by
+O¨zyapıcı and Bilgehan (2015),
+(cid:7) (cid:8)
+MðxÞ¼Yn (cid:5) y i (cid:6)ln axy (cid:5) ii b
+ax(cid:5)b
+i¼0 i
+can directly be applicable for the estimation of a and b without logarithmic trans-
+formation. For more details about multiplicative numerical methods, we refer to
+O¨zyapici et al. (2014) and Riza et al. (2009).
+3 Exponential approximation: a background for the proposed method
+3.1 Multiplicative Lagrange interpolation
+If we consider the two data points (x f (x )) and (x f(x )), then the exponential
+0, 0 1, 1
+function passing through these two points can be defined as follows:
+123
+
+--- PAGE 6 ---
+H.O¨zyapıcıetal.
+x(cid:5)x1 x(cid:5)x0
+E 1ðxÞ¼½fðx 0Þ(cid:4)x0(cid:5)x1(cid:2)½fðx 1Þ(cid:4)x1(cid:5)x0
+where it satisfies E (x ) = f(x ) when x = x and E (x ) = f(x ) when x = x .
+1 0 0 0 1 1 1 1
+Forthemoregeneralsituation,when(n ? 1)datapointsaregiven,say(x f (x )),
+0, 0
+(x f (x )), (x f (x )), we can define the multiplicative Lagrange interpolation to be
+1, 1 n, n
+used for computing learning curve values as follows:
+n
+E ðxÞ¼½fðx Þ(cid:4)Ln;0ðxÞ(cid:2)½fðx Þ(cid:4)Ln;1ðxÞ(cid:2)(cid:2)(cid:2)½fðx Þ(cid:4)Ln;nðxÞ¼Y ½fðx Þ(cid:4)Ln;kðxÞ ð1Þ
+n 0 1 n k
+k¼0
+where
+L ðxÞ¼
+Yn ðx(cid:5)x iÞ
+n;k ðx (cid:5)xÞ
+i¼0 k i
+i6¼k
+for each k = 0,1,…,n. The error of approximation E (x) was given by (Misirli and
+n
+O¨zyapici 2009) as
+h
+iQn ðxi(cid:5)xkÞ
+EðxÞ¼ f(cid:3)ðnþ1ÞðnÞ i¼0 ðnþ1Þ!
+where f is (n ? 1)th*-differentiable on [a,b] and a\n\b.
+Since interpolation techniques are widely used in science, engineering, finance
+and economics, multiplicative Lagrange interpolation provides a wide range of
+applications with very efficient estimations in many problems.
+3.2 Learning curve and multiplicative Lagrange interpolation
+Theclassicalderivativeofafunctionfrepresentstheslopeofthetangentlinetothe
+graph of f at points ðx ;fðx ÞÞ; i.e.fðxÞ(cid:6)fðx Þþf0ðx Þðx(cid:5)x Þ.
+0 0 0 0 0
+Analogously, multiplicative derivative of a function f represents multiplicative
+slope of multiplicative uniform function
+f ðxÞ¼axb:
+m
+Thefunctionf ðxÞisalsoassumedasconventionallearningfunction.Hence,itis
+m
+important to note that graphical meaning of multiplicative derivative also matches
+withthelearningfunction.Additionally,f ðxÞcanbeapproximatedaroundx inthe
+m 0
+multiplicative calculus as
+f ðxÞ(cid:6)f ðx Þ(cid:3) f(cid:3)ðx Þ(cid:4)x(cid:5)x0:
+m m 0 m 0
+Asanapplicationofmultiplicativecalculustothelearningcurve,whenthestudy
+conducted by Peles (1991) is considered, the exponential function fðxÞ¼
+a 1e(cid:5)b1x;b 1[0 which is the best fit to the learning curve estimation
+123
+
+--- PAGE 7 ---
+Integratingaccountingandmultiplicativecalculus:an…
+LðxÞ¼0:6768x(cid:5)0:322aroundx ¼1
+0
+can be obtained as
+LðxÞ(cid:7)EðxÞ¼0:678e(cid:5)0:322ðx(cid:5)1Þ ¼0:9355e(cid:5)0:322:
+On the other hand, corresponding classical approximation of learning curve
+analyzed by Peles (1991) can be given as
+LðxÞ(cid:7)CðxÞ¼0:678(cid:5)0:2183ðx(cid:5)1Þ¼0:8963(cid:5)0:2183x:
+Accordingly, it is not difficult to verify that exponential function EðxÞ is better
+than classical linear function CðxÞ for the estimation of the learning curve.
+Nevertheless, this should not be surprise since learning curve estimation can
+perfectly be fitted by decreasing exponential function. Hence, this proves that
+multiplicative Lagrange interpolation method (1) can be effectively used for
+interpolatinglearningdata.Theefficiencyofmethod(1)canalsobeobservedinthe
+next section.
+4 Estimation of learning curve via multiplicative calculus
+As stated by McDonald (1987), cost data may not be available for each unit of
+product produced for several reasons such as two or more products are produced
+simultaneously or the cost contract is related to the whole production rather than a
+particular product. The learning curve estimation is therefore needed. To better
+understandthisissue,consideracompanyinwhichtheproductiontakesplaceafter
+an order has been received. In order to estimate costs by using the learning curve
+phenomenon, all values should be recorded. However, because of the irregular
+characteristics of the orders, some of intermediate values of cumulative production
+cannotberecorded.Forinstance,assumethatthenumberoforderonthefirstdayis
+20 whereas it is 50 on the second day. If the company attempts to calculate the
+labourcosttobeincurredforproducingtheorderofthirddaywhichis30 units,the
+company should estimate the learning effect of this specific intermediate value
+based on the observed data of the 20th and 50th units. However, the conventional
+learning curve estimations do not produce accurate results since the learning curve
+equation is a decreasing exponential function. In this respect, multiplicative based
+method is likely to produce more accurate results since it provides a better fit than
+the conventional nonlinear methods.
+In order to clarify the above discussions, two examples, which demonstrate the
+superiorityofthemultiplicativeLagrangeinterpolationforlearningcurveestimation,
+will be considered. The first example was taken from the article written by Peles
+(1991, p. 352–355), while the second example was obtained from one of the most
+popularmanagementandcostaccountingbookswrittenbyDrury(2012,p.619–622).
+Example1Peles(1991,p.349–359)criticizedthelearningcurvesinceitignoresthe
+effectoftimeoncosts.Accordingly,theresearcherimprovedthelearningcurveinthe
+accounting literature by adding the rate effect to the conventional learning curve
+123
+
+--- PAGE 8 ---
+H.O¨zyapıcıetal.
+equation. Nevertheless, the alternative method that Peles (1991) proposed was still
+unabletocalculateintermediatevaluesaccurately.Forthepurposeofthisstudy,the
+learningcurveequationgiveninPeles’spaper(p.324)isusedtocomparewithour
+proposedlearningcurveequationwhichiscombinedbymultiplicativeLagrange.
+Table 1 shows the learning curve values that are representing the learning
+functionusedbyPeles(1991).Peles(1991)assumedacompanyhastoproducenew
+products. Accordingly, Table 1 shows both the first 10 units of products to be
+producedandtheircostsgivenbyPeles(1991).Inordertotestmultiplicativebased
+learning curve estimation, we removed data from production levels randomly. It is
+important to emphasize that which data will be removed from the list is not
+important.Thisisbecausethelearningcurvedatapresentexponentialbehaviouron
+graphics. In this regard, multiplicative based methods can work well since
+exponential functions are linear in the multiplicative calculus.
+Wefirstassumedcostsofproducing2units,4units,and7units,respectively,are
+not known. Then, we assumed both 2 and 7 units simultaneously are not known in
+this production process. Finally, we removed three units that are unit 3, 5, and 6 at
+thesametime,andmadetheestimations.Wefirstusedconventionallearningcurve
+equation to estimate costs of these units that are missing. Then, we used classical
+Lagrange interpolation and multiplicative Lagrange interpolation so as to compare
+theresults.Table 2,therefore,presentsacomparisonoftheaccuracyofestimatesof
+conventional learning curve, classical Lagrange interpolation, and multiplicative
+Lagrange interpolation methods.
+As can be seen in Table 2, the proposed learning curve method, which was
+combined by multiplicative Lagrange, was tested when some of the units given in
+Table 1 were missing. Even though Peles’s approach has improved the learning
+curveequation,theaboveresultsdemonstratethatourproposedmethodgivesbetter
+Table1 PeriodiccostdatagivenbyPeles’sarticle
+Unit 1 2 3 4 5 6 7 8 9 10
+Periodiccost 1.000 0.600 0.506 0.454 0.418 0.392 0.371 0.354 0.341 0.328
+Table2 Costestimationsofmissingunits
+Missing Actualvalue Conventionalmethod ClassicalLagrange MultiplicativeLagrange
+units usedbyPeles usedbyPeles interpolation interpolation
+Unit2 0.600 0.542 0.613 0.602
+Unit4 0.454 0.434 0.455 0.454
+Unit7 0.371 0.362 0.370 0.371
+(Unit2 0.600 0.542 0.622 0.610
+Unit7) 0.371 0.362 0.372 0.371
+(Unit3 0.506 0.475 0.485 0.495
+Unit5 0.418 0.403 0.428 0.423
+Unit6) 0.392 0.380 0.398 0.394
+123
+
+--- PAGE 9 ---
+Integratingaccountingandmultiplicativecalculus:an…
+results.Table 2alsoshowsthat,accordingtoourproposedmethod,theintermediate
+valuesof2nd,4th,and7thunits,whichareassumedtobemissingvalues,arecloser
+to reality when compared with the values found by both Peles’ learning curve
+function and classical Lagrange method. For example, when unit 2 is missing, our
+proposed method estimates periodic cost as 0.602 which is closer to actual value
+(0.600)thanthevalues(0.542and0.613)estimatedbyconventionallearningcurve
+and classical Lagrange interpolation methods, respectively. This is also the case
+when two or three units are missing within the data set.
+Example 2 Drury (2012) presents an application of the 80 % learning curve
+which means that 20 per cent productivity improvement occurs each time
+production is doubled. According to the example given by Drury (2012, p. 619–
+622),asequenceofsixorderswherethecumulativenumberofunitsisdoubledfor
+eachorderwasgiven.Theauthoremphasizedthatotherquantitiessuchas10,20,or
+30 units which are not known can be calculated mathematically by using the
+learning curve equation as follows:
+Y ¼ 2000x(cid:5)0:322 ð2Þ
+x
+Inthisrespect,Drury(2012)usesthefunction(2)tocalculatethetimeneededto
+produce each unit of cumulative production. Drury (2012) considered 80 per cent
+learning curve and calculated the values representing the learning curve function.
+Thus, the cumulative hours for the cumulative production of 1, 2, 4, and 8 units of
+products are found tobe 2000, 1600, 1280, and 1024 h, respectively.Drury (2012)
+stated that since the cumulative number of units is doubled, no information is
+available for other quantities such as, 3, 5, 6, and 7 units and the learning function
+(2) can be used to estimate these values that are missing.
+Table 3showsboththecumulativehoursforthecumulativeproductionof1,2,4,and
+8unitsandtheestimationsofintermediatevaluesthatarethetimeneededtoproduce3,
+5, 6, and 7 units in the production process, respectively. We first used conventional
+learning function considered and emphasized by Drury (2012) to estimate values of
+intermediateunitsthataremissing.Then,weusedclassicalLagrangeinterpolationand
+multiplicativeLagrangeinterpolationinordertocomparetheresults.
+Table3 IntermediatelearningcurveestimationusingthedataobtainedbyDrury’sarticle
+Number Conventional ClassicalLagrange MultiplicativeLagrange
+ofunits methodused interpolation interpolation
+byDrury
+1 2000 2000 2000
+2 1600 1600 1600
+3 1404 1378 1389
+4 1280 1280 1280
+5 1191 1250 1220
+6 1123 1234 1175
+7 1068 1177 1117
+8 1024 1024 1024
+123
+
+--- PAGE 10 ---
+H.O¨zyapıcıetal.
+Fig.1 GraphicalrepresentationoflearningcurveestimationmethodsforDrury’sdata,f(x)=Drury’s
+learning curve, g(x)=Learning curve produced by multiplicative Lagrange interpolation,
+h(x)=LearningcurveproducedbyclassicalLagrangeinterpolation
+Accordingtotheestimationsofintermediatevaluesthatweobtain,thelearningcurve
+equationbasedonmultiplicativeLagrangeproducescloserresultstoactualvaluesthan
+thatofconventionalequationaswellasclassicalLagrange.Thisisduetothefactthat
+exponentialfunctionsarelinearinmultiplicativecalculusandhencetheyproducebetter
+results in estimations via multiplicative calculus. Thus, the time needed to produce
+intermediateunitswillbecalculatedmoreaccurately.Thisleadscostandmanagerial
+accountants to estimate both cost of production and unused labour capacity more
+precisely.Inthiscontext,thesellingprice,whichisbasedonthecostdatacalculatedby
+usingtheconventionallearningcurvemethod,mayalsoneedtoberevisedbasedon
+theseresults.Theemployee-relatedcapacitydecisionssuchasthenumberofemployees
+tobedismissedordirectedtootherareasmayalsoneedtoberevisedinaccordancewith
+theresultsfoundbymultiplicativebasedlearningcurvemethod.
+Figure 1 portrays the graphical representation of conventional method used by
+Drury, multiplicative Lagrange interpolation and classical Lagrange interpolation
+that are represented by f(x), g(x) and h(x), respectively.
+From the graphical representations of the learning data given in Fig. 1, an
+exponential representation can be made. This is the general situation for many
+learning curve estimations. Since multiplicative interpolation uses exponential
+functions, it provides a better fit than the conventional methods. Comparing the
+results found by Peles (1991) and Drury (2012) to the ones produced by this study
+will help an audience better understand the efficiency of multiplicative Lagrange
+interpolation method. All of these also lead to the conclusion that multiplicative
+Lagrange based learning curve equation is able to yield more accurate results than
+the ones produced by conventional learning curve equation.
+5 Conclusion
+Thepurposeofthisstudywastodevelopawaytoestimatethelearningcurveusing
+multiplicative calculus in order to see whether the multiplicative based learning
+curve better estimates the intermediate values of cumulative production than the
+123
+
+
+[... 3 more pages truncated ...]

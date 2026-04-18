@@ -1,0 +1,47 @@
+{
+  "total_samples": 3753,
+  "n_black_swan": 293,
+  "strategy_distribution": {
+    "3": 1133,
+    "4": 1103,
+    "7": 332,
+    "1": 297,
+    "5": 277,
+    "0": 268,
+    "2": 254,
+    "6": 89
+  },
+  "regime_distribution": {
+    "bull": 1380,
+    "normal": 1222,
+    "high_volatility": 586,
+    "bear": 297,
+    "crisis": 268
+  },
+  "date_range": [
+    "2010-02-02 00:00:00",
+    "2024-12-30 00:00:00"
+  ],
+  "features": [
+    "date",
+    "spy_return_5d",
+    "spy_return_20d",
+    "spy_volatility_20d",
+    "vix_level",
+    "vix_change_5d",
+    "spy_tlt_corr_20d",
+    "credit_stress",
+    "regime",
+    "optimal_strategy",
+    "is_black_swan",
+    "black_swan_event",
+    "period_name",
+    "strategy_idx",
+    "pnl",
+    "class_weight",
+    "bs_weight",
+    "recency_weight",
+    "sample_weight"
+  ],
+  "created": "2025-12-10T18:17:08.517302"
+}

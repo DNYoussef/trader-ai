@@ -1,0 +1,232 @@
+DAILY LOSS LIMIT PROTECTION FLOW
+================================================================================
+
+INITIALIZATION (First Call or New Day)
+---------------------------------------
+
+    Trading Cycle Start
+            |
+            v
+    [Check if new day?] --> YES --> Reset daily tracking
+            |                       - daily_start_value = current_value
+            NO                      - daily_reset_time = now
+            |                       - daily_loss_triggered = False
+            v
+    Calculate daily change
+
+
+NORMAL TRADING (Within Limits)
+-------------------------------
+
+    Start of Day: $200.00
+            |
+            v
+    +--------------+
+    | 10:00 AM     |
+    | Value: $198  |  Daily Change: -1.0%
+    | Limit: -2.0% |  Status: TRADING
+    +--------------+
+            |
+            v
+    +--------------+
+    | 11:00 AM     |
+    | Value: $197  |  Daily Change: -1.5%
+    | Limit: -2.0% |  Status: TRADING
+    +--------------+
+            |
+            v
+    Continue trading...
+
+
+PROTECTION TRIGGERED (Exceeds -2%)
+-----------------------------------
+
+    Start of Day: $200.00
+            |
+            v
+    +--------------+
+    | 10:00 AM     |
+    | Value: $198  |  Daily Change: -1.0%
+    | Limit: -2.0% |  Status: TRADING
+    +--------------+
+            |
+            v
+    +--------------+
+    | 12:00 PM     |
+    | Value: $195  |  Daily Change: -2.5%
+    | Limit: -2.0% |  Status: TRIGGERED!
+    +--------------+
+            |
+            v
+    [CRITICAL ALERT FIRED]
+            |
+            v
+    [AUDIT LOG ENTRY]
+            |
+            v
+    [BLOCK ALL TRADES]
+            |
+            v
+    +--------------+
+    | 2:00 PM      |
+    | Value: $197  |  Daily Change: -1.5%
+    | Limit: -2.0% |  Status: STILL BLOCKED
+    +--------------+
+            |
+            v
+    Wait until next day...
+
+
+NEXT DAY RESET
+--------------
+
+    Day 1 End: $195.00 (blocked)
+            |
+            v
+    [Midnight passes]
+            |
+            v
+    Day 2 Start
+            |
+            v
+    [First check_daily_loss() call]
+            |
+            v
+    [Detect new date] --> Reset tracking
+            |               - daily_start_value = $195.00
+            v               - daily_loss_triggered = False
+    +--------------+
+    | Day 2        |
+    | 10:00 AM     |
+    | Value: $194  |  Daily Change: -0.5% (from $195)
+    | Limit: -2.0% |  Status: TRADING (reset!)
+    +--------------+
+
+
+TRADING ENGINE INTEGRATION
+---------------------------
+
+    Every Trading Cycle:
+
+    1. Sync with broker
+    2. --> CHECK DAILY LOSS <--
+    3. If triggered:
+       - Log critical alert
+       - Write audit entry
+       - RETURN (skip trading)
+    4. If OK:
+       - Continue to rebalancing
+       - Execute trades normally
+
+
+DECISION FLOW
+-------------
+
+    check_daily_loss()
+            |
+            v
+    [Is new day?] ----YES----> [Reset and allow trading]
+            |
+            NO
+            |
+            v
+    [Calculate % change]
+            |
+            v
+    [Change <= -2%?] ---YES---> [Trigger protection]
+            |                   - Set daily_loss_triggered = True
+            NO                  - Log critical alert
+            |                   - Block trading
+            v
+    [Allow trading]
+
+
+STATE DIAGRAM
+-------------
+
+                    +----------------+
+                    |   INITIAL      |
+                    |   (No reset)   |
+                    +----------------+
+                            |
+                            v
+                    +----------------+
+    New Day ------> |   RESET        |
+                    |   Triggered=F  |
+                    +----------------+
+                            |
+                            v
+                    +----------------+
+                    |   MONITORING   |
+                    |   P&L < -2%?   |
+                    +----------------+
+                        |        |
+                  YES   |        |   NO
+                        v        v
+                +----------+  [Continue
+                |TRIGGERED |   Trading]
+                |Block All |
+                +----------+
+                    |
+                    | Same Day
+                    v
+                +----------+
+                |TRIGGERED |
+                |(Persists)|
+                +----------+
+                    |
+                    | New Day
+                    v
+                +----------+
+                |  RESET   |
+                +----------+
+
+
+AUDIT TRAIL
+-----------
+
+When limit triggered, audit_log.jsonl receives:
+
+{
+  "event": "daily_loss_limit_blocked_trading",
+  "daily_change_pct": -0.025,
+  "limit_pct": -0.02,
+  "timestamp": "2025-01-15T14:30:00Z"
+}
+
+
+EXAMPLE LOG OUTPUT
+------------------
+
+Normal Day:
+  [INFO] Daily loss limit reset - Start value: $200.00
+  [INFO] Portfolio Status - Value: $198.00, Cash: $50.00
+  [INFO] Daily P&L: -1.00% (Limit: -2.00%)
+  [INFO] Trading cycle completed
+
+Protection Triggered:
+  [INFO] Daily loss limit reset - Start value: $200.00
+  [INFO] Portfolio Status - Value: $195.00, Cash: $50.00
+  [INFO] Daily P&L: -2.50% (Limit: -2.00%)
+  [CRITICAL] DAILY LOSS LIMIT TRIGGERED: -2.50%
+  [CRITICAL] TRADING BLOCKED: Daily loss limit triggered
+  [INFO] Trading cycle skipped
+
+Next Day:
+  [INFO] Daily loss limit reset - Start value: $195.00
+  [INFO] Portfolio Status - Value: $194.00, Cash: $50.00
+  [INFO] Daily P&L: -0.51% (Limit: -2.00%)
+  [INFO] Trading cycle completed
+
+
+SAFETY GUARANTEES
+-----------------
+
+1. Cannot bypass same-day block
+2. Automatic reset next day
+3. Persists across restarts
+4. Independent of kill switch
+5. Logged to immutable audit trail
+6. Critical alerts for visibility
+
+================================================================================

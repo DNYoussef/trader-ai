@@ -1,5 +1,16 @@
 # Gary×Taleb Trading System
 
+## Canonical Status
+
+<!-- STATUS:START -->
+Canonical status from `2026-EXOSKELETON-STATUS.json`.
+
+Status: 45% (source: implementation-plan)
+Registry refreshed: 2026-01-15T20:37:16.435423+00:00
+Signals: git=yes, tests=yes, ci=yes, readme=yes, last_commit=4185542
+<!-- STATUS:END -->
+
+
 > A sophisticated algorithmic trading platform combining Gary Antonacci's dual momentum strategies with Nassim Taleb's antifragility principles, featuring progressive capital gates and mobile app psychology-inspired UX.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)

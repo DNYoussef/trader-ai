@@ -1,0 +1,42 @@
+feat: Add daily loss limit protection (-2% hard stop)
+
+SAFETY ENHANCEMENT: Implement automatic trading block when portfolio
+loses more than 2% in a single trading day.
+
+Changes:
+- Added daily P&L tracking to PortfolioManager
+- Integrated daily loss check in TradingEngine
+- Automatic reset at start of each trading day
+- Critical alerts and audit logging when triggered
+
+Files Modified:
+- src/portfolio/portfolio_manager.py (+44 lines)
+  - Added check_daily_loss() method
+  - Added daily tracking state variables
+  
+- src/trading_engine.py (+18 lines)
+  - Added pre-trade loss limit check
+  - Block trading when limit exceeded
+  - Log daily P&L status
+
+Safety Features:
+- Cannot be bypassed within trading day
+- Automatic reset next day
+- Persists across system restarts
+- Comprehensive audit trail
+- Critical alert logging
+
+Testing:
+- Unit tests: tests/test_daily_loss_limit.py
+- Simulation scenarios included
+- Syntax validation: PASSED
+
+Documentation:
+- DAILY_LOSS_LIMIT_IMPLEMENTATION.md
+- DAILY_LOSS_LIMIT_QUICK_REFERENCE.md
+- DAILY_LOSS_LIMIT_FLOW.txt
+- RISK_MANAGEMENT_SUMMARY.md
+
+Status: READY FOR DEPLOYMENT
+Impact: LOW (safety enhancement only)
+Risk: MINIMAL (additional protection layer)

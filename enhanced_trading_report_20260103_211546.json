@@ -1,0 +1,29 @@
+{
+  "session_summary": {
+    "initial_capital": 200.0,
+    "final_capital": 200.0,
+    "total_return_pct": 0.0,
+    "total_pnl": 0.0,
+    "total_trades": 0,
+    "winning_trades": 0,
+    "win_rate_pct": 0.0,
+    "avg_trade_pnl": 0.0
+  },
+  "phase5_enhancements": {
+    "ng_enhanced_trades": 0,
+    "avg_ng_multiplier": NaN,
+    "avg_brier_adjustment": NaN,
+    "avg_dpi_enhancement": NaN,
+    "final_brier_score": 0.5
+  },
+  "monitoring_status": {
+    "monitoring_active": true,
+    "ng_signals_last_hour": 0,
+    "current_brier_score": null,
+    "brier_alert_level": null,
+    "current_enhanced_dpi": null,
+    "active_alerts": 0,
+    "total_ng_signals": 0,
+    "total_brier_updates": 0
+  }
+}

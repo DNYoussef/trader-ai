@@ -1,0 +1,68 @@
+{
+  "_comment": "NNC Feature Flags - Toggle NNC features without deployment",
+  "_version": "1.0.0",
+  "_source": "NNC-MOO-UNIFIED-IMPLEMENTATION-PLAN.md v2.1",
+
+  "nnc_enabled": false,
+  "_nnc_enabled_desc": "Master switch for all NNC features",
+
+  "use_nnc_returns": false,
+  "_use_nnc_returns_desc": "Use geometric mean for return calculations instead of arithmetic",
+
+  "use_nnc_risk": false,
+  "_use_nnc_risk_desc": "Use multiplicative risk compounding instead of additive",
+
+  "use_nnc_kelly": false,
+  "_use_nnc_kelly_desc": "Use beta-arithmetic adjusted Kelly criterion",
+
+  "use_nnc_nav": false,
+  "_use_nnc_nav_desc": "Track NAV using multiplicative growth factors",
+
+  "use_prelec_weighting": false,
+  "_use_prelec_weighting_desc": "Apply Prelec probability weighting to P(ruin)",
+
+  "use_k_evolution": false,
+  "_use_k_evolution_desc": "Use gate-dependent k parameter from k(L) formula",
+
+  "use_star_euler_projection": false,
+  "_use_star_euler_projection_desc": "Use Star-Euler projection for gate timing",
+
+  "parallel_classical_nnc": true,
+  "_parallel_classical_nnc_desc": "Run both classical and NNC calculations, alert on divergence",
+
+  "divergence_alert_threshold": 0.10,
+  "_divergence_alert_threshold_desc": "Alert when classical vs NNC diverge by more than 10%",
+
+  "moo_enabled": false,
+  "_moo_enabled_desc": "Enable multi-objective optimization features",
+
+  "use_globalmoo": false,
+  "_use_globalmoo_desc": "Use GlobalMOO cloud API (requires API key)",
+
+  "use_pymoo": true,
+  "_use_pymoo_desc": "Use pymoo local NSGA-II optimizer",
+
+  "use_woven_moo": false,
+  "_use_woven_moo_desc": "Use GlobalMOO + Pymoo woven strategy (best when available)",
+
+  "pareto_strategy_labeling": false,
+  "_pareto_strategy_labeling_desc": "Use Pareto-optimal sets for TRM training labels",
+
+  "nnc_profit_weighted_loss": false,
+  "_nnc_profit_weighted_loss_desc": "Use asymmetric NNC profit weighting in TRM loss",
+
+  "scheme_robust_signals": false,
+  "_scheme_robust_signals_desc": "Require 60% model consensus for strategy signals",
+
+  "consensus_threshold": 0.60,
+  "_consensus_threshold_desc": "Required agreement for scheme-robust signals",
+
+  "default_strategy_on_disagreement": "balanced_safe",
+  "_default_strategy_on_disagreement_desc": "Strategy to use when consensus not reached (strategy index 2)",
+
+  "dashboard_nnc_metrics": false,
+  "_dashboard_nnc_metrics_desc": "Display NNC-adjusted metrics in dashboard",
+
+  "mlflow_nnc_tracking": false,
+  "_mlflow_nnc_tracking_desc": "Log NNC metrics to MLflow"
+}
