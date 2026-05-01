@@ -5,6 +5,7 @@ Add this to your websocket_server.py to broadcast TRM predictions
 
 import asyncio
 import logging
+import os
 from typing import Dict, Any
 import sys
 from pathlib import Path
@@ -325,7 +326,7 @@ async def run_standalone_server():
     # Run server
     config = uvicorn.Config(
         app,
-        host="0.0.0.0",
+        host=os.environ.get("HOST", "127.0.0.1"),
         port=8001,
         log_level="info"
     )

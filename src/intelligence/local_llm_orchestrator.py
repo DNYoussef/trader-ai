@@ -117,7 +117,7 @@ class LocalLLMOrchestrator:
         """Check if Ollama is running and model is available"""
         try:
             # Check if Ollama is responsive
-            response = requests.get(f"{self.ollama_url}/api/tags")
+            response = requests.get(f"{self.ollama_url}/api/tags", timeout=5)
             if response.status_code != 200:
                 return False
 

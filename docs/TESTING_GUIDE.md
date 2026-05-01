@@ -6,6 +6,61 @@ This guide provides comprehensive documentation of the testing infrastructure, i
 
 ---
 
+## Current Verified Status
+
+Last verified locally: 2026-05-01.
+
+The active Python test runner is `pytest` with discovery configured in `pytest.ini` and `testpaths = tests`. Use markers for reliable slices:
+
+```bash
+python -m pytest -m unit -q --maxfail=20
+# 457 passed, 1 skipped, 1200 deselected, 1 xfailed
+
+python -m pytest -m e2e -q
+# 2 passed, 10 skipped
+```
+
+Focused unified prediction-market/Mieza/Kelly slice:
+
+```bash
+python -m pytest tests/test_prediction_market_moo.py tests/test_prediction_market_committee.py tests/test_prediction_market_risk.py tests/test_mieza_signal_ingestion.py tests/test_mieza_quant_bridge.py tests/test_kelly_system.py tests/test_circuit_breaker_integration.py -q
+# 87 passed
+```
+
+Focused gate runtime slice:
+
+```bash
+python -m pytest tests/test_gate_manager_runtime.py tests/test_kelly_system.py::TestGateIntegration -q
+# 22 passed
+```
+
+Combined focused bundle including G0-G12 runtime gates:
+
+```bash
+python -m pytest tests/test_prediction_market_moo.py tests/test_prediction_market_committee.py tests/test_prediction_market_risk.py tests/test_mieza_signal_ingestion.py tests/test_mieza_quant_bridge.py tests/test_kelly_system.py tests/test_circuit_breaker_integration.py tests/test_gate_manager_runtime.py -q
+# 106 passed
+```
+
+Important gates:
+
+- Live Alpaca paper API tests require `RUN_LIVE_ALPACA_TESTS=true`, `ALPACA_API_KEY`, and `ALPACA_SECRET_KEY`.
+- Prediction-market live execution is not part of default tests; normal coverage uses dry-run execution and mocked venue/resolution responses.
+- The current xfail is intentional legacy arithmetic coverage for the Six Sigma defect assertion.
+- Frontend tests live under `src/dashboard/frontend` and run with `npm run test`. The root `npm test` script is not the frontend test suite.
+
+New prediction-market coverage added in this phase:
+
+- `tests/test_mieza_quant_bridge.py`
+- `tests/test_mieza_signal_ingestion.py`
+- `tests/test_prediction_market_committee.py`
+- `tests/test_prediction_market_moo.py`
+- `tests/test_prediction_market_risk.py`
+- `tests/test_gate_manager_runtime.py`
+
+Older fixed pass-rate and coverage claims below are historical examples unless remeasured in the current environment.
+
+---
+
 ## Testing Architecture Overview
 
 ### Three-Layer Testing Strategy
@@ -801,8 +856,8 @@ QA_METRICS = {
 
 ---
 
-**Testing Status:** ✅ **PRODUCTION READY**
-**Mock Coverage:** 100% feature parity with live systems
-**Integration Success:** 67% improvement over baseline
-**Theater Detection:** All false claims identified and resolved
-**Performance:** All latency and throughput targets met
+**Testing Status:** Historical foundation snapshot. See "Current Verified Status" at the top of this file for the latest measured commands and results.
+**Mock Coverage:** Historical claim; current Alpaca adapter requires real credentials.
+**Integration Success:** Historical claim; remeasure before using for release decisions.
+**Theater Detection:** Historical snapshot.
+**Performance:** Historical claim; remeasure before using for release decisions.

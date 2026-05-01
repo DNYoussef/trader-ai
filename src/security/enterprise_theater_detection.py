@@ -1007,8 +1007,7 @@ class EnterpriseTheaterDetector:
                 test_formula = test_formula.replace('opportunities', str(test_opportunities))
 
                 try:
-                    # Safely evaluate the formula
-                    actual_result = eval(test_formula.replace('_', ''))
+                    actual_result = self._safe_arithmetic_eval(test_formula.replace('_', ''))
 
                     accuracy_check = abs(actual_result - expected_dpmo) < 0.01
 
@@ -1036,6 +1035,59 @@ class EnterpriseTheaterDetector:
             logger.error(f"Mathematical formula test failed: {e}")
 
         return None
+
+    def _safe_arithmetic_eval(self, expression: str) -> float:
+        """Evaluate a numeric expression without executing Python code."""
+        allowed_nodes = (
+            ast.Expression,
+            ast.BinOp,
+            ast.UnaryOp,
+            ast.Add,
+            ast.Sub,
+            ast.Mult,
+            ast.Div,
+            ast.FloorDiv,
+            ast.Mod,
+            ast.Pow,
+            ast.USub,
+            ast.UAdd,
+            ast.Constant,
+        )
+        tree = ast.parse(expression, mode="eval")
+        for node in ast.walk(tree):
+            if not isinstance(node, allowed_nodes):
+                raise ValueError(f"Unsupported expression node: {type(node).__name__}")
+            if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
+                raise ValueError("Only numeric constants are allowed")
+        return float(self._eval_arithmetic_node(tree.body))
+
+    def _eval_arithmetic_node(self, node: ast.AST) -> float:
+        if isinstance(node, ast.Constant):
+            return float(node.value)
+        if isinstance(node, ast.UnaryOp):
+            operand = self._eval_arithmetic_node(node.operand)
+            if isinstance(node.op, ast.USub):
+                return -operand
+            if isinstance(node.op, ast.UAdd):
+                return operand
+        if isinstance(node, ast.BinOp):
+            left = self._eval_arithmetic_node(node.left)
+            right = self._eval_arithmetic_node(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            if isinstance(node.op, ast.Div):
+                return left / right
+            if isinstance(node.op, ast.FloorDiv):
+                return left // right
+            if isinstance(node.op, ast.Mod):
+                return left % right
+            if isinstance(node.op, ast.Pow):
+                return left ** right
+        raise ValueError(f"Unsupported arithmetic expression: {ast.dump(node)}")
 
     def _assess_pattern_severity(self, pattern: str, line: str) -> TheaterSeverity:
         """Assess severity of detected theater pattern"""

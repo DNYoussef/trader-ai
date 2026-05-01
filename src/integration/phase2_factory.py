@@ -18,6 +18,11 @@ from ..brokers.alpaca_adapter import AlpacaAdapter
 from ..portfolio.portfolio_manager import PortfolioManager
 from ..trading.trade_executor import TradeExecutor
 from ..market.market_data import MarketDataProvider
+from ..safety.circuit_breakers.circuit_breaker import (
+    CircuitBreakerConfig,
+    CircuitBreakerManager,
+    CircuitType,
+)
 
 # Phase 2 imports
 from ..safety.kill_switch_system import KillSwitchSystem
@@ -163,8 +168,27 @@ class Phase2SystemFactory:
         # Initialize gate manager
         gate_manager = GateManager()
 
+        # Initialize circuit breaker manager before trade execution.
+        circuit_manager = CircuitBreakerManager()
+        circuit_manager.create_circuit_breaker(
+            name="trading_loss_protection",
+            circuit_type=CircuitType.TRADING_LOSS,
+            config=CircuitBreakerConfig(
+                failure_threshold=3,
+                failure_rate_threshold=0.8,
+                open_timeout_seconds=300,
+                exponential_backoff=True,
+            )
+        )
+
         # Initialize trade executor
-        trade_executor = TradeExecutor(broker, portfolio_manager, market_data)
+        trade_executor = TradeExecutor(
+            broker,
+            portfolio_manager,
+            market_data,
+            gate_manager,
+            circuit_manager,
+        )
 
         self.phase1_systems = {
             "broker": broker,
@@ -173,6 +197,7 @@ class Phase2SystemFactory:
             "dpi_calculator": dpi_calculator,
             "antifragility_engine": antifragility_engine,
             "gate_manager": gate_manager,
+            "circuit_manager": circuit_manager,
             "trade_executor": trade_executor
         }
 

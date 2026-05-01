@@ -5,7 +5,7 @@ Financial sentiment analysis using FinGPT models for news and social media
 
 import logging
 import numpy as np
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass
 import os
@@ -78,7 +78,8 @@ class FinGPTSentimentAnalyzer:
 
     def __init__(self,
                  model_name: str = "ProsusAI/finbert",
-                 use_fallback: bool = True):
+                 use_fallback: bool = True,
+                 model_revision: Optional[str] = None):
         """
         Initialize FinGPT sentiment analyzer
 
@@ -87,6 +88,7 @@ class FinGPTSentimentAnalyzer:
             use_fallback: Use simple fallback if models unavailable
         """
         self.model_name = model_name
+        self.model_revision = model_revision or os.getenv("FINGPT_SENTIMENT_REVISION")
         self.use_fallback = use_fallback
         self.model = None
         self.tokenizer = None
@@ -105,13 +107,16 @@ class FinGPTSentimentAnalyzer:
         ]
 
         # Initialize model
-        if FINGPT_AVAILABLE:
+        if FINGPT_AVAILABLE and self.model_revision:
             self._initialize_fingpt()
+        elif FINGPT_AVAILABLE and not self.model_revision and use_fallback:
+            logger.warning("FINGPT_SENTIMENT_REVISION is not set; using fallback instead of unpinned model download")
+            self.is_initialized = True
         elif use_fallback:
             logger.info("Initializing fallback sentiment analysis")
             self.is_initialized = True
         else:
-            raise RuntimeError("FinGPT not available and fallback disabled")
+            raise RuntimeError("FinGPT revision not pinned and fallback disabled")
 
     def _initialize_fingpt(self):
         """Initialize FinGPT/FinBERT model"""
@@ -122,8 +127,16 @@ class FinGPTSentimentAnalyzer:
             hf_token = os.getenv('HF_TOKEN')
 
             # Load sentiment analysis model
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, token=hf_token)
-            self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, token=hf_token)
+            self.tokenizer = AutoTokenizer.from_pretrained(  # nosec B615 - revision is required before this path runs
+                self.model_name,
+                token=hf_token,
+                revision=self.model_revision,
+            )
+            self.model = AutoModelForSequenceClassification.from_pretrained(  # nosec B615 - revision is required before this path runs
+                self.model_name,
+                token=hf_token,
+                revision=self.model_revision,
+            )
 
             # Create sentiment pipeline
             self.pipeline = pipeline(

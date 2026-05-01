@@ -248,16 +248,7 @@ class EnhancedGateManager:
 
     def _get_next_gate(self, current_gate: GateLevel) -> Optional[GateLevel]:
         """Get the next gate level."""
-        gate_order = [GateLevel.G0, GateLevel.G1, GateLevel.G2, GateLevel.G3]
-
-        try:
-            current_index = gate_order.index(current_gate)
-            if current_index < len(gate_order) - 1:
-                return gate_order[current_index + 1]
-        except ValueError:
-            logger.error(f"Unknown gate level: {current_gate}")
-
-        return None
+        return self.base_manager.next_gate_level(current_gate)
 
     def _calculate_progress_data(self, portfolio_metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate progress data for motivation system."""
@@ -310,28 +301,7 @@ class EnhancedGateManager:
 
     def _get_graduation_criteria(self) -> Optional[Dict[str, Any]]:
         """Get graduation criteria for current gate."""
-        criteria_map = {
-            GateLevel.G0: {
-                'min_compliant_days': 14,
-                'max_violations_30d': 2,
-                'min_performance_score': 0.6,
-                'min_capital': 500
-            },
-            GateLevel.G1: {
-                'min_compliant_days': 21,
-                'max_violations_30d': 1,
-                'min_performance_score': 0.7,
-                'min_capital': 1000
-            },
-            GateLevel.G2: {
-                'min_compliant_days': 30,
-                'max_violations_30d': 0,
-                'min_performance_score': 0.75,
-                'min_capital': 2500
-            }
-        }
-
-        return criteria_map.get(self.base_manager.current_gate)
+        return self.base_manager.get_graduation_criteria()
 
     def _estimate_days_to_graduation(self) -> Optional[int]:
         """Estimate days until ready for graduation."""

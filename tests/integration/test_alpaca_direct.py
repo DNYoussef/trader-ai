@@ -1,56 +1,43 @@
-#!/usr/bin/env python3
-"""Direct Alpaca test without async wrapper"""
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+"""Opt-in live Alpaca account smoke test."""
 
+import os
+
+import pytest
 from alpaca.trading.client import TradingClient
 
-# Your credentials
-API_KEY = "PKMQWWO2BXYFSE7RCTPHUTS2T4"
-SECRET_KEY = "7LQY1SqAgLPcHE6fziYu5WxLncAp97sDeevHY5Ci8432"
 
-print("Testing direct Alpaca connection (no async)...")
-print(f"Using paper trading: True")
-print(f"Base URL: https://paper-api.alpaca.markets")
-print()
+pytestmark = [pytest.mark.integration, pytest.mark.live_api, pytest.mark.e2e]
 
-try:
-    # Initialize client with paper=True
-    client = TradingClient(
-        api_key=API_KEY,
-        secret_key=SECRET_KEY,
-        paper=True  # Paper trading
-    )
 
-    print("[OK] Client initialized")
+def _live_alpaca_enabled() -> bool:
+    return os.getenv("RUN_LIVE_ALPACA_TESTS", "").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
-    # Test connection by getting account
-    print("Fetching account info...")
+
+@pytest.mark.skipif(
+    not _live_alpaca_enabled(),
+    reason="Set RUN_LIVE_ALPACA_TESTS=true to run live Alpaca paper API tests.",
+)
+def test_alpaca_paper_account_and_clock() -> None:
+    api_key = os.getenv("ALPACA_API_KEY")
+    secret_key = os.getenv("ALPACA_SECRET_KEY")
+
+    if not api_key or not secret_key:
+        pytest.skip("ALPACA_API_KEY and ALPACA_SECRET_KEY are required.")
+
+    client = TradingClient(api_key=api_key, secret_key=secret_key, paper=True)
+
     account = client.get_account()
+    assert account.account_number
+    assert account.status
+    assert account.currency
+    assert float(account.portfolio_value) >= 0.0
+    assert float(account.buying_power) >= 0.0
 
-    print(f"\n[OK] Connected successfully!")
-    print(f"  Account Number: {account.account_number}")
-    print(f"  Status: {account.status}")
-    print(f"  Currency: {account.currency}")
-    print(f"  Cash: ${float(account.cash):,.2f}")
-    print(f"  Portfolio Value: ${float(account.portfolio_value):,.2f}")
-    print(f"  Buying Power: ${float(account.buying_power):,.2f}")
-    print(f"  Equity: ${float(account.equity):,.2f}")
-
-    # Test getting market clock
-    print("\nFetching market clock...")
     clock = client.get_clock()
-    print(f"  Market is: {'OPEN' if clock.is_open else 'CLOSED'}")
-    print(f"  Next open: {clock.next_open}")
-    print(f"  Next close: {clock.next_close}")
-
-except Exception as e:
-    print(f"\n[FAIL] Connection failed!")
-    print(f"  Error type: {type(e).__name__}")
-    print(f"  Error message: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-
-print("\n[SUCCESS] All tests passed!")
+    assert clock.next_open is not None
+    assert clock.next_close is not None

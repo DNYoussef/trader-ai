@@ -14,11 +14,61 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
+import base64
+import hashlib
+import hmac
+import json
 import logging
+import os
 import pickle
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_PICKLE_SIGNING_KEY_ENV = "TRADER_AI_PICKLE_SIGNING_KEY"
+_SIGNED_PICKLE_MAGIC = "TRADER_AI_SIGNED_PICKLE_V1"
+
+
+def _pickle_signing_key() -> bytes:
+    key = os.environ.get(_PICKLE_SIGNING_KEY_ENV)
+    if not key:
+        raise RuntimeError(
+            f"{_PICKLE_SIGNING_KEY_ENV} must be set to load or save signed pickle artifacts"
+        )
+    return key.encode("utf-8")
+
+
+def _save_signed_pickle(path: Path, data: object) -> None:
+    payload = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+    signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    envelope = {
+        "magic": _SIGNED_PICKLE_MAGIC,
+        "algorithm": "HMAC-SHA256",
+        "payload": base64.b64encode(payload).decode("ascii"),
+        "signature": signature,
+    }
+
+    path.write_bytes(json.dumps(envelope, separators=(",", ":")).encode("utf-8"))
+
+
+def _load_signed_pickle(path: Path) -> object:
+    try:
+        envelope = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}") from exc
+
+    if not isinstance(envelope, dict) or envelope.get("magic") != _SIGNED_PICKLE_MAGIC:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}")
+
+    if envelope.get("algorithm") != "HMAC-SHA256":
+        raise ValueError(f"Unsupported pickle signature algorithm: {envelope.get('algorithm')}")
+
+    payload = base64.b64decode(envelope["payload"])
+    expected_signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(envelope.get("signature", ""), expected_signature):
+        raise ValueError(f"Invalid pickle artifact signature: {path}")
+
+    return pickle.loads(payload)  # nosec B301 - HMAC signature verified before deserialization
 
 # Try to import sklearn
 try:
@@ -368,16 +418,17 @@ class StrategySelector:
             'training_metrics': self.training_metrics,
         }
 
-        with open(path, 'wb') as f:
-            pickle.dump(state, f)
+        _save_signed_pickle(path, state)
 
         logger.info(f"Selector saved to {path}")
 
     @classmethod
     def load(cls, path: Union[str, Path]) -> 'StrategySelector':
         """Load selector from file."""
-        with open(path, 'rb') as f:
-            state = pickle.load(f)
+        path = Path(path)
+        state = _load_signed_pickle(path)
+        if not isinstance(state, dict):
+            raise ValueError(f"Invalid selector artifact payload: {path}")
 
         selector = cls(
             input_dim=state['input_dim'],

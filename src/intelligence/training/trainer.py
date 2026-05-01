@@ -12,8 +12,6 @@ from typing import Dict, Any, Optional, Tuple
 from pathlib import Path
 
 import mlflow
-import mlflow.sklearn
-import mlflow.pytorch
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -216,6 +214,8 @@ class ModelTrainer:
             with open(model_path, 'wb') as f:
                 pickle.dump(best_model, f)
 
+            import mlflow.sklearn
+
             mlflow.sklearn.log_model(best_model, "model")
             mlflow.log_artifact(str(model_path))
 
@@ -262,6 +262,8 @@ class ModelTrainer:
             model_path = self.model_dir / "gradient_boosting_model.pkl"
             with open(model_path, 'wb') as f:
                 pickle.dump(best_model, f)
+
+            import mlflow.sklearn
 
             mlflow.sklearn.log_model(best_model, "model")
             mlflow.log_artifact(str(model_path))

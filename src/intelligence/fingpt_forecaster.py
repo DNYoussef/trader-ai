@@ -59,7 +59,8 @@ class FinGPTForecaster:
 
     def __init__(self,
                  model_name: str = "FinGPT/fingpt-forecaster_dow30_llama2-7b_lora",
-                 use_fallback: bool = True):
+                 use_fallback: bool = True,
+                 model_revision: Optional[str] = None):
         """
         Initialize FinGPT forecaster
 
@@ -68,6 +69,7 @@ class FinGPTForecaster:
             use_fallback: Use statistical fallback if model unavailable
         """
         self.model_name = model_name
+        self.model_revision = model_revision or os.getenv("FINGPT_FORECASTER_REVISION")
         self.use_fallback = use_fallback
         self.model = None
         self.tokenizer = None
@@ -93,13 +95,16 @@ class FinGPTForecaster:
         }
 
         # Initialize
-        if FINGPT_FORECASTER_AVAILABLE:
+        if FINGPT_FORECASTER_AVAILABLE and self.model_revision:
             self._initialize_fingpt_forecaster()
+        elif FINGPT_FORECASTER_AVAILABLE and not self.model_revision and use_fallback:
+            logger.warning("FINGPT_FORECASTER_REVISION is not set; using fallback instead of unpinned model download")
+            self.is_initialized = True
         elif use_fallback:
             logger.info("Using fallback forecasting (statistical)")
             self.is_initialized = True
         else:
-            raise RuntimeError("FinGPT Forecaster not available and fallback disabled")
+            raise RuntimeError("FinGPT Forecaster revision not pinned and fallback disabled")
 
     def _initialize_fingpt_forecaster(self):
         """Initialize FinGPT-Forecaster model"""
@@ -110,10 +115,15 @@ class FinGPTForecaster:
             hf_token = os.getenv('HF_TOKEN')
 
             # Load model and tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, token=hf_token)
-            self.model = AutoModelForCausalLM.from_pretrained(
+            self.tokenizer = AutoTokenizer.from_pretrained(  # nosec B615 - revision is required before this path runs
                 self.model_name,
                 token=hf_token,
+                revision=self.model_revision,
+            )
+            self.model = AutoModelForCausalLM.from_pretrained(  # nosec B615 - revision is required before this path runs
+                self.model_name,
+                token=hf_token,
+                revision=self.model_revision,
                 torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
                 device_map="auto" if torch.cuda.is_available() else None
             )

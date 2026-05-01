@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./src/performance/benchmarker",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "newLine": "lf",
+    "composite": true,
+    "tsBuildInfoFile": "./dist/tsconfig.performance.tsbuildinfo"
+  },
+  "include": [
+    "src/performance/benchmarker/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "compiled",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

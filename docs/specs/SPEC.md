@@ -12,7 +12,7 @@
 - ✅ **Taleb's Antifragility Engine**: 900+ LOC of barbell allocation and EVT
 - ✅ **Production Trading Pipeline**: 1,700+ LOC replacing all mock stubs
 - ✅ **Real Broker Integration**: Alpaca API with $200 seed capital capability
-- ✅ **Gate Management System**: G0-G3 with constraint enforcement
+- ✅ **Gate Management System**: G0-G12 capital ladder with constraint enforcement
 - ✅ **Weekly Cycle Automation**: Friday 4:10pm/6:00pm ET execution
 - ✅ **Comprehensive Test Suite**: 95%+ coverage with sandbox validation
 
@@ -40,7 +40,7 @@ Build an autonomous trading system that combines Gary's distributional analysis 
 - ✅ **Criterion 1**: Gary's DPI system calculates real distributional pressure from OHLC data
 - ✅ **Criterion 2**: Taleb's antifragility engine implements 80/20 barbell with EVT mathematics
 - ✅ **Criterion 3**: Production trading system can execute real trades with $200 seed capital
-- ✅ **Criterion 4**: Gate system G0-G3 enforces constraints and progression rules
+- ✅ **Criterion 4**: Gate system G0-G12 enforces capital ranges and conservative runtime guardrails
 - ✅ **Criterion 5**: Weekly cycle automation schedules Friday 4:10pm/6:00pm ET execution
 
 ### Risks & Mitigations
@@ -63,7 +63,7 @@ pytest tests/ -v
 - ✅ Gary's DPI engine operational
 - ✅ Taleb's antifragility framework complete
 - ✅ Production trading pipeline validated
-- ✅ G0-G3 gate system functional
+- ✅ G0-G12 gate system functional; higher-gate derivative/direct-instrument capabilities still require venue-specific validators
 - ✅ Fresh eyes audit passed
 
 ### Timeline

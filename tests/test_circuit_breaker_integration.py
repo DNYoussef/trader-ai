@@ -21,7 +21,14 @@ class TestCircuitBreakerIntegration:
         return manager
 
     @pytest.fixture
-    def trade_executor(self, mock_circuit_manager):
+    def mock_gate_manager(self):
+        """Create mock gate manager."""
+        manager = Mock()
+        manager.validate_trade.return_value = Mock(is_valid=True, violations=[])
+        return manager
+
+    @pytest.fixture
+    def trade_executor(self, mock_circuit_manager, mock_gate_manager):
         """Create trade executor with mock dependencies."""
         broker = AsyncMock()
         broker.is_connected = True
@@ -31,6 +38,11 @@ class TestCircuitBreakerIntegration:
 
         portfolio = AsyncMock()
         portfolio.get_total_portfolio_value = AsyncMock(return_value=Decimal("1000"))
+        portfolio.get_portfolio_summary = AsyncMock(return_value={
+            'cash': 1000.0,
+            'total_value': 1000.0,
+            'positions': {}
+        })
         portfolio.positions = AsyncMock()
         portfolio.positions.get = AsyncMock(return_value=None)
         portfolio.record_transaction = AsyncMock()
@@ -38,8 +50,13 @@ class TestCircuitBreakerIntegration:
         market_data = AsyncMock()
         market_data.get_current_price = AsyncMock(return_value=100.0)
 
-        executor = TradeExecutor(broker, portfolio, market_data)
-        executor.circuit_manager = mock_circuit_manager
+        executor = TradeExecutor(
+            broker,
+            portfolio,
+            market_data,
+            mock_gate_manager,
+            mock_circuit_manager,
+        )
 
         return executor
 
@@ -143,43 +160,35 @@ class TestCircuitBreakerIntegration:
         assert 'Loss limit circuit breaker OPEN' in result.broker_response.get('error', '')
 
     @pytest.mark.asyncio
-    async def test_trade_proceeds_without_circuit_manager(self, mock_circuit_manager):
-        """Test that trades proceed normally if circuit_manager is not set."""
-        # Create executor without circuit_manager
+    async def test_actual_trading_loss_protection_name_blocks_trade(self, trade_executor, mock_circuit_manager):
+        """Test that the production trading_loss_protection breaker name blocks trades."""
+        mock_circuit_manager.get_system_status.return_value = {
+            'open_breakers': 0,
+            'circuit_breakers': {
+                'trading_loss_protection': {
+                    'type': 'trading_loss',
+                    'state': 'open',
+                    'reason': 'Daily loss limit exceeded'
+                }
+            }
+        }
+
+        result = await trade_executor.buy_market_order('SPY', Decimal('100'), 'TEST')
+
+        assert result.status == 'error'
+        assert 'Loss limit circuit breaker OPEN' in result.broker_response.get('error', '')
+
+    def test_trade_executor_rejects_missing_risk_controls(self, mock_circuit_manager, mock_gate_manager):
+        """TradeExecutor must fail closed when mandatory controls are absent."""
         broker = AsyncMock()
-        broker.is_connected = True
-        broker.is_market_open = AsyncMock(return_value=True)
-        broker.get_buying_power = AsyncMock(return_value=Decimal("1000"))
-
         portfolio = AsyncMock()
-        portfolio.get_total_portfolio_value = AsyncMock(return_value=Decimal("1000"))
-        portfolio.positions = AsyncMock()
-        portfolio.positions.get = AsyncMock(return_value=None)
-        portfolio.record_transaction = AsyncMock()
-
         market_data = AsyncMock()
-        market_data.get_current_price = AsyncMock(return_value=100.0)
 
-        executor = TradeExecutor(broker, portfolio, market_data)
-        # Note: No circuit_manager assigned
+        with pytest.raises(ValueError, match="gate_manager is required"):
+            TradeExecutor(broker, portfolio, market_data, None, mock_circuit_manager)
 
-        # Mock successful order submission
-        mock_order = Mock()
-        mock_order.id = 'ORDER123'
-        mock_order.qty = Decimal('1')
-        mock_order.filled_qty = Decimal('1')
-        mock_order.filled_avg_price = Decimal('100')
-        mock_order.status = Mock(value='filled')
-        mock_order.submitted_at = None
-
-        executor.broker.submit_order.return_value = mock_order
-
-        # Trade should proceed normally without circuit manager
-        result = await executor.buy_market_order('SPY', Decimal('100'), 'TEST')
-
-        # Verify trade was allowed
-        assert result.status == 'filled'
-        assert result.order_id == 'ORDER123'
+        with pytest.raises(ValueError, match="circuit_manager is required"):
+            TradeExecutor(broker, portfolio, market_data, mock_gate_manager, None)
 
 
 if __name__ == '__main__':

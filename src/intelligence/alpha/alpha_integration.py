@@ -24,8 +24,13 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from narrative.narrative_gap import NarrativeGapEngine, NGSignal
-from ..learning.shadow_book import ShadowBookEngine, Trade, TradeType, ActionType
-from ..learning.policy_twin import PolicyTwin, EthicalTrade, AlphaType
+
+try:
+    from ..learning.shadow_book import ShadowBookEngine, Trade, TradeType, ActionType
+    from ..learning.policy_twin import PolicyTwin, EthicalTrade, AlphaType
+except ImportError:  # pragma: no cover - legacy top-level intelligence import
+    from learning.shadow_book import ShadowBookEngine, Trade, TradeType, ActionType
+    from learning.policy_twin import PolicyTwin, EthicalTrade, AlphaType
 
 logger = logging.getLogger(__name__)
 

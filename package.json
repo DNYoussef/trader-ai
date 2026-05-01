@@ -4,8 +4,8 @@
   "description": "Real executable performance testing framework for trader-ai CI/CD system",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --build",
-    "build:watch": "tsc --build --watch",
+    "build": "tsc --build tsconfig.performance.json",
+    "build:watch": "tsc --build tsconfig.performance.json --watch",
     "clean": "rimraf dist compiled",
     "compile": "npm run clean && npm run build && npm run copy-compiled",
     "copy-compiled": "node -e \"const fs=require('fs');const p=require('path');const src='dist';const dest='compiled';function copy(s,d){if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).forEach(f=>{const sp=p.join(s,f);const dp=p.join(d,f);if(fs.statSync(sp).isDirectory())copy(sp,dp);else fs.copyFileSync(sp,dp)});};copy(src,dest);\"",

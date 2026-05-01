@@ -58,14 +58,15 @@ class EnterpriseAnalyzerIntegration:
         Returns a new class that extends the original with enterprise capabilities
         while maintaining full API compatibility.
         """
+        integration = self
+
         class EnterpriseWrappedAnalyzer(analyzer_class):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
-                self._enterprise_integration = self
+                self._enterprise_integration = integration
                 self._original_class = analyzer_class
                 self._analysis_start_time = None
                 
-            @enterprise_feature("enterprise_telemetry", "Enable Six Sigma telemetry")
             async def analyze(self, *args, **kwargs):
                 """Enhanced analyze method with enterprise features"""
                 analysis_id = f"{name}_{datetime.now().isoformat()}"
@@ -75,9 +76,6 @@ class EnterpriseAnalyzerIntegration:
                     # Pre-analysis hooks
                     await self._run_hooks('pre_analysis', analysis_id, args, kwargs)
                     
-                    # Record analysis start
-                    self.telemetry.record_unit_processed()
-                    
                     # Call original analyze method
                     if hasattr(super(), 'analyze'):
                         result = await super().analyze(*args, **kwargs)
@@ -86,7 +84,7 @@ class EnterpriseAnalyzerIntegration:
                         result = super().analyze(*args, **kwargs) if hasattr(super(), 'analyze') else None
                     
                     # Record successful analysis
-                    self.telemetry.record_unit_processed(passed=True)
+                    self._enterprise_integration.telemetry.record_unit_processed(passed=True)
                     
                     # Post-analysis hooks
                     await self._run_hooks('post_analysis', analysis_id, result)
@@ -101,7 +99,7 @@ class EnterpriseAnalyzerIntegration:
                     
                 except Exception as e:
                     # Record failed analysis
-                    self.telemetry.record_defect("analysis_failure")
+                    self._enterprise_integration.telemetry.record_defect("analysis_failure")
                     
                     # Error hooks
                     await self._run_hooks('on_error', analysis_id, e)
@@ -143,7 +141,6 @@ class EnterpriseAnalyzerIntegration:
                 if len(self._enterprise_integration.analysis_history) > 1000:
                     self._enterprise_integration.analysis_history.pop(0)
                     
-            @enterprise_feature("enterprise_compliance", "Enable compliance checking")
             async def get_compliance_status(self) -> Dict[str, Any]:
                 """Get compliance status for this analyzer"""
                 return {
@@ -186,7 +183,6 @@ class EnterpriseAnalyzerIntegration:
                     'overall_status': 'compliant'
                 }
                 
-            @enterprise_feature("enterprise_security", "Enable security analysis")
             async def get_security_analysis(self) -> Dict[str, Any]:
                 """Perform enterprise security analysis"""
                 security_report = await self._enterprise_integration.supply_chain.generate_comprehensive_security_report()
@@ -201,7 +197,6 @@ class EnterpriseAnalyzerIntegration:
                     'recommendations': security_report.recommendations
                 }
                 
-            @enterprise_feature("enterprise_metrics", "Enable Six Sigma metrics")
             def get_quality_metrics(self) -> Dict[str, Any]:
                 """Get Six Sigma quality metrics"""
                 metrics = self._enterprise_integration.telemetry.generate_metrics_snapshot()

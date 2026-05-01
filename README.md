@@ -2,25 +2,33 @@
 
 ## Canonical Status
 
-<!-- STATUS:START -->
-Canonical status from `2026-EXOSKELETON-STATUS.json`.
+Last verified locally: 2026-05-01.
 
-Status: 45% (source: implementation-plan)
-Registry refreshed: 2026-01-15T20:37:16.435423+00:00
-Signals: git=yes, tests=yes, ci=yes, readme=yes, last_commit=4185542
-<!-- STATUS:END -->
+The active equity-trading runtime is `main.py` -> `src/trading_engine.py`. It initializes Alpaca, portfolio management, gate management, safety/circuit systems, and a rebalancing loop. The loop checks every 300 seconds and uses `config/config.json` `rebalance_frequency_minutes`, currently `5`, to decide when to run a trading cycle.
+
+Important boundaries:
+
+- Alpaca trading requires `alpaca-py`, `ALPACA_API_KEY`, and `ALPACA_SECRET_KEY`; the current adapter does not fall back to a mock broker.
+- Runtime capital gates implemented in `src/gates/gate_manager.py` now cover the full `G0` through `G12` capital ladder. Higher gates use conservative ETF/proxy guardrails; futures, FX derivatives, swaps, and direct-treasury operations still need venue-specific validators before they should be treated as tradable runtime capabilities.
+- `src/cycles/weekly_cycle.py` exists, but it is not the active scheduler for `main.py`.
+- Dashboard trade execution is not wired as a live order path; `/api/trading/execute` returns `501`.
+- Equity live mode requires the interactive `CONFIRM` prompt in `main.py --mode live`. Alpaca paper API tests additionally require `RUN_LIVE_ALPACA_TESTS=true` and credentials.
+
+The Mieza/prediction-market integration is separate from the equity loop. Trader-AI ingests signed Mieza signal envelopes, stores them durably, reviews them through a deterministic committee, applies MOO sizing, then passes them through `PredictionMarketRiskGate`. Default execution is dry-run. Live prediction-market execution requires `TRADER_AI_ENABLE_LIVE_PREDICTION_MARKETS=true` plus venue credentials and configured clients. See `docs/MIEZA-PREDICTION-MARKET-INTEGRATION.md`.
 
 
 > A sophisticated algorithmic trading platform combining Gary Antonacci's dual momentum strategies with Nassim Taleb's antifragility principles, featuring progressive capital gates and mobile app psychology-inspired UX.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![TypeScript](https://img.shields.io/badge/typescript-5.0%2B-blue)
 ![React](https://img.shields.io/badge/react-18.0%2B-green)
 
 ## 🎯 Overview
 
 The Gary×Taleb Trading System is an advanced algorithmic trading platform that implements a unique fusion of momentum-based strategies with risk management principles designed to thrive in volatile markets. The system features a progressive capital gate system, starting from $200 and scaling through 13 gates to multi-million dollar portfolios.
+
+Current implementation note: the canonical status section above is the source of truth. The G0-G12 capital ladder is implemented in `GateManager`; older weekly-cycle and high-gate derivative/direct-instrument language remains roadmap/design context unless it is explicitly called out as implemented.
 
 ### Core Trading Philosophy
 
@@ -37,7 +45,7 @@ The Gary×Taleb Trading System is an advanced algorithmic trading platform that 
 
 3. **Progressive Capital Gates**
    - Start with $200 minimum
-   - 13 gates from G0 ($200) to G12 ($10M+)
+   - Runtime gates currently implemented from G0 ($200) to G12 ($10M+)
    - Risk-adjusted position sizing
    - Automatic profit siphoning (50/50 split)
 
@@ -45,7 +53,7 @@ The Gary×Taleb Trading System is an advanced algorithmic trading platform that 
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - Node.js 16+
 - npm or yarn
 - Git
@@ -345,7 +353,7 @@ Professional trading interface with:
 
 - **🏛️ Progressive Quest System** (2h)
   - Collaborative learning with "Babble & Prune" methodology
-  - Gate progression quests (G0-G12) with team challenges
+  - Gate progression quests using the roadmap gate model
   - Structured skill development through iterative improvement
   - *Based on Guild's "Quest Creation" and "Quest Planning" workshops*
 
@@ -375,7 +383,7 @@ Professional trading interface with:
 <summary>Click to view Progress System</summary>
 
 Visual progression system showing:
-- **Current Gate**: Track progression from G0 ($200) to G12 ($10M+)
+- **Current Gate**: Track implemented runtime gates and roadmap progression views
 - **Achievements**: Milestone rewards and accomplishments
 - **Performance Metrics**: Historical performance tracking
 - **Learning Progress**: Course completion percentages
@@ -432,6 +440,21 @@ ALPACA_BASE_URL=https://paper-api.alpaca.markets
 ```
 
 ## 🧪 Testing
+
+Current verified commands from the 2026-05-01 audit:
+
+```bash
+python -m pytest -m unit -q --maxfail=20
+# 457 passed, 1 skipped, 1200 deselected, 1 xfailed
+
+python -m pytest -m e2e -q
+# 2 passed, 10 skipped
+
+python -m pytest tests/test_prediction_market_moo.py tests/test_prediction_market_committee.py tests/test_prediction_market_risk.py tests/test_mieza_signal_ingestion.py tests/test_mieza_quant_bridge.py tests/test_kelly_system.py tests/test_circuit_breaker_integration.py -q
+# 87 passed
+```
+
+Security scan status from the same audit: Bandit high/medium findings are zero after replacing unsafe model/pickle loading patterns, loopback-only dashboard defaults, signed pickle envelopes, pinned HuggingFace revision gates, parameterized SQL, and request timeouts. Low-severity Bandit noise remains for future triage.
 
 ### Run All Tests
 ```bash

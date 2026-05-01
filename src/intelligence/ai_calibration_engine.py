@@ -6,6 +6,10 @@ Implements mathematical framework for AI to learn its own risk tolerances and de
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
+import base64
+import hashlib
+import hmac
+import json
 import logging
 import numpy as np
 from scipy import stats
@@ -13,6 +17,55 @@ import pickle
 import os
 
 logger = logging.getLogger(__name__)
+
+_PICKLE_SIGNING_KEY_ENV = "TRADER_AI_PICKLE_SIGNING_KEY"
+_SIGNED_PICKLE_MAGIC = "TRADER_AI_SIGNED_PICKLE_V1"
+
+
+def _pickle_signing_key() -> bytes:
+    key = os.environ.get(_PICKLE_SIGNING_KEY_ENV)
+    if not key:
+        raise RuntimeError(
+            f"{_PICKLE_SIGNING_KEY_ENV} must be set to load or save signed pickle artifacts"
+        )
+    return key.encode("utf-8")
+
+
+def _save_signed_pickle(path: str, data: Any) -> None:
+    payload = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+    signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    envelope = {
+        "magic": _SIGNED_PICKLE_MAGIC,
+        "algorithm": "HMAC-SHA256",
+        "payload": base64.b64encode(payload).decode("ascii"),
+        "signature": signature,
+    }
+
+    with open(path, "wb") as f:
+        f.write(json.dumps(envelope, separators=(",", ":")).encode("utf-8"))
+
+
+def _load_signed_pickle(path: str) -> Any:
+    with open(path, "rb") as f:
+        raw_data = f.read()
+
+    try:
+        envelope = json.loads(raw_data.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}") from exc
+
+    if not isinstance(envelope, dict) or envelope.get("magic") != _SIGNED_PICKLE_MAGIC:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}")
+
+    if envelope.get("algorithm") != "HMAC-SHA256":
+        raise ValueError(f"Unsupported pickle signature algorithm: {envelope.get('algorithm')}")
+
+    payload = base64.b64decode(envelope["payload"])
+    expected_signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(envelope.get("signature", ""), expected_signature):
+        raise ValueError(f"Invalid pickle artifact signature: {path}")
+
+    return pickle.loads(payload)  # nosec B301 - HMAC signature verified before deserialization
 
 @dataclass
 class AIPrediction:
@@ -429,8 +482,7 @@ class AICalibrationEngine:
                 'calibration_metrics': self.calibration_metrics
             }
 
-            with open(self.persistence_path, 'wb') as f:
-                pickle.dump(data, f)
+            _save_signed_pickle(self.persistence_path, data)
 
         except Exception as e:
             logger.error(f"Failed to save calibration data: {e}")
@@ -439,8 +491,7 @@ class AICalibrationEngine:
         """Load calibration data from disk"""
         try:
             if os.path.exists(self.persistence_path):
-                with open(self.persistence_path, 'rb') as f:
-                    data = pickle.load(f)
+                data = _load_signed_pickle(self.persistence_path)
 
                 self.predictions = data.get('predictions', [])
                 self.utility_params = data.get('utility_params', AIUtilityParameters())

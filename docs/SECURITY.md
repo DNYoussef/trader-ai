@@ -4,6 +4,27 @@
 
 Trader-AI implements multiple layers of security to protect sensitive data and prevent unauthorized access. This guide covers security setup, configuration, and best practices.
 
+## Current Audit Status
+
+Last verified locally: 2026-05-01.
+
+Bandit high/medium findings are currently zero for `src/`. Recent fixes include:
+
+- PyTorch checkpoint loading now uses `weights_only=True` where applicable.
+- Pickle artifacts that remain are loaded only after HMAC envelope verification.
+- HuggingFace FinGPT model downloads require pinned revision environment variables or use fallback behavior.
+- Dashboard servers bind to `127.0.0.1` by default; deployment can opt into `HOST=0.0.0.0`.
+- Symbol filtering SQL was changed to static SQL plus a temporary table.
+- Local LLM health checks use explicit request timeouts.
+- Hardcoded Alpaca test credentials were removed; live paper API tests require `RUN_LIVE_ALPACA_TESTS=true` plus environment credentials.
+
+Active API caveats:
+
+- `src/dashboard/run_server_simple.py` is the active dashboard backend. It wires JWT/limiter infrastructure, but endpoint-specific documented rate limits and the full security-header middleware are not active on every route.
+- `JWT_SECRET_KEY` is required for `src.security.auth`.
+- Durable encrypted bank-token storage requires `DATABASE_ENCRYPTION_KEY`; in-memory fallback is not a durable encrypted store.
+- Prediction-market live execution requires `TRADER_AI_ENABLE_LIVE_PREDICTION_MARKETS=true`, durable SQLite state, and configured venue clients.
+
 ## Quick Start
 
 ### 1. Run Security Setup Script

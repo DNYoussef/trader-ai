@@ -9,9 +9,21 @@ Provides enterprise-grade quality metrics including:
 """
 
 from .six_sigma import SixSigmaTelemetry, SixSigmaMetrics
-from .dpmo_calculator import DPMOCalculator
-from .rty_calculator import RTYCalculator
-from .process_capability import ProcessCapabilityAnalyzer
+
+try:
+    from .dpmo_calculator import DPMOCalculator
+except ModuleNotFoundError:  # pragma: no cover - optional legacy module
+    DPMOCalculator = None
+
+try:
+    from .rty_calculator import RTYCalculator
+except ModuleNotFoundError:  # pragma: no cover - optional legacy module
+    RTYCalculator = None
+
+try:
+    from .process_capability import ProcessCapabilityAnalyzer
+except ModuleNotFoundError:  # pragma: no cover - optional legacy module
+    ProcessCapabilityAnalyzer = None
 
 __all__ = [
     "SixSigmaTelemetry",

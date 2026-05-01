@@ -165,7 +165,7 @@ def main():
         background_thread.start()
 
         # Start the server
-        dashboard_server.run(host="0.0.0.0", port=8000)
+        dashboard_server.run(host=os.environ.get("HOST", "127.0.0.1"), port=8000)
 
     except KeyboardInterrupt:
         logger.info("Shutdown requested by user")

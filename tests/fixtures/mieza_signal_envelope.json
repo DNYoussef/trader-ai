@@ -1,0 +1,21 @@
+{
+  "schema_version": "mieza.signal.v1",
+  "source": "mieza-quant",
+  "generated_at": "2026-04-30T12:00:00Z",
+  "nonce": "contract-fixture-nonce",
+  "signals": [
+    {
+      "market_id": "polymarket-election-001",
+      "platform": "polymarket",
+      "question": "Will the event resolve yes?",
+      "signal_type": "equilibrium",
+      "side": "yes",
+      "edge": 0.08,
+      "confidence": 0.72,
+      "recommended_size": 3,
+      "market_price": 0.42,
+      "estimated_fair_price": 0.5
+    }
+  ],
+  "signature": "e575ea11ee76c13b333f3dba6c33c97133803c56009f4b70c31e45c962c80394"
+}

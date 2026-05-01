@@ -22,6 +22,18 @@ class GateLevel(Enum):
     G1 = "G1"  # $500-999
     G2 = "G2"  # $1k-2.5k
     G3 = "G3"  # $2.5k-5k
+    G4 = "G4"  # $5k-10k
+    G5 = "G5"  # $10k-25k
+    G6 = "G6"  # $25k-50k
+    G7 = "G7"  # $50k-100k
+    G8 = "G8"  # $100k-250k
+    G9 = "G9"  # $250k-500k
+    G10 = "G10"  # $500k-1M
+    G11 = "G11"  # $1M-10M
+    G12 = "G12"  # $10M+
+
+
+GATE_ORDER = tuple(GateLevel)
 
 class ViolationType(Enum):
     """Types of gate violations."""
@@ -123,13 +135,30 @@ class GateManager:
     def _initialize_gate_configs(self) -> Dict[GateLevel, GateConfig]:
         """Initialize all gate configurations."""
         configs = {}
-        
+
+        core_assets = {'ULTY', 'AMDY'}
+        hedge_assets = {'IAU', 'GLDM', 'VTIP'}
+        factor_assets = {'VTI', 'VTV', 'VUG', 'VEA', 'VWO', 'UUP'}
+        dividend_assets = {'SCHD', 'DGRO', 'NOBL', 'VYM'}
+        liquid_index_assets = {'SPY', 'QQQ', 'IWM', 'DIA'}
+        convexity_proxy_assets = {'VIXY', 'VXX', 'SH', 'TLT', 'IEF'}
+        treasury_assets = {'BIL', 'SHV', 'SGOV', 'USFR', 'TFLO'}
+        credit_assets = {'LQD', 'HYG', 'VCIT', 'VCSH'}
+        macro_assets = {'GLD', 'SLV', 'DBC', 'EEM', 'FXE', 'FXY', 'FXB'}
+        institutional_assets = {'SOFR', 'TIP'}
+
+        def universe(*asset_sets: Set[str]) -> Set[str]:
+            allowed: Set[str] = set()
+            for assets in asset_sets:
+                allowed.update(assets)
+            return allowed
+
         # G0: $200-499, ULTY/AMDY only, 50% cash floor, no options
         configs[GateLevel.G0] = GateConfig(
             level=GateLevel.G0,
             capital_min=200.0,
             capital_max=499.99,
-            allowed_assets={'ULTY', 'AMDY'},
+            allowed_assets=universe(core_assets),
             cash_floor_pct=0.50,
             options_enabled=False,
             max_position_pct=0.25,  # More conservative for beginners
@@ -141,7 +170,7 @@ class GateManager:
             level=GateLevel.G1,
             capital_min=500.0,
             capital_max=999.99,
-            allowed_assets={'ULTY', 'AMDY', 'IAU', 'GLDM', 'VTIP'},
+            allowed_assets=universe(core_assets, hedge_assets),
             cash_floor_pct=0.60,
             options_enabled=False,
             max_position_pct=0.22,
@@ -153,11 +182,7 @@ class GateManager:
             level=GateLevel.G2,
             capital_min=1000.0,
             capital_max=2499.99,
-            allowed_assets={
-                'ULTY', 'AMDY', 'IAU', 'GLDM', 'VTIP',
-                'VTI', 'VTV', 'VUG', 'VEA', 'VWO',  # Factor ETFs
-                'SCHD', 'DGRO', 'NOBL', 'VYM'  # Dividend ETFs
-            },
+            allowed_assets=universe(core_assets, hedge_assets, factor_assets, dividend_assets),
             cash_floor_pct=0.65,
             options_enabled=False,
             max_position_pct=0.20,
@@ -169,17 +194,213 @@ class GateManager:
             level=GateLevel.G3,
             capital_min=2500.0,
             capital_max=4999.99,
-            allowed_assets={
-                'ULTY', 'AMDY', 'IAU', 'GLDM', 'VTIP',
-                'VTI', 'VTV', 'VUG', 'VEA', 'VWO',
-                'SCHD', 'DGRO', 'NOBL', 'VYM',
-                'SPY', 'QQQ', 'IWM', 'DIA'  # Options-eligible ETFs
-            },
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+            ),
             cash_floor_pct=0.70,
             options_enabled=True,
             max_theta_pct=0.005,  # 0.5% theta limit
             max_position_pct=0.20,
             max_concentration_pct=0.30
+        )
+
+        # G4-G12 are roadmap-derived runtime guardrails. They deliberately use
+        # listed ETFs/proxies; futures, FX derivatives, swaps, and direct
+        # treasury workflows need separate venue-specific validators before use.
+        configs[GateLevel.G4] = GateConfig(
+            level=GateLevel.G4,
+            capital_min=5000.0,
+            capital_max=9999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+            ),
+            cash_floor_pct=0.75,
+            options_enabled=True,
+            max_theta_pct=0.005,
+            max_position_pct=0.18,
+            max_concentration_pct=0.28,
+        )
+
+        configs[GateLevel.G5] = GateConfig(
+            level=GateLevel.G5,
+            capital_min=10000.0,
+            capital_max=24999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+            ),
+            cash_floor_pct=0.80,
+            options_enabled=True,
+            max_theta_pct=0.010,
+            max_position_pct=0.15,
+            max_concentration_pct=0.25,
+        )
+
+        configs[GateLevel.G6] = GateConfig(
+            level=GateLevel.G6,
+            capital_min=25000.0,
+            capital_max=49999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+            ),
+            cash_floor_pct=0.80,
+            options_enabled=True,
+            max_theta_pct=0.010,
+            max_position_pct=0.12,
+            max_concentration_pct=0.22,
+        )
+
+        configs[GateLevel.G7] = GateConfig(
+            level=GateLevel.G7,
+            capital_min=50000.0,
+            capital_max=99999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+            ),
+            cash_floor_pct=0.75,
+            options_enabled=True,
+            max_theta_pct=0.008,
+            max_position_pct=0.10,
+            max_concentration_pct=0.20,
+        )
+
+        configs[GateLevel.G8] = GateConfig(
+            level=GateLevel.G8,
+            capital_min=100000.0,
+            capital_max=249999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+                macro_assets,
+            ),
+            cash_floor_pct=0.70,
+            options_enabled=True,
+            max_theta_pct=0.006,
+            max_position_pct=0.08,
+            max_concentration_pct=0.18,
+        )
+
+        configs[GateLevel.G9] = GateConfig(
+            level=GateLevel.G9,
+            capital_min=250000.0,
+            capital_max=499999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+                macro_assets,
+            ),
+            cash_floor_pct=0.65,
+            options_enabled=True,
+            max_theta_pct=0.005,
+            max_position_pct=0.06,
+            max_concentration_pct=0.15,
+        )
+
+        configs[GateLevel.G10] = GateConfig(
+            level=GateLevel.G10,
+            capital_min=500000.0,
+            capital_max=999999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+                macro_assets,
+                institutional_assets,
+            ),
+            cash_floor_pct=0.60,
+            options_enabled=True,
+            max_theta_pct=0.004,
+            max_position_pct=0.05,
+            max_concentration_pct=0.12,
+        )
+
+        configs[GateLevel.G11] = GateConfig(
+            level=GateLevel.G11,
+            capital_min=1000000.0,
+            capital_max=9999999.99,
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+                macro_assets,
+                institutional_assets,
+            ),
+            cash_floor_pct=0.55,
+            options_enabled=True,
+            max_theta_pct=0.003,
+            max_position_pct=0.04,
+            max_concentration_pct=0.10,
+        )
+
+        configs[GateLevel.G12] = GateConfig(
+            level=GateLevel.G12,
+            capital_min=10000000.0,
+            capital_max=float("inf"),
+            allowed_assets=universe(
+                core_assets,
+                hedge_assets,
+                factor_assets,
+                dividend_assets,
+                liquid_index_assets,
+                convexity_proxy_assets,
+                treasury_assets,
+                credit_assets,
+                macro_assets,
+                institutional_assets,
+            ),
+            cash_floor_pct=0.50,
+            options_enabled=True,
+            max_theta_pct=0.0025,
+            max_position_pct=0.03,
+            max_concentration_pct=0.08,
         )
         
         return configs
@@ -187,6 +408,57 @@ class GateManager:
     def get_current_config(self) -> GateConfig:
         """Get the configuration for the current gate level."""
         return self.gate_configs[self.current_gate]
+
+    @staticmethod
+    def next_gate_level(current_gate: GateLevel) -> Optional[GateLevel]:
+        """Return the next gate in the configured progression."""
+        try:
+            index = GATE_ORDER.index(current_gate)
+        except ValueError:
+            return None
+        if index >= len(GATE_ORDER) - 1:
+            return None
+        return GATE_ORDER[index + 1]
+
+    @staticmethod
+    def previous_gate_level(current_gate: GateLevel) -> Optional[GateLevel]:
+        """Return the previous gate in the configured progression."""
+        try:
+            index = GATE_ORDER.index(current_gate)
+        except ValueError:
+            return None
+        if index <= 0:
+            return None
+        return GATE_ORDER[index - 1]
+
+    def get_graduation_criteria(self, gate_level: Optional[GateLevel] = None) -> Optional[Dict[str, Any]]:
+        """Get graduation criteria from a gate to the next gate."""
+        gate_level = gate_level or self.current_gate
+        next_gate = self.next_gate_level(gate_level)
+        if next_gate is None:
+            return None
+
+        criteria_by_gate = {
+            GateLevel.G0: (14, 2, 0.60),
+            GateLevel.G1: (21, 1, 0.70),
+            GateLevel.G2: (30, 0, 0.75),
+            GateLevel.G3: (30, 0, 0.78),
+            GateLevel.G4: (45, 0, 0.80),
+            GateLevel.G5: (60, 0, 0.82),
+            GateLevel.G6: (60, 0, 0.84),
+            GateLevel.G7: (90, 0, 0.86),
+            GateLevel.G8: (90, 0, 0.88),
+            GateLevel.G9: (120, 0, 0.90),
+            GateLevel.G10: (120, 0, 0.92),
+            GateLevel.G11: (180, 0, 0.95),
+        }
+        min_days, max_violations, min_score = criteria_by_gate[gate_level]
+        return {
+            'min_compliant_days': min_days,
+            'max_violations_30d': max_violations,
+            'min_performance_score': min_score,
+            'min_capital': self.gate_configs[next_gate].capital_min,
+        }
     
     def update_capital(self, new_capital: float) -> bool:
         """Update current capital and check if gate change is needed."""
@@ -213,7 +485,7 @@ class GateManager:
         
         # If capital exceeds all gates, stay at highest gate
         if capital > max(config.capital_max for config in self.gate_configs.values()):
-            return GateLevel.G3
+            return GATE_ORDER[-1]
         
         # If capital is below minimum, use G0
         return GateLevel.G0
@@ -446,28 +718,6 @@ class GateManager:
         else:
             self.graduation_metrics.consecutive_compliant_days += 1
         
-        # Graduation criteria
-        graduation_criteria = {
-            GateLevel.G0: {
-                'min_compliant_days': 14,
-                'max_violations_30d': 2,
-                'min_performance_score': 0.6,
-                'min_capital': self.gate_configs[GateLevel.G1].capital_min
-            },
-            GateLevel.G1: {
-                'min_compliant_days': 21,
-                'max_violations_30d': 1,
-                'min_performance_score': 0.7,
-                'min_capital': self.gate_configs[GateLevel.G2].capital_min
-            },
-            GateLevel.G2: {
-                'min_compliant_days': 30,
-                'max_violations_30d': 0,
-                'min_performance_score': 0.75,
-                'min_capital': self.gate_configs[GateLevel.G3].capital_min
-            }
-        }
-        
         # Downgrade criteria
         downgrade_criteria = {
             'max_violations_30d': 5,
@@ -475,7 +725,7 @@ class GateManager:
             'max_drawdown_threshold': 0.15  # 15% drawdown
         }
         
-        current_criteria = graduation_criteria.get(self.current_gate)
+        current_criteria = self.get_graduation_criteria()
         
         # Check for downgrade first
         if (self.graduation_metrics.total_violations_30d > downgrade_criteria['max_violations_30d'] or
@@ -530,16 +780,12 @@ class GateManager:
     def execute_graduation(self) -> bool:
         """Execute graduation to next gate level."""
         current_level = self.current_gate
-        
-        if current_level == GateLevel.G0:
-            self.current_gate = GateLevel.G1
-        elif current_level == GateLevel.G1:
-            self.current_gate = GateLevel.G2
-        elif current_level == GateLevel.G2:
-            self.current_gate = GateLevel.G3
-        else:
+
+        next_level = self.next_gate_level(current_level)
+        if next_level is None:
             logger.warning(f"Cannot graduate from {current_level.value} - already at maximum")
             return False
+        self.current_gate = next_level
         
         # Reset metrics for new gate
         self.graduation_metrics = GraduationMetrics()
@@ -551,16 +797,12 @@ class GateManager:
     def execute_downgrade(self) -> bool:
         """Execute downgrade to previous gate level."""
         current_level = self.current_gate
-        
-        if current_level == GateLevel.G1:
-            self.current_gate = GateLevel.G0
-        elif current_level == GateLevel.G2:
-            self.current_gate = GateLevel.G1
-        elif current_level == GateLevel.G3:
-            self.current_gate = GateLevel.G2
-        else:
+
+        previous_level = self.previous_gate_level(current_level)
+        if previous_level is None:
             logger.warning(f"Cannot downgrade from {current_level.value} - already at minimum")
             return False
+        self.current_gate = previous_level
         
         # Reset metrics for new gate
         self.graduation_metrics = GraduationMetrics()
@@ -573,6 +815,13 @@ class GateManager:
         """Get violation history for specified number of days."""
         cutoff_date = datetime.now() - timedelta(days=days)
         return [v for v in self.violation_history if v.timestamp >= cutoff_date]
+
+    @staticmethod
+    def _format_capital_range(config: GateConfig) -> str:
+        """Format finite and open-ended gate capital ranges."""
+        if config.capital_max == float("inf"):
+            return f"${config.capital_min:.0f}+"
+        return f"${config.capital_min:.0f}-${config.capital_max:.0f}"
     
     def get_status_report(self) -> Dict[str, Any]:
         """Generate comprehensive status report."""
@@ -582,8 +831,8 @@ class GateManager:
             'current_gate': self.current_gate.value,
             'current_capital': self.current_capital,
             'gate_config': {
-                'capital_range': f"${config.capital_min:.0f}-${config.capital_max:.0f}",
-                'allowed_assets': list(config.allowed_assets),
+                'capital_range': self._format_capital_range(config),
+                'allowed_assets': sorted(config.allowed_assets),
                 'cash_floor_pct': config.cash_floor_pct,
                 'options_enabled': config.options_enabled,
                 'max_theta_pct': config.max_theta_pct,

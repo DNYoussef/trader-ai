@@ -99,7 +99,7 @@ export interface ReportingConfig {
 
 export class BenchmarkExecutor extends EventEmitter {
   private config: ExecutionConfig;
-  private benchmarker: CICDPerformanceBenchmarker;
+  private benchmarker!: CICDPerformanceBenchmarker;
   private executionState: ExecutionState;
   private results: ExecutionResults;
   private monitors: Map<string, any> = new Map();
@@ -153,7 +153,7 @@ export class BenchmarkExecutor extends EventEmitter {
 
     } catch (error) {
       console.error('[FAIL] Performance validation failed:', error);
-      throw new ValidationError(`Performance validation failed: ${error.message}`);
+      throw new ValidationError(`Performance validation failed: ${this.getErrorMessage(error)}`);
     }
   }
 
@@ -220,7 +220,7 @@ export class BenchmarkExecutor extends EventEmitter {
     // Calculate summary statistics
     const allResults = Array.from(results.domains.values());
     results.summary.averageOverhead = allResults.reduce((sum, r) =>
-      sum + r.performance.overheadPercentage, 0) / allResults.length;
+      sum + r.performance.summary.overheadPercentage, 0) / allResults.length;
     results.summary.overallCompliance = allResults.reduce((sum, r) =>
       sum + r.compliance.overallCompliance, 0) / allResults.length;
 
@@ -427,7 +427,7 @@ export class BenchmarkExecutor extends EventEmitter {
         overheadPercentage: 100,
         resourceUsage: { memory: 0, cpu: 0, network: 0 },
         constraints: false,
-        error: error.message,
+        error: this.getErrorMessage(error),
         timestamp: new Date()
       };
     }
@@ -648,6 +648,9 @@ export class BenchmarkExecutor extends EventEmitter {
   private async measureDomainResourceUsage(domain: CICDDomain): Promise<any> { return null; }
   private async validateDomainConstraints(domain: CICDDomain, perf: any, res: any): Promise<any> { return null; }
   private async generateDomainOptimizations(domain: CICDDomain, perf: any, res: any): Promise<any> { return null; }
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
   private calculateScenarioPerformance(
     startMetrics: SystemMetrics,
     endMetrics: SystemMetrics,

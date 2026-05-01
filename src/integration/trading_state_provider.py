@@ -5,6 +5,7 @@ This module provides a clean interface for the dashboard to access real-time
 trading engine state without tight coupling to internal implementation.
 """
 import asyncio
+import inspect
 import logging
 import json
 import time
@@ -136,7 +137,9 @@ class TradingStateProvider:
             unrealized_pnl = sum(p.unrealized_pnl for p in positions)
 
             # Calculate risk metrics
-            risk_metrics = await self._calculate_risk_metrics(positions, nav)
+            position_risk_metrics = await self._calculate_risk_metrics(positions, nav)
+            engine_risk_metrics = await self._get_engine_risk_metrics()
+            risk_metrics = {**position_risk_metrics, **engine_risk_metrics}
 
             return DashboardMetrics(
                 timestamp=time.time(),
@@ -152,7 +155,7 @@ class TradingStateProvider:
                 max_drawdown=risk_metrics.get('max_drawdown', 0),
                 sharpe_ratio=risk_metrics.get('sharpe_ratio', 0),
                 volatility=risk_metrics.get('volatility', 0),
-                beta=risk_metrics.get('beta', 1.0),
+                beta=risk_metrics.get('beta', 0),
                 margin_used=risk_metrics.get('margin_used', 0),
                 buying_power=cash * 2  # 2x margin typical for paper
             )
@@ -430,42 +433,26 @@ class TradingStateProvider:
                 'max_drawdown': 0,
                 'sharpe_ratio': 0,
                 'volatility': 0,
-                'beta': 1.0,
+                'beta': 0,
                 'margin_used': 0
             }
 
         try:
             # Calculate basic metrics
             total_pnl = sum(p.unrealized_pnl for p in positions)
-            daily_pnl_pct = (total_pnl / nav) * 100 if nav > 0 else 0
-
-            # Estimate volatility from position weights
-            # This is simplified - real implementation would use historical returns
-            [p.weight / 100 for p in positions]
-            avg_volatility = 0.20  # 20% annualized as baseline
-
-            # Calculate VaR (simplified parametric)
-            var_95 = nav * avg_volatility * 1.645 / (252 ** 0.5)  # Daily 95% VaR
-            var_99 = nav * avg_volatility * 2.326 / (252 ** 0.5)  # Daily 99% VaR
-
-            # Expected shortfall (simplified)
-            expected_shortfall = var_99 * 1.2
-
-            # P(ruin) based on Kelly criterion approximation
-            # With proper sizing, P(ruin) should be low
-            p_ruin = max(0, min(0.05, abs(daily_pnl_pct) / 100))
+            gross_exposure = sum(abs(p.market_value) for p in positions)
 
             return {
                 'daily_pnl': total_pnl,
-                'p_ruin': p_ruin,
-                'var_95': var_95,
-                'var_99': var_99,
-                'expected_shortfall': expected_shortfall,
+                'p_ruin': 0,
+                'var_95': 0,
+                'var_99': 0,
+                'expected_shortfall': 0,
                 'max_drawdown': abs(min(0, total_pnl)),
-                'sharpe_ratio': 1.5,  # Would need historical data
-                'volatility': avg_volatility,
-                'beta': 1.0,
-                'margin_used': 0
+                'sharpe_ratio': 0,
+                'volatility': 0,
+                'beta': 0,
+                'margin_used': max(0, gross_exposure - nav)
             }
 
         except Exception as e:
@@ -479,9 +466,29 @@ class TradingStateProvider:
                 'max_drawdown': 0,
                 'sharpe_ratio': 0,
                 'volatility': 0,
-                'beta': 1.0,
+                'beta': 0,
                 'margin_used': 0
             }
+
+    async def _get_engine_risk_metrics(self) -> Dict[str, float]:
+        """Return live risk manager metrics when the engine exposes them."""
+        risk_manager = getattr(self._engine, 'risk_manager', None)
+        if risk_manager is None or not hasattr(risk_manager, 'get_metrics'):
+            return {}
+
+        metrics = risk_manager.get_metrics()
+        if inspect.isawaitable(metrics):
+            metrics = await metrics
+        if not isinstance(metrics, dict):
+            return {}
+
+        numeric_metrics: Dict[str, float] = {}
+        for key, value in metrics.items():
+            if isinstance(value, Decimal):
+                numeric_metrics[key] = float(value)
+            elif isinstance(value, (int, float)):
+                numeric_metrics[key] = float(value)
+        return numeric_metrics
 
     def _get_default_metrics(self) -> DashboardMetrics:
         """Return default metrics when engine not connected."""
@@ -499,7 +506,7 @@ class TradingStateProvider:
             max_drawdown=0,
             sharpe_ratio=0,
             volatility=0,
-            beta=1.0,
+            beta=0,
             margin_used=0,
             buying_power=0
         )

@@ -386,6 +386,34 @@ class PortfolioManager:
             'last_updated': datetime.now(timezone.utc)
         }
 
+    async def get_portfolio_summary(self) -> Dict[str, Any]:
+        """Get the gate-validation portfolio shape expected by TradeExecutor."""
+        if not await self.sync_with_broker():
+            raise RuntimeError("Broker portfolio sync failed; cannot validate trade")
+
+        positions = {
+            symbol: {
+                'quantity': float(position.quantity),
+                'avg_cost': float(position.avg_cost),
+                'current_price': float(position.current_price),
+                'market_value': float(position.market_value),
+                'gate': position.gate,
+            }
+            for symbol, position in self.positions.items()
+        }
+        positions_value = sum(position.market_value for position in self.positions.values())
+        total_value = self.cash_balance + positions_value
+
+        return {
+            'cash': float(self.cash_balance),
+            'cash_balance': float(self.cash_balance),
+            'positions': positions,
+            'positions_count': len(positions),
+            'positions_value': float(positions_value),
+            'total_value': float(total_value),
+            'last_updated': datetime.now(timezone.utc).isoformat(),
+        }
+
     async def check_daily_loss(self) -> dict:
         """Check if daily loss limit exceeded."""
         current_time = datetime.now(timezone.utc)

@@ -26,8 +26,13 @@ from .causal.hank_lite import HANKLiteModel, PolicyShock, AgentType
 from .causal.synthetic_controls import SyntheticControlValidator
 from .experiments.registry import NaturalExperimentsRegistry
 
-# Import existing system components
-from ..integration.phase2_factory import Phase2SystemFactory
+# Import existing system components. Some legacy tests import this module as
+# ``intelligence.causal_intelligence_factory`` with ``src`` directly on
+# sys.path, while production code imports it as ``src.intelligence...``.
+try:
+    from ..integration.phase2_factory import Phase2SystemFactory
+except ImportError:  # pragma: no cover - legacy import path compatibility
+    from src.integration.phase2_factory import Phase2SystemFactory
 
 logger = logging.getLogger(__name__)
 

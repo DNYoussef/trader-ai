@@ -596,6 +596,159 @@ ${this.generateProductionRecommendation(analysis)}
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  private validateCompliance(results: BenchmarkResult[]): boolean {
+    if (results.length === 0) {
+      return false;
+    }
+
+    return results.every(result =>
+      result.compliance.overheadCompliant &&
+      result.compliance.latencyCompliant &&
+      result.compliance.throughputCompliant &&
+      result.compliance.resourceCompliant
+    );
+  }
+
+  private generateOptimizationRecommendations(results: BenchmarkResult[]): OptimizationRecommendations {
+    const recommendations: OptimizationRecommendations = {
+      memory: [],
+      cpu: [],
+      network: [],
+      configuration: [],
+      priorityActions: []
+    };
+
+    for (const result of results) {
+      recommendations.memory.push(...result.optimization.memory);
+      recommendations.cpu.push(...result.optimization.cpu);
+      recommendations.network.push(...result.optimization.network);
+      recommendations.configuration.push(...result.optimization.configuration);
+      recommendations.priorityActions.push(...result.optimization.priorityActions);
+    }
+
+    recommendations.memory = [...new Set(recommendations.memory)];
+    recommendations.cpu = [...new Set(recommendations.cpu)];
+    recommendations.network = [...new Set(recommendations.network)];
+    recommendations.configuration = [...new Set(recommendations.configuration)];
+
+    return recommendations;
+  }
+
+  private analyzeDomainPerformance(results: BenchmarkResult[]): Record<string, DomainMetrics> {
+    const byDomain: Record<string, DomainMetrics> = {};
+    const domains = [...new Set(results.map(result => result.domain))];
+
+    for (const domain of domains) {
+      const domainResults = results.filter(result => result.domain === domain);
+      byDomain[domain] = {
+        averageOverhead: this.average(domainResults.map(result => result.resources.overhead.totalOverhead)),
+        peakThroughput: Math.max(...domainResults.map(result => result.performance.throughput)),
+        averageLatency: this.average(domainResults.map(result => result.performance.latency.p95)),
+        resourceEfficiency: this.calculateResourceEfficiency(domainResults),
+        complianceScore: this.average(domainResults.map(result => result.compliance.overallCompliance))
+      };
+    }
+
+    return byDomain;
+  }
+
+  private analyzeCompliance(results: BenchmarkResult[]): ComplianceAnalysis {
+    if (results.length === 0) {
+      return {
+        overheadCompliance: 0,
+        performanceCompliance: 0,
+        resourceCompliance: 0,
+        overallCompliance: 0
+      };
+    }
+
+    const percent = (count: number) => (count / results.length) * 100;
+
+    return {
+      overheadCompliance: percent(results.filter(result => result.compliance.overheadCompliant).length),
+      performanceCompliance: percent(results.filter(result =>
+        result.compliance.latencyCompliant && result.compliance.throughputCompliant
+      ).length),
+      resourceCompliance: percent(results.filter(result => result.compliance.resourceCompliant).length),
+      overallCompliance: this.average(results.map(result => result.compliance.overallCompliance))
+    };
+  }
+
+  private identifyBottlenecks(results: BenchmarkResult[]): Bottleneck[] {
+    const bottlenecks: Bottleneck[] = [];
+
+    for (const result of results) {
+      if (!result.compliance.latencyCompliant) {
+        bottlenecks.push({
+          type: 'latency',
+          severity: 'high',
+          impact: `${result.domain}/${result.scenario} exceeded p95 latency constraint`,
+          description: `Measured p95 latency was ${result.performance.latency.p95.toFixed(0)}ms.`,
+          recommendation: 'Tune caching, batching, and connection pooling for the affected domain.'
+        });
+      }
+
+      if (!result.compliance.resourceCompliant) {
+        bottlenecks.push({
+          type: 'resource',
+          severity: 'medium',
+          impact: `${result.domain}/${result.scenario} exceeded resource constraints`,
+          description: `Memory ${result.resources.memory.used.toFixed(1)}MB, CPU ${result.resources.cpu.average.toFixed(1)}%.`,
+          recommendation: 'Profile domain hot paths and reduce memory or CPU pressure before increasing load.'
+        });
+      }
+
+      if (!result.compliance.overheadCompliant) {
+        bottlenecks.push({
+          type: 'overhead',
+          severity: 'critical',
+          impact: `${result.domain}/${result.scenario} exceeded overhead budget`,
+          description: `Total overhead was ${result.resources.overhead.totalOverhead.toFixed(2)}%.`,
+          recommendation: 'Reduce monitoring and orchestration overhead in the benchmarked path.'
+        });
+      }
+    }
+
+    return bottlenecks;
+  }
+
+  private analyzeTrends(results: BenchmarkResult[]): TrendAnalysis {
+    if (results.length < 2) {
+      return {
+        stable: true,
+        scalable: true,
+        degradation: false,
+        improvement: false
+      };
+    }
+
+    const overheads = results.map(result => result.resources.overhead.totalOverhead);
+    const latencies = results.map(result => result.performance.latency.p95);
+    const firstLatency = latencies[0];
+    const lastLatency = latencies[latencies.length - 1];
+
+    return {
+      stable: Math.max(...overheads) - Math.min(...overheads) <= this.config.targetOverhead,
+      scalable: lastLatency <= firstLatency * 1.5,
+      degradation: lastLatency > firstLatency,
+      improvement: lastLatency < firstLatency
+    };
+  }
+
+  private calculateResourceEfficiency(results: BenchmarkResult[]): number {
+    const scores = results.map(result => {
+      const memoryScore = Math.max(0, 100 - result.resources.memory.used);
+      const cpuScore = Math.max(0, 100 - result.resources.cpu.average);
+      return (memoryScore + cpuScore) / 2;
+    });
+
+    return this.average(scores);
+  }
+
+  private average(values: number[]): number {
+    return values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length;
+  }
 }
 
 // Supporting classes and interfaces

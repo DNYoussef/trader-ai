@@ -17,10 +17,19 @@ from datetime import datetime
 import logging
 import asyncio
 
-# Import alpha generation components
-from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
-from ..learning.shadow_book import ShadowBookEngine
-from ..learning.policy_twin import PolicyTwin
+# Import alpha generation components. Legacy scripts import this module from
+# inside the alpha directory, while tests import it as intelligence.alpha.
+try:
+    from .alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
+except ImportError:  # pragma: no cover - legacy script import
+    from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
+
+try:
+    from ..learning.shadow_book import ShadowBookEngine
+    from ..learning.policy_twin import PolicyTwin
+except ImportError:  # pragma: no cover - top-level intelligence import
+    from learning.shadow_book import ShadowBookEngine
+    from learning.policy_twin import PolicyTwin
 
 logger = logging.getLogger(__name__)
 

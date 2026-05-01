@@ -6,6 +6,7 @@ strategies, and parameter configurations with statistical significance testing.
 """
 
 import logging
+import hashlib
 import numpy as np
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
@@ -408,9 +409,8 @@ class ABTestingFramework:
 
     def _random_assignment(self, config: ExperimentConfig, user_id: str) -> str:
         """Random variant assignment"""
-        # Use user_id for deterministic randomness
-        np.random.seed(hash(user_id) % (2**32))
-        random_val = np.random.random()
+        seed = self._stable_seed(config.experiment_id, user_id)
+        random_val = np.random.default_rng(seed).random()
 
         cumulative_prob = 0
         for variant_id, traffic_share in config.traffic_split.items():
@@ -423,7 +423,7 @@ class ABTestingFramework:
 
     def _deterministic_assignment(self, config: ExperimentConfig, user_id: str) -> str:
         """Deterministic assignment based on user ID hash"""
-        user_hash = hash(user_id) % 100  # 0-99
+        user_hash = self._stable_bucket(config.experiment_id, user_id, 100)
 
         cumulative_threshold = 0
         for variant_id, traffic_share in config.traffic_split.items():
@@ -433,6 +433,15 @@ class ABTestingFramework:
 
         # Fallback to control
         return config.control_variant
+
+    @staticmethod
+    def _stable_seed(experiment_id: str, user_id: str) -> int:
+        digest = hashlib.sha256(f"{experiment_id}:{user_id}".encode("utf-8")).digest()
+        return int.from_bytes(digest[:8], "big", signed=False)
+
+    @classmethod
+    def _stable_bucket(cls, experiment_id: str, user_id: str, bucket_count: int) -> int:
+        return cls._stable_seed(experiment_id, user_id) % bucket_count
 
     def _stratified_assignment(self, config: ExperimentConfig, user_id: str,
                              context: Optional[Dict[str, Any]]) -> str:

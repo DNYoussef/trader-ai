@@ -167,8 +167,80 @@ class GatePsychology:
                     "Elite trading community member",
                     "Maximum earning potential"
                 ],
-                next_gate_preview=None  # Highest gate
-            )
+                next_gate_preview="G4 adds convexity and hedge proxy monitoring"
+            ),
+
+            GateLevel.G4: GateUnlock(
+                gate_level=GateLevel.G4,
+                new_features=["Convexity hedge proxies", "Higher-capital risk reviews"],
+                expanded_capabilities=["Expanded ETF hedge universe", "Tighter position limits"],
+                psychological_rewards=["Demonstrated discipline beyond starter gates"],
+                next_gate_preview="G5 raises calibrated tail-hedge requirements"
+            ),
+
+            GateLevel.G5: GateUnlock(
+                gate_level=GateLevel.G5,
+                new_features=["Tail-hedge sizing reviews", "1% theta ceiling"],
+                expanded_capabilities=["Broader convexity toolkit", "Full barbell cash discipline"],
+                psychological_rewards=["Consistent mid-size account discipline"],
+                next_gate_preview="G6 adds treasury ladder proxies"
+            ),
+
+            GateLevel.G6: GateUnlock(
+                gate_level=GateLevel.G6,
+                new_features=["Treasury and cash-management proxies", "Stricter concentration limits"],
+                expanded_capabilities=["Ladder-style reserve allocation", "Large-account compliance checks"],
+                psychological_rewards=["Operational discipline at pattern-day-trader scale"],
+                next_gate_preview="G7 adds credit ETF risk controls"
+            ),
+
+            GateLevel.G7: GateUnlock(
+                gate_level=GateLevel.G7,
+                new_features=["Credit ETF proxies", "Event blackout discipline"],
+                expanded_capabilities=["Credit and liquidity risk monitoring", "Lower single-position caps"],
+                psychological_rewards=["Advanced risk-process maturity"],
+                next_gate_preview="G8 adds macro and dynamic convexity proxies"
+            ),
+
+            GateLevel.G8: GateUnlock(
+                gate_level=GateLevel.G8,
+                new_features=["Macro ETF proxies", "Per-asset CVaR reviews"],
+                expanded_capabilities=["Macro diversification", "Quarterly model review discipline"],
+                psychological_rewards=["Significant-capital trading discipline"],
+                next_gate_preview="G9 adds multi-broker and concentration hardening"
+            ),
+
+            GateLevel.G9: GateUnlock(
+                gate_level=GateLevel.G9,
+                new_features=["Multi-broker readiness checks", "15% concentration ceiling"],
+                expanded_capabilities=["Counterfactual review workflow", "Institutional concentration limits"],
+                psychological_rewards=["Pre-institutional operating discipline"],
+                next_gate_preview="G10 adds daily VaR governance"
+            ),
+
+            GateLevel.G10: GateUnlock(
+                gate_level=GateLevel.G10,
+                new_features=["Daily VaR governance", "External-audit readiness"],
+                expanded_capabilities=["Full macro ETF suite", "5% single-position cap"],
+                psychological_rewards=["Institutional process readiness"],
+                next_gate_preview="G11 adds model committee discipline"
+            ),
+
+            GateLevel.G11: GateUnlock(
+                gate_level=GateLevel.G11,
+                new_features=["Model committee discipline", "Legal-readiness checks"],
+                expanded_capabilities=["Direct-treasury planning boundary", "4% single-position cap"],
+                psychological_rewards=["Large-account governance maturity"],
+                next_gate_preview="G12 adds capacity governance"
+            ),
+
+            GateLevel.G12: GateUnlock(
+                gate_level=GateLevel.G12,
+                new_features=["Capacity governance", "Board-level review boundary"],
+                expanded_capabilities=["3% single-position cap", "Highest-tier audit expectations"],
+                psychological_rewards=["Maximum roadmap gate reached"],
+                next_gate_preview=None
+            ),
         }
 
     def _initialize_celebration_flows(self) -> Dict[Tuple[GateLevel, GateLevel], CelebrationFlow]:
@@ -219,20 +291,20 @@ class GatePsychology:
         flows[(GateLevel.G2, GateLevel.G3)] = CelebrationFlow(
             gate_from=GateLevel.G2,
             gate_to=GateLevel.G3,
-            celebration_title="Master Trader Unlocked!",
-            celebration_subtitle="You've reached the highest level of systematic trading",
+            celebration_title="Options Gate Unlocked!",
+            celebration_subtitle="You've reached the first options-enabled trading level",
             achievement_description="Achieved master-level discipline, risk management, and profitability across multiple market conditions",
             celebration_style=CelebrationStyle.EPIC,
             unlocks=self.unlocks[GateLevel.G3],
-            motivational_message="You are now a master of systematic trading! Options access puts you in the elite category of traders who can generate income in any market condition. You have everything needed to build serious wealth.",
+            motivational_message="You now have access to tightly constrained long-options workflows. The higher gates still demand stronger capital, cleaner compliance, and more conservative sizing.",
             next_steps=[
                 "Begin conservative options strategies",
                 "Monitor theta exposure carefully",
                 "Maximize income generation potential",
                 "Mentor other traders in the community"
             ],
-            social_share_message="MASTER TRADER STATUS ACHIEVED! Full access to options trading and maximum system capabilities unlocked!",
-            estimated_time_to_next=None
+            social_share_message="Gate 3 achieved in my systematic trading journey: long-options access with strict risk controls unlocked.",
+            estimated_time_to_next="Continue consistent execution toward G4"
         )
 
         return flows
@@ -492,13 +564,7 @@ class GatePsychology:
 
     def _get_next_gate(self, current_gate: GateLevel) -> Optional[GateLevel]:
         """Get the next gate level."""
-        gate_order = [GateLevel.G0, GateLevel.G1, GateLevel.G2, GateLevel.G3]
-        current_index = gate_order.index(current_gate)
-
-        if current_index < len(gate_order) - 1:
-            return gate_order[current_index + 1]
-
-        return None
+        return self.gate_manager.next_gate_level(current_gate)
 
     def _create_generic_celebration(self, from_gate: GateLevel, to_gate: GateLevel) -> CelebrationFlow:
         """Create generic celebration flow as fallback."""

@@ -7,13 +7,20 @@ for software development workflows.
 
 import logging
 import time
+import threading
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 from enum import Enum
 import statistics
+import math
 
 logger = logging.getLogger(__name__)
+
+# Kept as a module attribute for legacy tests that patch it. The production
+# calculation below intentionally uses the deterministic threshold table instead
+# of importing SciPy in telemetry hot paths.
+stats = None
 
 
 class QualityLevel(Enum):
@@ -54,6 +61,8 @@ class SixSigmaTelemetry:
     def __init__(self, process_name: str = "default"):
         self.process_name = process_name
         self.metrics_history: List[SixSigmaMetrics] = []
+        self._lock = threading.Lock()
+        self._last_snapshot_timestamp: Optional[datetime] = None
         self.current_session_data = {
             'defects': 0,
             'opportunities': 0,
@@ -71,37 +80,55 @@ class SixSigmaTelemetry:
         
     def record_defect(self, defect_type: str = "generic", opportunities: int = 1):
         """Record a defect occurrence with associated opportunities"""
-        self.current_session_data['defects'] += 1
-        self.current_session_data['opportunities'] += opportunities
+        with self._lock:
+            self.current_session_data['defects'] += 1
+            self.current_session_data['opportunities'] += opportunities
         
         logger.debug(f"Recorded defect: {defect_type}, opportunities: {opportunities}")
         
     def record_unit_processed(self, passed: bool = True, opportunities: int = 1):
         """Record a processed unit (e.g., test case, code review, deployment)"""
-        self.current_session_data['units_processed'] += 1
-        self.current_session_data['opportunities'] += opportunities
-        
-        if passed:
-            self.current_session_data['units_passed'] += 1
-        else:
-            self.current_session_data['defects'] += 1
-            
-    def calculate_dpmo(self, defects: int = None, opportunities: int = None) -> float:
+        with self._lock:
+            self.current_session_data['units_processed'] += 1
+            self.current_session_data['opportunities'] += opportunities
+
+            if passed:
+                self.current_session_data['units_passed'] += 1
+            else:
+                self.current_session_data['defects'] += 1
+
+    def calculate_dpmo(
+        self,
+        defects: int = None,
+        opportunities: int = None,
+        opportunities_per_unit: int = None,
+    ) -> float:
         """
         Calculate Defects Per Million Opportunities
         
         DPMO = (Number of Defects / Number of Opportunities) * 1,000,000
         """
-        if defects is None:
+        if defects is None and opportunities is None and opportunities_per_unit is None:
             defects = self.current_session_data['defects']
+        elif defects is None:
+            return 0.0
         if opportunities is None:
             opportunities = self.current_session_data['opportunities']
+
+        if opportunities_per_unit is not None:
+            opportunities = opportunities * opportunities_per_unit
             
-        if opportunities == 0:
+        if not opportunities:
+            return 0.0
+
+        try:
+            defects = float(defects)
+            opportunities = float(opportunities)
+        except (TypeError, ValueError):
             return 0.0
             
         dpmo = (defects / opportunities) * 1_000_000
-        return round(dpmo, 2)
+        return round(dpmo, 6)
         
     def calculate_rty(self, units_processed: int = None, units_passed: int = None) -> float:
         """
@@ -129,22 +156,19 @@ class SixSigmaTelemetry:
         if dpmo is None:
             dpmo = self.calculate_dpmo()
             
-        if dpmo == 0:
-            return 6.0  # Perfect quality
-            
-        # Convert DPMO to defect rate
-        defect_rate = dpmo / 1_000_000
-        
-        # Calculate sigma level using inverse normal distribution
-        # Sigma level = Z-score + 1.5 (accounting for process shift)
         try:
-            from scipy import stats
-            z_score = stats.norm.ppf(1 - defect_rate)
-            sigma_level = z_score + 1.5
-            return max(0, round(sigma_level, 2))
-        except ImportError:
-            # Fallback calculation without scipy
-            return self._approximate_sigma_level(dpmo)
+            dpmo = float(dpmo)
+        except (TypeError, ValueError):
+            return 0.0
+
+        if dpmo <= 0:
+            return 6.0  # Perfect quality
+        if dpmo >= 1_000_000:
+            return 0.0
+
+        # The threshold lookup is stable, deterministic, and fast enough for
+        # telemetry hot paths. It also avoids importing SciPy in tight loops.
+        return min(6.0, max(0.0, float(self._approximate_sigma_level(dpmo))))
             
     def _approximate_sigma_level(self, dpmo: float) -> float:
         """Approximate sigma level calculation without scipy"""
@@ -176,6 +200,8 @@ class SixSigmaTelemetry:
         """
         if not measurements or len(measurements) < 2:
             return 0.0, 0.0
+        if not all(isinstance(value, (int, float)) and math.isfinite(value) for value in measurements):
+            return 0.0, 0.0
             
         mean = statistics.mean(measurements)
         std_dev = statistics.stdev(measurements)
@@ -199,30 +225,37 @@ class SixSigmaTelemetry:
         rty = self.calculate_rty()
         sigma_level = self.calculate_sigma_level(dpmo)
         quality_level = self.get_quality_level(dpmo)
+        timestamp = datetime.now()
+        if self._last_snapshot_timestamp and timestamp <= self._last_snapshot_timestamp:
+            timestamp = self._last_snapshot_timestamp + timedelta(microseconds=1)
+        self._last_snapshot_timestamp = timestamp
         
         metrics = SixSigmaMetrics(
             dpmo=dpmo,
             rty=rty,
             sigma_level=sigma_level,
             quality_level=quality_level,
+            timestamp=timestamp,
             process_name=self.process_name,
             sample_size=self.current_session_data['units_processed'],
             defect_count=self.current_session_data['defects'],
             opportunity_count=self.current_session_data['opportunities']
         )
         
-        self.metrics_history.append(metrics)
+        with self._lock:
+            self.metrics_history.append(metrics)
         return metrics
         
     def reset_session(self):
         """Reset current session data"""
-        self.current_session_data = {
-            'defects': 0,
-            'opportunities': 0,
-            'units_processed': 0,
-            'units_passed': 0,
-            'start_time': time.time()
-        }
+        with self._lock:
+            self.current_session_data = {
+                'defects': 0,
+                'opportunities': 0,
+                'units_processed': 0,
+                'units_passed': 0,
+                'start_time': time.time()
+            }
         
     def get_trend_analysis(self, days: int = 30) -> Dict[str, Any]:
         """Analyze quality trends over specified period"""

@@ -593,7 +593,7 @@ class RiskDashboardServer:
                 logger.error(f"Background update error: {e}")
                 await asyncio.sleep(5)
 
-    def run(self, host: str = "0.0.0.0", port: int = 8000):
+    def run(self, host: str = "127.0.0.1", port: int = 8000):
         """Run the WebSocket server."""
         logger.info(f"Starting Risk Dashboard Server on {host}:{port}")
 

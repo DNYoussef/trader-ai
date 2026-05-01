@@ -10,19 +10,9 @@ Provides enterprise compliance management for multiple frameworks:
 """
 
 from .matrix import ComplianceMatrix, ComplianceFramework, ComplianceStatus
-from .soc2 import SOC2Compliance
-from .iso27001 import ISO27001Compliance  
-from .nist import NISTCompliance
-from .gdpr import GDPRCompliance
-from .assessor import ComplianceAssessor
 
 __all__ = [
     "ComplianceMatrix",
     "ComplianceFramework", 
     "ComplianceStatus",
-    "SOC2Compliance",
-    "ISO27001Compliance",
-    "NISTCompliance", 
-    "GDPRCompliance",
-    "ComplianceAssessor"
 ]

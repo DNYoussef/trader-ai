@@ -20,8 +20,14 @@ Key Features:
 """
 
 import logging
+import hashlib
+import hmac
+import io
 import numpy as np
 import pandas as pd
+import os
+import pickle
+import secrets
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -31,6 +37,9 @@ from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings('ignore')
+
+REGIME_MODEL_MAGIC = b"TRADER_AI_REGIME_MODEL_V1\n"
+REGIME_MODEL_KEY_ENV = "TRADER_AI_MODEL_SIGNING_KEY"
 
 class MarketRegime(Enum):
     """Market regime classifications"""
@@ -733,25 +742,75 @@ class ConvexityManager:
     def _save_regime_model(self):
         """Save regime detection model"""
         try:
-            import pickle
             model_path = self.data_path / 'regime_model.pkl'
+            payload = pickle.dumps({
+                'model': self.regime_model,
+                'scaler': self.scaler
+            }, protocol=pickle.HIGHEST_PROTOCOL)
+            signature = hmac.new(self._model_signing_key(), payload, hashlib.sha256).hexdigest().encode("ascii")
             with open(model_path, 'wb') as f:
-                pickle.dump({
-                    'model': self.regime_model,
-                    'scaler': self.scaler
-                }, f)
+                f.write(REGIME_MODEL_MAGIC)
+                f.write(signature + b"\n")
+                f.write(payload)
             self.logger.info("Regime model saved")
         except Exception as e:
             self.logger.error(f"Error saving regime model: {e}")
 
     def _load_regime_model(self):
         """Load regime detection model"""
-        import pickle
         model_path = self.data_path / 'regime_model.pkl'
-        with open(model_path, 'rb') as f:
-            data = pickle.load(f)
-            self.regime_model = data['model']
-            self.scaler = data['scaler']
+        raw = model_path.read_bytes()
+        if not raw.startswith(REGIME_MODEL_MAGIC):
+            self.logger.warning("Ignoring unsigned legacy regime model at %s", model_path)
+            return
+
+        try:
+            signature, payload = raw[len(REGIME_MODEL_MAGIC):].split(b"\n", 1)
+        except ValueError:
+            self.logger.warning("Ignoring malformed regime model at %s", model_path)
+            return
+
+        expected = hmac.new(self._model_signing_key(), payload, hashlib.sha256).hexdigest().encode("ascii")
+        if not hmac.compare_digest(signature, expected):
+            self.logger.warning("Ignoring regime model with invalid signature at %s", model_path)
+            return
+
+        data = _RestrictedModelUnpickler(io.BytesIO(payload)).load()
+        self.regime_model = data['model']
+        self.scaler = data['scaler']
+
+    def _model_signing_key(self) -> bytes:
+        configured_key = os.environ.get(REGIME_MODEL_KEY_ENV)
+        if configured_key:
+            return configured_key.encode("utf-8")
+
+        key_path = self.data_path / 'regime_model.key'
+        if not key_path.exists():
+            key_path.write_text(secrets.token_hex(32), encoding="utf-8")
+            try:
+                key_path.chmod(0o600)
+            except OSError:
+                pass
+        return key_path.read_text(encoding="utf-8").strip().encode("utf-8")
+
+
+class _RestrictedModelUnpickler(pickle.Unpickler):
+    """Load signed sklearn/numpy model state while blocking arbitrary globals."""
+
+    _ALLOWED_PREFIXES = (
+        "builtins",
+        "copyreg",
+        "numpy",
+        "sklearn",
+        "scipy",
+    )
+
+    def find_class(self, module: str, name: str):
+        if module == "builtins" and name in {"eval", "exec", "compile", "open", "__import__"}:
+            raise pickle.UnpicklingError(f"Blocked unsafe global {module}.{name}")
+        if module.startswith(self._ALLOWED_PREFIXES):
+            return super().find_class(module, name)
+        raise pickle.UnpicklingError(f"Blocked unsafe global {module}.{name}")
 
 # Example usage and testing
 if __name__ == "__main__":

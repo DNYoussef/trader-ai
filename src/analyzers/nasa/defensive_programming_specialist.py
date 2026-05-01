@@ -392,16 +392,16 @@ Systematic assertion framework with defensive programming patterns.
 """
 
 from icontract import require, ensure, invariant, ViolationError
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
 
 # NASA Rule 5 compliance decorators
-def nasa_precondition(condition: str, description: str = ""):
+def nasa_precondition(condition: Callable[..., bool], description: str = ""):
     """NASA Rule 5 compliant precondition decorator."""
-    return require(lambda *args, **kwargs: eval(condition), description=description)
+    return require(condition, description=description)
 
-def nasa_postcondition(condition: str, description: str = ""):
+def nasa_postcondition(condition: Callable[..., bool], description: str = ""):
     """NASA Rule 5 compliant postcondition decorator.""" 
-    return ensure(lambda result, *args, **kwargs: eval(condition), description=description)
+    return ensure(condition, description=description)
 
 def bounded_operation(max_iterations: int = 1000, max_memory: int = 1000000):
     """NASA Rule 4 compliant bounded operation decorator."""

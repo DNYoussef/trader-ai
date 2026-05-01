@@ -21,6 +21,7 @@ All timestamps are UTC. All monetary amounts are stored as REAL (floating point)
 
 import sqlite3
 import os
+import uuid
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Any
 import logging
@@ -57,25 +58,40 @@ class BankDatabase:
                           If None, loads from DATABASE_ENCRYPTION_KEY env var.
         """
         self.db_path = db_path
+        self._sqlite_uri = False
+        self._keeper_connection: Optional[sqlite3.Connection] = None
+        self._connection_path = db_path
+
+        if db_path == ":memory:":
+            self._sqlite_uri = True
+            self._connection_path = f"file:bankdb_{uuid.uuid4().hex}?mode=memory&cache=shared"
+            self._keeper_connection = sqlite3.connect(self._connection_path, uri=True)
 
         # Ensure directory exists
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        db_dir = os.path.dirname(db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
 
         # Initialize token encryption
-        try:
-            self.encryptor = TokenEncryption(encryption_key=encryption_key)
-            self.encryption_enabled = True
-            logger.info("Token encryption initialized for database")
-        except TokenEncryptionError as e:
-            logger.error(f"Token encryption REQUIRED but not available: {e}")
-            logger.error("Set DATABASE_ENCRYPTION_KEY in .env file. Generate key: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""); raise RuntimeError(f"Token encryption is REQUIRED. Set DATABASE_ENCRYPTION_KEY. Error: {e}") from e
+        if db_path == ":memory:" and encryption_key is None:
+            self.encryptor = None
+            self.encryption_enabled = False
+            logger.info("Token encryption disabled for non-durable in-memory database")
+        else:
+            try:
+                self.encryptor = TokenEncryption(encryption_key=encryption_key)
+                self.encryption_enabled = True
+                logger.info("Token encryption initialized for database")
+            except TokenEncryptionError as e:
+                logger.error(f"Token encryption REQUIRED but not available: {e}")
+                logger.error("Set DATABASE_ENCRYPTION_KEY in .env file. Generate key: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""); raise RuntimeError(f"Token encryption is REQUIRED. Set DATABASE_ENCRYPTION_KEY. Error: {e}") from e
 
         # Initialize database schema
         self._init_schema()
 
     def _get_connection(self) -> sqlite3.Connection:
         """Get database connection with row factory for dict-like access."""
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self._connection_path, uri=self._sqlite_uri)
         conn.row_factory = sqlite3.Row
         return conn
 
@@ -215,27 +231,29 @@ class BankDatabase:
         Raises:
             TokenEncryptionError: If encryption fails
         """
-        conn = self._get_connection()
-        cursor = conn.cursor()
-
         # Generate unique item_id (timestamp-based)
-        item_id = f"item_{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
+        item_id = f"item_{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}_{uuid.uuid4().hex[:8]}"
 
         # Encrypt access token before storage
         encrypted_token = self._encrypt_token(access_token)
 
-        if self.encryption_enabled:
-            logger.info(f"Access token encrypted for item {item_id}")
-        else:
-            logger.warning(f"Storing plaintext token for item {item_id}")
+        conn = self._get_connection()
+        cursor = conn.cursor()
 
-        cursor.execute("""
-            INSERT INTO plaid_items (item_id, access_token, institution_name)
-            VALUES (?, ?, ?)
-        """, (item_id, encrypted_token, institution_name))
+        try:
+            if self.encryption_enabled:
+                logger.info(f"Access token encrypted for item {item_id}")
+            else:
+                logger.warning(f"Storing plaintext token for item {item_id}")
 
-        conn.commit()
-        conn.close()
+            cursor.execute("""
+                INSERT INTO plaid_items (item_id, access_token, institution_name)
+                VALUES (?, ?, ?)
+            """, (item_id, encrypted_token, institution_name))
+
+            conn.commit()
+        finally:
+            conn.close()
 
         return item_id
 
@@ -560,8 +578,18 @@ class BankDatabase:
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM plaid_items WHERE item_id = ?", (item_id,))
-        deleted = cursor.rowcount > 0
+        cursor.execute("SELECT 1 FROM plaid_items WHERE item_id = ?", (item_id,))
+        deleted = cursor.fetchone() is not None
+
+        if deleted:
+            cursor.execute("""
+                DELETE FROM bank_transactions
+                WHERE account_id IN (
+                    SELECT account_id FROM bank_accounts WHERE item_id = ?
+                )
+            """, (item_id,))
+            cursor.execute("DELETE FROM bank_accounts WHERE item_id = ?", (item_id,))
+            cursor.execute("DELETE FROM plaid_items WHERE item_id = ?", (item_id,))
 
         conn.commit()
         conn.close()

@@ -100,21 +100,18 @@ class PylintAdapter(BaseLinterAdapter):
             'convention': StandardSeverity.INFO,
             'information': StandardSeverity.INFO,
             # Single letter codes
-            'F': StandardSeverity.FATAL,
-            'E': StandardSeverity.ERROR,
-            'W': StandardSeverity.WARNING,
-            'R': StandardSeverity.INFO,
-            'C': StandardSeverity.INFO,
-            'I': StandardSeverity.INFO
+            'f': StandardSeverity.FATAL,
+            'e': StandardSeverity.ERROR,
+            'w': StandardSeverity.WARNING,
+            'r': StandardSeverity.INFO,
+            'c': StandardSeverity.INFO,
+            'i': StandardSeverity.INFO
         }
         
         return severity_map.get(tool_severity.lower(), StandardSeverity.WARNING)
     
     def get_violation_type(self, rule_id: str, category: str = "") -> ViolationType:
         """Determine violation type from pylint rule ID and category."""
-        if not rule_id:
-            return ViolationType.STYLE
-        
         # Pylint rule ID patterns
         if rule_id.startswith('C'):
             return ViolationType.CONVENTION

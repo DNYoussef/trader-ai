@@ -23,6 +23,7 @@ from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
 from plaid.model.transactions_get_request import TransactionsGetRequest
 
 logger = logging.getLogger(__name__)
+_MISSING = object()
 
 
 @dataclass
@@ -60,7 +61,7 @@ class PlaidClient:
     Handles Link token creation, public token exchange, and data fetching.
     """
 
-    def __init__(self, client_id: str = None, secret: str = None, environment: str = "sandbox"):
+    def __init__(self, client_id: str = _MISSING, secret: str = _MISSING, environment: str = "sandbox"):
         """
         Initialize Plaid client.
 
@@ -69,8 +70,8 @@ class PlaidClient:
             secret: Plaid secret (falls back to env var PLAID_SECRET)
             environment: Plaid environment (sandbox, development, production)
         """
-        self.client_id = client_id or os.getenv("PLAID_CLIENT_ID")
-        self.secret = secret or os.getenv("PLAID_SECRET")
+        self.client_id = os.getenv("PLAID_CLIENT_ID") if client_id is _MISSING else client_id
+        self.secret = os.getenv("PLAID_SECRET") if secret is _MISSING else secret
         self.environment = environment
 
         if not self.client_id or not self.secret:

@@ -23,8 +23,11 @@ import logging
 import asyncio
 from abc import ABC, abstractmethod
 
-# Import alpha generation components
-from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
+# Import alpha generation components. Support both package and legacy script imports.
+try:
+    from .alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
+except ImportError:  # pragma: no cover
+    from alpha_integration import AlphaIntegrationEngine, AlphaSignal, PortfolioState
 
 logger = logging.getLogger(__name__)
 

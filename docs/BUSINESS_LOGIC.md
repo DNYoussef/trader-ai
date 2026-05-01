@@ -632,7 +632,7 @@ def cache_market_data(symbols, ttl=300):
 ---
 
 **Business Logic Status:** ✅ **PRODUCTION READY**
-**Gate Implementation:** G0-G3 fully specified and tested
+**Gate Implementation:** G0-G12 capital ladder implemented in `GateManager`; G4-G12 use conservative ETF/proxy guardrails while futures, swaps, FX derivatives, and direct treasury execution remain target capabilities.
 **Risk Framework:** Comprehensive constraint validation
 **Compliance:** WORM audit logging and monitoring
 **Antifragility:** Taleb principles embedded throughout

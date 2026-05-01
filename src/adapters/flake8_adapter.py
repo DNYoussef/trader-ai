@@ -19,7 +19,7 @@ class Flake8Adapter(BaseLinterAdapter):
     
     def get_command_args(self, target_paths: List[str]) -> List[str]:
         """Build flake8 command arguments."""
-        cmd = self.config.get_command_base()
+        cmd = [self.config.executable_path or self.tool_name]
         
         # Add JSON format for structured output
         cmd.extend(['--format', '{"file":"%(path)s","line":%(row)d,"column":%(col)d,"code":"%(code)s","text":"%(text)s"}'])
@@ -27,6 +27,8 @@ class Flake8Adapter(BaseLinterAdapter):
         # Add config file if specified
         if self.config.config_file:
             cmd.extend(['--config', self.config.config_file])
+
+        cmd.extend(self.config.extra_args)
         
         # Add target paths
         cmd.extend(target_paths)

@@ -1,26 +1,39 @@
-#!/usr/bin/env python3
-"""Quick Alpaca connection test"""
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+"""Opt-in live Alpaca connection test."""
 
+import os
+
+import pytest
 from alpaca.trading.client import TradingClient
 
-# Your credentials
-API_KEY = "PKMQWWO2BXYFSE7RCTPHUTS2T4"
-SECRET_KEY = "7LQY1SqAgLPcHE6fziYu5WxLncAp97sDeevHY5Ci8432"
 
-print("Testing Alpaca connection...")
-try:
-    client = TradingClient(API_KEY, SECRET_KEY, paper=True)
+pytestmark = [pytest.mark.integration, pytest.mark.live_api, pytest.mark.e2e]
+
+
+def _live_alpaca_enabled() -> bool:
+    return os.getenv("RUN_LIVE_ALPACA_TESTS", "").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+@pytest.mark.skipif(
+    not _live_alpaca_enabled(),
+    reason="Set RUN_LIVE_ALPACA_TESTS=true to run live Alpaca paper API tests.",
+)
+def test_alpaca_paper_connection() -> None:
+    api_key = os.getenv("ALPACA_API_KEY")
+    secret_key = os.getenv("ALPACA_SECRET_KEY")
+
+    if not api_key or not secret_key:
+        pytest.skip("ALPACA_API_KEY and ALPACA_SECRET_KEY are required.")
+
+    client = TradingClient(api_key=api_key, secret_key=secret_key, paper=True)
     account = client.get_account()
 
-    print(f"✓ Connected successfully!")
-    print(f"  Account Value: ${float(account.equity):,.2f}")
-    print(f"  Cash: ${float(account.cash):,.2f}")
-    print(f"  Buying Power: ${float(account.buying_power):,.2f}")
-    print(f"  Portfolio Value: ${float(account.portfolio_value):,.2f}")
-
-except Exception as e:
-    print(f"✗ Connection failed: {e}")
-    sys.exit(1)
+    assert account.account_number
+    assert float(account.equity) >= 0.0
+    assert float(account.cash) >= 0.0
+    assert float(account.buying_power) >= 0.0
+    assert float(account.portfolio_value) >= 0.0

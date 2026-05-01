@@ -24,7 +24,7 @@ class BaseLinterAdapter(LinterAdapter):
     
     async def run_linter(self, target_paths: List[str]) -> LinterResult:
         """Execute the linter with proper error handling and timing."""
-        start_time = time.time()
+        start_time = time.perf_counter()
         
         try:
             # Build command
@@ -48,7 +48,7 @@ class BaseLinterAdapter(LinterAdapter):
                 await process.wait()
                 raise RuntimeError(f"Linter {self.tool_name} timed out after {self.config.timeout}s")
             
-            execution_time = time.time() - start_time
+            execution_time = max(time.perf_counter() - start_time, 1e-9)
             
             # Decode output
             stdout_str = stdout.decode('utf-8', errors='replace')
@@ -77,7 +77,7 @@ class BaseLinterAdapter(LinterAdapter):
             return result
             
         except Exception as e:
-            execution_time = time.time() - start_time
+            execution_time = max(time.perf_counter() - start_time, 1e-9)
             logger.error(f"Error running {self.tool_name}: {e}")
             
             return LinterResult(

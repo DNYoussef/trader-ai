@@ -6,27 +6,24 @@ Production-ready machine learning pipeline for financial trading
 __version__ = "1.0.0"
 __author__ = "AI Trading Intelligence Team"
 
-# Core ML Components
-try:
-    from .training.trainer import ModelTrainer
-    from .models.registry import ModelRegistry
-    from .data.processor import DataProcessor
-    from .prediction.predictor import Predictor
+_LAZY_EXPORTS = {
+    "ModelTrainer": ".training.trainer",
+    "ModelRegistry": ".models.registry",
+    "DataProcessor": ".data.processor",
+    "Predictor": ".prediction.predictor",
+}
 
-    # ML Intelligence Components
-    ML_COMPONENTS = [
-        "ModelTrainer",
-        "ModelRegistry",
-        "DataProcessor",
-        "Predictor"
-    ]
-except ImportError as e:
-    print(f"Warning: ML components not available: {e}")
-    ML_COMPONENTS = []
+__all__ = list(_LAZY_EXPORTS)
 
-# Legacy Intelligence Components - Simplified to avoid import errors
-# These components are no longer actively used in the main system
-LEGACY_COMPONENTS = []
 
-# Export all available components
-__all__ = ML_COMPONENTS + LEGACY_COMPONENTS
+def __getattr__(name):
+    """Load heavyweight ML components only when explicitly requested."""
+    if name not in _LAZY_EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    from importlib import import_module
+
+    module = import_module(_LAZY_EXPORTS[name], __name__)
+    value = getattr(module, name)
+    globals()[name] = value
+    return value

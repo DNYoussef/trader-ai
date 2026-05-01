@@ -1,10 +1,3 @@
-"""Test Phase 2 Integration"""
-
-from src.integration.phase2_factory import Phase2SystemFactory
-
-def test_integration():
-    """Test Phase 2 integration factory"""
-
 import sys
 from pathlib import Path
 
@@ -13,6 +6,11 @@ project_root = Path(__file__).parent.parent.resolve()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from src.integration.phase2_factory import Phase2SystemFactory
+
+
+def test_integration():
+    """Test Phase 2 integration factory."""
 
     # Test factory initialization
     factory = Phase2SystemFactory()

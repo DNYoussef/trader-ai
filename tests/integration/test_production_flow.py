@@ -142,8 +142,27 @@ async def validate_components():
             # Test trade executor
             logger.info("\nTesting TradeExecutor...")
             from src.trading.trade_executor import TradeExecutor
+            from src.gates.gate_manager import GateManager
+            from src.safety.circuit_breakers.circuit_breaker import (
+                CircuitBreakerConfig,
+                CircuitBreakerManager,
+                CircuitType,
+            )
 
-            trade_executor = TradeExecutor(broker, portfolio, market_data)
+            gate_manager = GateManager()
+            circuit_manager = CircuitBreakerManager()
+            circuit_manager.create_circuit_breaker(
+                name="trading_loss_protection",
+                circuit_type=CircuitType.TRADING_LOSS,
+                config=CircuitBreakerConfig(failure_threshold=3, failure_rate_threshold=0.8),
+            )
+            trade_executor = TradeExecutor(
+                broker,
+                portfolio,
+                market_data,
+                gate_manager,
+                circuit_manager,
+            )
             logger.info("TradeExecutor initialized successfully")
 
             await broker.disconnect()

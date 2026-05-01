@@ -87,6 +87,38 @@ class TradeExecutor:
 
         logger.info("Trade Executor initialized with production broker integration")
 
+    @staticmethod
+    def _trading_loss_breaker_status(system_status: Dict[str, Any]) -> Dict[str, Any]:
+        """Return the trading-loss breaker status across legacy and current names."""
+        circuit_breakers = system_status.get('circuit_breakers', {})
+        if not isinstance(circuit_breakers, dict):
+            return {}
+
+        for name in ('trading_loss', 'trading_loss_protection'):
+            breaker = circuit_breakers.get(name)
+            if isinstance(breaker, dict):
+                return breaker
+
+        for breaker in circuit_breakers.values():
+            if isinstance(breaker, dict) and breaker.get('type') == 'trading_loss':
+                return breaker
+
+        return {}
+
+    def _ensure_trading_allowed_by_circuits(self) -> None:
+        """Fail closed when circuit breaker state is unavailable or blocking."""
+        system_status = self.circuit_manager.get_system_status()
+        if not isinstance(system_status, dict):
+            raise Exception("Trading halted: invalid circuit breaker status")
+
+        if system_status.get('open_breakers', 0) > 0:
+            logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
+            raise Exception("Trading halted: Circuit breakers active")
+
+        trading_cb = self._trading_loss_breaker_status(system_status)
+        if trading_cb.get('state') == 'open':
+            raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
+
     def _journal_order_intent(self, client_order_id: str, order_intent: Dict[str, Any]) -> None:
         """
         TRD-003: Record order intent before submission.
@@ -141,17 +173,7 @@ class TradeExecutor:
         """
         try:
             # TRD-006: Check circuit breaker status (now mandatory)
-            system_status = self.circuit_manager.get_system_status()
-
-            # Check if any critical breakers are open
-            if system_status.get('open_breakers', 0) > 0:
-                logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
-                raise Exception(f"Trading halted: Circuit breakers active")
-
-            # Check specific trading loss breaker
-            trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
-            if trading_cb.get('state') == 'open':
-                raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
+            self._ensure_trading_allowed_by_circuits()
 
             # Validate inputs
             await self._validate_order_params(symbol, dollar_amount, "buy", gate)
@@ -299,17 +321,7 @@ class TradeExecutor:
         """
         try:
             # TRD-006: Check circuit breaker status (now mandatory)
-            system_status = self.circuit_manager.get_system_status()
-
-            # Check if any critical breakers are open
-            if system_status.get('open_breakers', 0) > 0:
-                logger.critical(f"Trade blocked: {system_status['open_breakers']} circuit breakers OPEN")
-                raise Exception(f"Trading halted: Circuit breakers active")
-
-            # Check specific trading loss breaker
-            trading_cb = system_status.get('circuit_breakers', {}).get('trading_loss', {})
-            if trading_cb.get('state') == 'open':
-                raise Exception(f"Trading halted: Loss limit circuit breaker OPEN - {trading_cb.get('reason')}")
+            self._ensure_trading_allowed_by_circuits()
 
             # Validate inputs
             await self._validate_order_params(symbol, dollar_amount, "sell", gate)
@@ -583,9 +595,12 @@ class TradeExecutor:
         """Validate position sizing rules."""
         if side == "buy":
             # Check if this order would create oversized position
-            portfolio_value = await self.portfolio.get_total_portfolio_value()
-            current_position = await self.portfolio.positions.get(symbol)
-            current_value = current_position.market_value if current_position else Decimal("0")
+            portfolio_value = Decimal(str(await self.portfolio.get_total_portfolio_value()))
+            positions = getattr(self.portfolio, 'positions', {})
+            current_position = positions.get(symbol) if hasattr(positions, 'get') else None
+            if asyncio.iscoroutine(current_position):
+                current_position = await current_position
+            current_value = Decimal(str(current_position.market_value)) if current_position else Decimal("0")
 
             new_position_value = current_value + dollar_amount
             position_percent = (new_position_value / portfolio_value * Decimal("100")) if portfolio_value > 0 else Decimal("0")

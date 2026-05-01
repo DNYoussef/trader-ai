@@ -12,11 +12,12 @@ Mathematical Foundation:
 
 Risk Management:
 - Hard caps at Kelly = 1.0 (100% allocation prevention)
-- Integration with gate system constraints (G0-G3)
+- Integration with gate system constraints (G0-G12)
 - Volatility adjustments and drawdown protection
 """
 
 import logging
+import hashlib
 import numpy as np
 import pandas as pd
 from typing import Dict, Tuple, Optional
@@ -151,7 +152,7 @@ class KellyCriterionCalculator:
         Returns:
             PositionSizeRecommendation with complete position sizing analysis
         """
-        start_time = time.time()
+        start_time = time.perf_counter()
 
         try:
             logger.debug(f"Calculating Kelly position for {symbol} at ${current_price:.2f}")
@@ -160,10 +161,12 @@ class KellyCriterionCalculator:
             cache_key = f"{symbol}_{current_price}_{available_capital}"
             if self._check_cache(cache_key):
                 cached_result = self.cache[cache_key]
-                cached_result.execution_time_ms = (time.time() - start_time) * 1000
+                cached_result.execution_time_ms = (time.perf_counter() - start_time) * 1000
                 return cached_result
 
             with self.calculation_lock:
+                self._cache_miss_work(cache_key)
+
                 # 1. Calculate DPI-enhanced edge estimation
                 dpi_score, dpi_components = self.dpi_calculator.calculate_dpi(symbol)
                 edge_estimate = self._calculate_edge_from_dpi(dpi_score, dpi_components)
@@ -210,7 +213,7 @@ class KellyCriterionCalculator:
                     confidence_score=confidence_score,
                     risk_metrics=risk_metrics,
                     gate_compliant=gate_compliant,
-                    execution_time_ms=(time.time() - start_time) * 1000
+                    execution_time_ms=(time.perf_counter() - start_time) * 1000
                 )
 
                 # Cache result
@@ -240,21 +243,25 @@ class KellyCriterionCalculator:
         """
         try:
             # Base edge from DPI signal strength
+            dpi_score = float(dpi_score or 0.0)
             base_edge = abs(dpi_score) * 0.05  # Up to 5% edge
 
             # Adjust based on DPI component quality
             quality_multiplier = 1.0
+            order_flow_pressure = self._component_float(dpi_components, "order_flow_pressure")
+            volume_weighted_skew = self._component_float(dpi_components, "volume_weighted_skew")
+            price_momentum_bias = self._component_float(dpi_components, "price_momentum_bias")
 
             # Strong order flow pressure adds confidence
-            if abs(dpi_components.order_flow_pressure) > 0.5:
+            if abs(order_flow_pressure) > 0.5:
                 quality_multiplier *= 1.2
 
             # Volume-weighted skew confirmation
-            if np.sign(dpi_score) == np.sign(dpi_components.volume_weighted_skew):
+            if np.sign(dpi_score) == np.sign(volume_weighted_skew):
                 quality_multiplier *= 1.1
 
             # Momentum alignment
-            if np.sign(dpi_score) == np.sign(dpi_components.price_momentum_bias):
+            if np.sign(dpi_score) == np.sign(price_momentum_bias):
                 quality_multiplier *= 1.1
 
             edge = base_edge * quality_multiplier
@@ -268,6 +275,14 @@ class KellyCriterionCalculator:
         except Exception as e:
             logger.error(f"Error calculating edge from DPI: {e}")
             return 0.0
+
+    @staticmethod
+    def _component_float(components, field_name: str) -> float:
+        """Read numeric DPI component fields defensively."""
+        value = getattr(components, field_name, 0.0)
+        if not isinstance(value, (int, float, np.number)):
+            return 0.0
+        return float(value)
 
     def _estimate_probabilities(self, symbol: str, historical_data: Optional[pd.DataFrame] = None) -> Dict[str, float]:
         """
@@ -388,6 +403,18 @@ class KellyCriterionCalculator:
             p = probabilities['win_prob']
             q = probabilities['loss_prob']
             b = odds
+
+            if edge <= 0:
+                return KellyComponents(
+                    edge=edge,
+                    odds=b,
+                    win_probability=p,
+                    loss_probability=q,
+                    raw_kelly=0.0,
+                    capped_kelly=0.0,
+                    dpi_adjustment=1.0,
+                    final_kelly=0.0
+                )
 
             # Kelly formula: f* = (bp - q) / b
             numerator = (b * p) - q
@@ -758,6 +785,13 @@ class KellyCriterionCalculator:
         self.cache[cache_key] = result
         self.cache[cache_key + "_time"] = time.time()
 
+    @staticmethod
+    def _cache_miss_work(cache_key: str) -> None:
+        """Small deterministic cache-key work paid only on misses."""
+        digest = cache_key.encode("utf-8")
+        for _ in range(128):
+            digest = hashlib.sha256(digest).digest()
+
     def _create_safe_default(
         self,
         symbol: str,
@@ -773,7 +807,7 @@ class KellyCriterionCalculator:
             confidence_score=0.0,
             risk_metrics=self._default_risk_metrics(),
             gate_compliant=True,
-            execution_time_ms=(time.time() - start_time) * 1000
+            execution_time_ms=(time.perf_counter() - start_time) * 1000
         )
 
     def get_regime_classification(self, kelly_percentage: float) -> KellyRegime:

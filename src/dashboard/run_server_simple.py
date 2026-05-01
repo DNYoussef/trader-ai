@@ -21,7 +21,7 @@ from dataclasses import dataclass
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -401,30 +401,12 @@ class SimpleDashboardServer:
         async def execute_trade(trade_request: dict):
             """Execute real trades through trading engine."""
             try:
-                # Import trade executor
-                from src.trading.trade_executor import TradeExecutor
-                from src.brokers.alpaca_adapter import AlpacaAdapter
-
-                # Initialize components (should be cached in production)
-                broker = AlpacaAdapter({'paper_trading': True})
-                executor = TradeExecutor(broker, None, None)
-
-                # Execute trade
-                result = await executor.execute_trade(
-                    symbol=trade_request.get('symbol'),
-                    quantity=trade_request.get('quantity'),
-                    order_type=trade_request.get('order_type', 'market'),
-                    side=trade_request.get('side', 'buy')
+                raise HTTPException(
+                    status_code=501,
+                    detail="Dashboard trade execution must be wired through TradingEngine safety controls."
                 )
-
-                return {
-                    "success": True,
-                    "order_id": result.get('order_id'),
-                    "symbol": trade_request.get('symbol'),
-                    "quantity": trade_request.get('quantity'),
-                    "executed_price": result.get('price'),
-                    "status": result.get('status')
-                }
+            except HTTPException:
+                raise
             except Exception as e:
                 logger.error(f"Error executing trade: {e}")
                 return {"success": False, "error": str(e)}
@@ -542,7 +524,7 @@ class SimpleDashboardServer:
             subscription = message.get('subscription')
             logger.info(f"Client unsubscribed from: {subscription}")
 
-    def run(self, host="0.0.0.0", port=8000):
+    def run(self, host="127.0.0.1", port=8000):
         """Run the server."""
         logger.info(f"Starting dashboard server on {host}:{port}")
         uvicorn.run(self.app, host=host, port=port)
@@ -904,10 +886,16 @@ class RealDataProvider:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # Get historical concentration data
-        cursor.execute(f"""
+        cursor.execute("CREATE TEMP TABLE IF NOT EXISTS mega_cap_symbols(symbol TEXT PRIMARY KEY)")
+        cursor.execute("DELETE FROM mega_cap_symbols")
+        cursor.executemany(
+            "INSERT INTO mega_cap_symbols(symbol) VALUES (?)",
+            [(symbol,) for symbol in C.MEGA_CAP_SYMBOLS],
+        )
+
+        cursor.execute("""
             SELECT date,
-                   AVG(CASE WHEN symbol IN ({','.join([f"'{s}'" for s in C.MEGA_CAP_SYMBOLS])}) THEN returns ELSE 0 END) as mega_cap_returns,
+                   AVG(CASE WHEN symbol IN (SELECT symbol FROM mega_cap_symbols) THEN returns ELSE 0 END) as mega_cap_returns,
                    AVG(returns) as market_returns,
                    AVG(volatility_20d) as market_vol
             FROM market_data
@@ -1179,9 +1167,9 @@ def main(trading_engine=None):
         ai_thread.start()
 
     # Start the server
-    # Railway deployment: Read PORT from environment, bind to 0.0.0.0
+    # Railway deployment can set HOST=0.0.0.0. Local default binds loopback.
     port = int(os.environ.get("PORT", 8000))
-    host = os.environ.get("HOST", "0.0.0.0")
+    host = os.environ.get("HOST", "127.0.0.1")
 
     try:
         data_mode = "LIVE (trading engine)" if getattr(server, '_using_live_data', False) else "MOCK (database)"

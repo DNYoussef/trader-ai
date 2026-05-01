@@ -7,6 +7,19 @@
 
 ---
 
+## 2026-05-01 Addendum
+
+This report is historical. The latest local audit found zero Bandit high/medium findings in `src/` after remediation of unsafe model loading, signed pickle envelopes, unpinned HuggingFace downloads, bind-all-interface defaults, SQL string construction, missing request timeouts, and hardcoded Alpaca test credentials.
+
+Remaining security work is operational rather than a known high/medium static finding:
+
+- Keep secret scanning in CI.
+- Keep `.env` out of git and rotate keys on exposure.
+- Exercise live Alpaca and live prediction-market paths only with explicit opt-in environment gates.
+- Keep prediction-market live execution behind explicit opt-in, durable journals, and submit/read-back reconciliation; add monitored venue operations, partial-fill handling, and runbooks before treating it as production-ready.
+
+---
+
 ## Executive Summary
 
 A comprehensive security audit was performed on the trader-ai project to identify all API integrations and verify that credentials are properly secured. The audit revealed **NO CRITICAL vulnerabilities** in the codebase itself, but identified **IMPORTANT security practices** that must be maintained.

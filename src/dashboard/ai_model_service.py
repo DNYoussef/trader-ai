@@ -133,8 +133,9 @@ class AIModelService:
             # Initialize model architecture
             self.model = OptimizedHRM32D(input_dim=32, hidden_dim=512, output_dim=8)
 
-            # Load checkpoint
-            checkpoint = torch.load(model_path, map_location=self.device)
+            # Only load tensor/state-dict checkpoints. Full PyTorch object
+            # deserialization can execute code from the checkpoint file.
+            checkpoint = torch.load(model_path, map_location=self.device, weights_only=True)
 
             # Handle different checkpoint formats
             if isinstance(checkpoint, dict):
@@ -155,12 +156,7 @@ class AIModelService:
                     'loaded_at': datetime.now().isoformat()
                 }
             else:
-                # Direct model object
-                self.model = checkpoint
-                self.model_metadata = {
-                    'loaded_from': model_path,
-                    'loaded_at': datetime.now().isoformat()
-                }
+                raise ValueError("Unsupported checkpoint format: expected state-dict dictionary")
 
             self.model.to(self.device)
             self.model.eval()  # Set to evaluation mode

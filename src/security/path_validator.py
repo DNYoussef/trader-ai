@@ -5,6 +5,7 @@ Implements comprehensive path traversal prevention and validation.
 
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from urllib.parse import unquote
@@ -317,7 +318,7 @@ def create_dfars_path_validator() -> PathSecurityValidator:
     allowed_paths = [
         str(Path.cwd()),  # Current working directory
         str(Path.home() / 'projects'),  # User projects
-        '/tmp',  # Temp directory (Linux)
+        tempfile.gettempdir(),
         str(Path.home() / 'AppData' / 'Local' / 'Temp')  # Temp (Windows)
     ]
 

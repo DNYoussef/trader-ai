@@ -23,6 +23,7 @@ class FlagStatus(Enum):
     """Feature flag status"""
     ENABLED = "enabled"
     DISABLED = "disabled"
+    BETA = "beta"
     ROLLOUT = "rollout"  # Gradual rollout
     AB_TEST = "ab_test"   # A/B testing
     DEPRECATED = "deprecated"
@@ -86,7 +87,7 @@ class FeatureFlag:
                 
             if self.status == FlagStatus.DISABLED:
                 return False
-            elif self.status == FlagStatus.ENABLED:
+            elif self.status in {FlagStatus.ENABLED, FlagStatus.BETA}:
                 return True
             elif self.status == FlagStatus.ROLLOUT:
                 return self._check_rollout_eligibility(user_id, group_ids, context)

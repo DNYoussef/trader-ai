@@ -91,7 +91,7 @@ class ResultCache:
             'objectives': [o.name for o in oracle.get_objectives()],
         }
         spec_str = json.dumps(spec, sort_keys=True)
-        return hashlib.md5(spec_str.encode()).hexdigest()[:12]
+        return hashlib.sha256(spec_str.encode()).hexdigest()[:12]
 
     def get(self, oracle: TradingOracle) -> Optional[OptimizationResult]:
         """

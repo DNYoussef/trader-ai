@@ -3,12 +3,12 @@
   "current_capital": 0.0,
   "graduation_metrics": {
     "consecutive_compliant_days": 0,
-    "total_violations_30d": 10,
+    "total_violations_30d": 26,
     "avg_cash_utilization_30d": 0.0,
     "max_drawdown_30d": 0.0,
     "sharpe_ratio_30d": null,
     "performance_score": 0.0,
-    "last_violation_date": "2025-09-15T10:32:19.462712"
+    "last_violation_date": "2026-04-30T22:29:29.977829"
   },
   "violation_history": [
     {
@@ -136,6 +136,370 @@
         "current_position_value": 0,
         "new_position_value": 275.0,
         "max_position_value": 50.0
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T12:57:23.259774",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:28:20.811018",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:29:55.726833",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:32:14.986195",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:43:22.328478",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:44:22.191920",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T13:45:41.970322",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T14:25:00.885939",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T17:32:47.355175",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T17:34:19.780545",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:07:05.312836",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:23:56.161484",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:30:44.473486",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:35:03.885604",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:42:01.087879",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:55:15.742448",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T18:58:44.057060",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T19:02:54.668814",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T19:30:08.490485",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T19:49:35.016189",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T19:52:45.165217",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T20:39:18.896960",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T20:41:29.070142",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T21:39:13.319698",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T21:44:12.286368",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "AMDY",
+          "ULTY"
+        ]
+      },
+      "resolved": false
+    },
+    {
+      "timestamp": "2026-04-30T22:29:29.977829",
+      "gate_level": "G0",
+      "violation_type": "asset_not_allowed",
+      "message": "Asset SPY not allowed in G0",
+      "details": {
+        "symbol": "SPY",
+        "allowed_assets": [
+          "ULTY",
+          "AMDY"
+        ]
       },
       "resolved": false
     }

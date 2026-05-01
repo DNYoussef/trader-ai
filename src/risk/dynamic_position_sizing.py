@@ -487,7 +487,7 @@ class DynamicPositionSizer:
                 deviation = abs(current_pct - target_pct)
                 max_deviation = max(max_deviation, deviation)
 
-            return max_deviation >= self.config.rebalance_threshold
+            return (max_deviation + 1e-12) >= self.config.rebalance_threshold
 
         except Exception as e:
             logger.error(f"Error checking rebalance condition: {e}")

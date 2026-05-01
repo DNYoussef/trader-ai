@@ -81,6 +81,7 @@ class TradingEngine:
         self.broker = None
         self.market_data = None
         self.portfolio_manager = None
+        self.gate_manager = None
         self.trade_executor = None
         self.memory_client = None
 
@@ -176,6 +177,7 @@ class TradingEngine:
             from .portfolio.portfolio_manager import PortfolioManager
             from .trading.trade_executor import TradeExecutor
             from .market.market_data import MarketDataProvider
+            from .gates.gate_manager import GateManager
 
             # Pass broker adapter to all components for real integration
             self.market_data = MarketDataProvider(self.broker)
@@ -184,11 +186,34 @@ class TradingEngine:
                 self.market_data,
                 Decimal(str(self.config['initial_capital']))
             )
+            self.gate_manager = GateManager()
+
+            # ISS-003/TRD-006: Safety systems must exist before trade execution is wired.
+            try:
+                safety_config = self.config.get('safety', get_default_safety_config())
+                self.safety_integration = TradingSafetyIntegration(safety_config)
+                if not asyncio.run(self.safety_integration.initialize(self)):
+                    logger.error("Safety systems failed to initialize - trade execution disabled")
+                    self.safety_integration = None
+                    return False
+                if not self.safety_integration.circuit_manager:
+                    logger.error("Circuit breaker manager unavailable - trade execution disabled")
+                    self.safety_integration = None
+                    return False
+                logger.info("Safety systems initialized successfully")
+            except Exception as e:
+                logger.error(f"Safety integration not available: {e}")
+                self.safety_integration = None
+                return False
+
             self.trade_executor = TradeExecutor(
                 self.broker,
                 self.portfolio_manager,
-                self.market_data
+                self.market_data,
+                self.gate_manager,
+                self.safety_integration.circuit_manager
             )
+            logger.info("Trade executor wired with gate and circuit breaker controls")
 
             # ISS-008: Initialize AntifragilityEngine with config
             try:
@@ -211,22 +236,6 @@ class TradingEngine:
             except Exception as e:
                 logger.warning(f"Dashboard state provider not available: {e}")
                 self.dashboard_state_provider = None
-
-            # ISS-003: Initialize safety systems
-            try:
-                safety_config = self.config.get('safety', get_default_safety_config())
-                self.safety_integration = TradingSafetyIntegration(safety_config)
-                if asyncio.run(self.safety_integration.initialize(self)):
-                    logger.info("Safety systems initialized successfully")
-                    # Assign circuit_manager to trade_executor for pre-trade checks
-                    if self.safety_integration.circuit_manager:
-                        self.trade_executor.circuit_manager = self.safety_integration.circuit_manager
-                        logger.info("Circuit breaker manager attached to trade executor")
-                else:
-                    logger.warning("Safety systems failed to initialize - continuing with reduced safety")
-            except Exception as e:
-                logger.warning(f"Safety integration not available: {e}")
-                self.safety_integration = None
 
             # Log initialization
             self._audit_log({

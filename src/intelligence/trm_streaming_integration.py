@@ -92,7 +92,7 @@ class TRMStreamingPredictor:
             )
 
             # Load checkpoint
-            checkpoint = torch.load(self.model_path, map_location='cpu')
+            checkpoint = torch.load(self.model_path, map_location='cpu', weights_only=True)
 
             # Handle both direct state_dict and wrapped checkpoint formats
             if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:

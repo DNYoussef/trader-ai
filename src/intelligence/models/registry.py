@@ -4,14 +4,61 @@ Production-ready model versioning and storage
 """
 
 import pickle
+import base64
+import hashlib
+import hmac
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 import torch
 
 logger = logging.getLogger(__name__)
+
+_PICKLE_SIGNING_KEY_ENV = "TRADER_AI_PICKLE_SIGNING_KEY"
+_SIGNED_PICKLE_MAGIC = "TRADER_AI_SIGNED_PICKLE_V1"
+
+
+def _pickle_signing_key() -> bytes:
+    key = os.environ.get(_PICKLE_SIGNING_KEY_ENV)
+    if not key:
+        raise RuntimeError(
+            f"{_PICKLE_SIGNING_KEY_ENV} must be set to load or save signed pickle artifacts"
+        )
+    return key.encode("utf-8")
+
+
+def _save_signed_pickle(path: Path, data: Any) -> None:
+    payload = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+    signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    envelope = {
+        "magic": _SIGNED_PICKLE_MAGIC,
+        "algorithm": "HMAC-SHA256",
+        "payload": base64.b64encode(payload).decode("ascii"),
+        "signature": signature,
+    }
+    path.write_bytes(json.dumps(envelope, separators=(",", ":")).encode("utf-8"))
+
+
+def _load_signed_pickle(path: Path) -> Any:
+    try:
+        envelope = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}") from exc
+
+    if not isinstance(envelope, dict) or envelope.get("magic") != _SIGNED_PICKLE_MAGIC:
+        raise ValueError(f"Refusing unsigned pickle artifact: {path}")
+    if envelope.get("algorithm") != "HMAC-SHA256":
+        raise ValueError(f"Unsupported pickle signature algorithm: {envelope.get('algorithm')}")
+
+    payload = base64.b64decode(envelope["payload"])
+    expected_signature = hmac.new(_pickle_signing_key(), payload, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(envelope.get("signature", ""), expected_signature):
+        raise ValueError(f"Invalid pickle artifact signature: {path}")
+
+    return pickle.loads(payload)  # nosec B301 - HMAC signature verified before deserialization
 
 class ModelRegistry:
     """
@@ -74,11 +121,8 @@ class ModelRegistry:
         model_path = version_dir / "model"
         if hasattr(model, 'state_dict'):  # PyTorch model
             torch.save(model.state_dict(), f"{model_path}.pth")
-            # Also save the model architecture
-            torch.save(model, f"{model_path}_full.pth")
         else:  # Scikit-learn or other models
-            with open(f"{model_path}.pkl", 'wb') as f:
-                pickle.dump(model, f)
+            _save_signed_pickle(Path(f"{model_path}.pkl"), model)
 
         # Save model metadata
         model_metadata = {
@@ -140,19 +184,13 @@ class ModelRegistry:
 
         # Load based on file extension
         if model_file.suffix == '.pth':
-            # PyTorch model - try to load full model first
-            full_model_file = version_dir / "model_full.pth"
-            if full_model_file.exists():
-                model = torch.load(full_model_file, map_location='cpu')
-            else:
-                # Load state dict only (requires model architecture)
-                torch.load(model_file, map_location='cpu')
-                # Note: This requires the model architecture to be available
-                raise NotImplementedError("Loading state dict requires model architecture")
+            # Load state dict only (requires model architecture)
+            torch.load(model_file, map_location='cpu', weights_only=True)
+            # Note: This requires the model architecture to be available
+            raise NotImplementedError("Loading state dict requires model architecture")
         elif model_file.suffix == '.pkl':
             # Scikit-learn or other pickle-able models
-            with open(model_file, 'rb') as f:
-                model = pickle.load(f)
+            model = _load_signed_pickle(model_file)
         else:
             raise ValueError(f"Unsupported model file format: {model_file.suffix}")
 
@@ -249,8 +287,7 @@ class ModelRegistry:
         if hasattr(model, 'state_dict'):  # PyTorch
             torch.save(model, export_dir / "model.pth")
         else:  # Scikit-learn
-            with open(export_dir / "model.pkl", 'wb') as f:
-                pickle.dump(model, f)
+            _save_signed_pickle(export_dir / "model.pkl", model)
 
         # Export metadata
         with open(export_dir / "model_info.json", 'w') as f:
