@@ -1152,6 +1152,26 @@ def create_dashboard_server(trading_engine=None) -> SimpleDashboardServer:
     return SimpleDashboardServer(trading_engine=trading_engine)
 
 
+RAILWAY_RUNTIME_ENV_KEYS = (
+    "RAILWAY_ENVIRONMENT",
+    "RAILWAY_PROJECT_ID",
+    "RAILWAY_SERVICE_ID",
+    "RAILWAY_DEPLOYMENT_ID",
+    "RAILWAY_PUBLIC_DOMAIN",
+    "RAILWAY_PRIVATE_DOMAIN",
+)
+
+
+def resolve_bind_host(env=os.environ) -> str:
+    """Resolve bind host without making local development public by default."""
+    configured = env.get("HOST")
+    if configured:
+        return configured
+    if any(env.get(key) for key in RAILWAY_RUNTIME_ENV_KEYS):
+        return "0.0.0.0"
+    return "127.0.0.1"
+
+
 def main(trading_engine=None):
     """Main entry point."""
     server = SimpleDashboardServer(trading_engine=trading_engine)
@@ -1166,10 +1186,9 @@ def main(trading_engine=None):
         ai_thread = threading.Thread(target=run_ai_init, daemon=True)
         ai_thread.start()
 
-    # Start the server
-    # Railway deployment can set HOST=0.0.0.0. Local default binds loopback.
+    # Start the server. Railway must bind all interfaces for health checks.
     port = int(os.environ.get("PORT", 8000))
-    host = os.environ.get("HOST", "127.0.0.1")
+    host = resolve_bind_host()
 
     try:
         data_mode = "LIVE (trading engine)" if getattr(server, '_using_live_data', False) else "MOCK (database)"
