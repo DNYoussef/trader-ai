@@ -1,0 +1,45 @@
+name: Daily Mieza Spine Report
+
+on:
+  schedule:
+    - cron: "25 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  daily-dry-run-report:
+    name: daily-dry-run-report
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MIEZA_SIGNAL_SIGNING_KEY: ci-mieza-spine-signing-key
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            pytest.ini
+
+      - name: Install spine report dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Generate dry-run spine report
+        run: python scripts/mieza_spine_dry_run_report.py --out reports/mieza-spine/daily-report.json
+
+      - name: Upload dry-run spine report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mieza-spine-dry-run-report
+          path: reports/mieza-spine/daily-report.json
+          if-no-files-found: error

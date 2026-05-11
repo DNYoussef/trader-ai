@@ -1,0 +1,42 @@
+name: CodeGuard
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  codeguard:
+    name: codeguard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze with CodeGuard
+        id: guard
+        uses: DNYoussef/codeguard-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          risk_threshold: L3
+          ai_review: false
+          decision_policy: advisory
+          fail_on_high_risk: false
+          post_comment: true
+          generate_bundle: true
+
+      - name: Upload CodeGuard evidence bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codeguard-evidence-bundle
+          path: .guardspine/bundles/
+          if-no-files-found: ignore

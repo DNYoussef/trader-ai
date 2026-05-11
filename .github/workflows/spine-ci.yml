@@ -1,0 +1,51 @@
+name: Trader-AI Spine CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-spine:
+    name: python-spine
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MIEZA_SIGNAL_SIGNING_KEY: ci-mieza-spine-signing-key
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            pytest.ini
+
+      - name: Install spine test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "pytest>=8.2.0,<10.0.0" "pytest-asyncio>=0.21.0,<2.0.0"
+
+      - name: Run exact spine tests
+        run: |
+          python -m pytest -q --maxfail=1 \
+            tests/test_ai_dashboard_integration.py \
+            tests/test_dashboard_runtime_config.py \
+            tests/test_mieza_spine_dry_run_report.py \
+            tests/test_mieza_spine_status_cli.py \
+            tests/test_mieza_inbox_cli.py \
+            tests/test_mieza_signal_cli.py \
+            tests/test_mieza_quant_bridge.py \
+            tests/test_mieza_signal_ingestion.py \
+            tests/test_prediction_market_moo.py \
+            tests/test_prediction_market_committee.py \
+            tests/test_prediction_market_risk.py
