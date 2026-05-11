@@ -30,7 +30,7 @@ jobs:
           ai_review: false
           decision_policy: advisory
           fail_on_high_risk: false
-          post_comment: true
+          post_comment: ${{ github.event_name == 'pull_request' }}
           generate_bundle: true
 
       - name: Upload CodeGuard evidence bundle
