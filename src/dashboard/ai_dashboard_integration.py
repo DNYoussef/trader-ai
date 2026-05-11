@@ -136,6 +136,11 @@ class AIDashboardIntegrator:
 
         logger.info("Starting AI dashboard integration")
 
+        if not AI_SYSTEMS_AVAILABLE or ai_data_stream_integrator is None:
+            logger.info("AI data stream integration unavailable; background AI services disabled")
+            self.is_streaming = False
+            return
+
         # Start AI data stream processing
         await ai_data_stream_integrator.start_processing()
 
@@ -152,7 +157,8 @@ class AIDashboardIntegrator:
         logger.info("Stopping AI dashboard integration")
 
         self.is_streaming = False
-        await ai_data_stream_integrator.stop_processing()
+        if ai_data_stream_integrator is not None:
+            await ai_data_stream_integrator.stop_processing()
 
     async def on_ai_data_update(self, stream_name: str, data_point):
         """Handle AI data stream updates"""
