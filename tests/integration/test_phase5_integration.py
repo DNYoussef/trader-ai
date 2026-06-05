@@ -54,12 +54,10 @@ def test_phase_5_vision_components():
 
         print("SUCCESS: Enhanced DPI: Import successful")
 
-        return True
-
     except Exception as e:
         print(f"FAILED: Phase 5 - {e}")
         traceback.print_exc()
-        return False
+        raise
 
 def test_integrated_signal_generation():
     """Test Complete Integrated Signal Generation"""
@@ -99,12 +97,10 @@ def test_integrated_signal_generation():
         print(f"   Final Enhanced Position: ${enhanced_position:.2f}")
         print(f"   Enhancement: {((enhanced_position / base_position) - 1) * 100:+.1f}%")
 
-        return True
-
     except Exception as e:
         print(f"FAILED: Integrated Signal Generation - {e}")
         traceback.print_exc()
-        return False
+        raise
 
 def main():
     """Run Phase 5 integration test"""
@@ -117,8 +113,15 @@ def main():
     results = {}
 
     # Run key tests
-    results['Phase 5 Components'] = test_phase_5_vision_components()
-    results['Integrated Signals'] = test_integrated_signal_generation()
+    for name, test_func in [
+        ('Phase 5 Components', test_phase_5_vision_components),
+        ('Integrated Signals', test_integrated_signal_generation),
+    ]:
+        try:
+            test_func()
+            results[name] = True
+        except Exception:
+            results[name] = False
 
     # Summary
     print("=" * 55)
