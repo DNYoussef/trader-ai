@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Dict, Optional
 import json
 import os
+import sys
 
 from .brokers.broker_interface import BrokerInterface
 from .brokers.alpaca_adapter import AlpacaAdapter
@@ -21,6 +22,11 @@ from .integration.memory_client import SyncMemoryClient as MemoryClient
 
 # ISS-008: Import AntifragilityEngine for strategy recommendations
 from .strategies.antifragility_engine import AntifragilityEngine
+from .risk.dynamic_position_sizing import DynamicPositionSizer
+from .risk.kelly_criterion import KellyCriterionCalculator
+from .strategies.dpi_calculator import DistributionalPressureIndex
+from .cycles.profit_calculator import ProfitCalculator
+from .cycles.weekly_siphon_automator import WeeklySiphonAutomator
 
 # ISS-005: Import state provider for dashboard integration
 from .integration.trading_state_provider import (
@@ -56,14 +62,13 @@ def validate_trading_mode() -> str:
         logger.warning("Real money will be at risk!")
         logger.warning("=" * 60)
 
-        # For non-interactive mode, check for LIVE_TRADING_CONFIRMED env var
-        if os.getenv("LIVE_TRADING_CONFIRMED", "").upper() != "YES":
-            confirm = input("Type 'CONFIRM LIVE TRADING' to proceed: ")
-            if confirm != "CONFIRM LIVE TRADING":
-                raise SystemExit("Live trading not confirmed. Exiting safely.")
-            logger.info("Live trading confirmed by user.")
-        else:
-            logger.info("Live trading pre-confirmed via LIVE_TRADING_CONFIRMED env var.")
+        if not sys.stdin.isatty():
+            raise SystemExit("Live trading requires interactive operator confirmation.")
+
+        confirm = input("Type 'CONFIRM LIVE TRADING' to proceed: ")
+        if confirm != "CONFIRM LIVE TRADING":
+            raise SystemExit("Live trading not confirmed. Exiting safely.")
+        logger.info("Live trading confirmed by user.")
 
     return mode
 
@@ -84,6 +89,11 @@ class TradingEngine:
         self.gate_manager = None
         self.trade_executor = None
         self.memory_client = None
+        self.dpi_calculator = None
+        self.kelly_calculator = None
+        self.position_sizer = None
+        self.profit_calculator = None
+        self.siphon_automator = None
 
         # ISS-008: AntifragilityEngine for strategy recommendations
         self.antifragility_engine: Optional[AntifragilityEngine] = None
@@ -120,7 +130,7 @@ class TradingEngine:
             'rebalance_frequency_minutes': 60  # Rebalance every hour
         }
 
-    def initialize(self) -> bool:
+    async def initialize_async(self) -> bool:
         """Initialize all trading engine components."""
         try:
             # Initialize Memory Client
@@ -169,7 +179,7 @@ class TradingEngine:
                 raise ValueError(f"Unknown broker: {self.config['broker']}")
 
             # Connect to broker
-            if not asyncio.run(self.broker.connect()):
+            if not await self.broker.connect():
                 logger.error("Failed to connect to broker")
                 return False
 
@@ -188,11 +198,27 @@ class TradingEngine:
             )
             self.gate_manager = GateManager()
 
+            siphon_config = self.config.get('siphon', {})
+            siphon_base_capital = Decimal(str(
+                siphon_config.get('base_capital', self.config.get('initial_capital', 200))
+            ))
+            self.profit_calculator = ProfitCalculator(initial_capital=siphon_base_capital)
+            self.siphon_automator = WeeklySiphonAutomator(
+                portfolio_manager=self.portfolio_manager,
+                broker_adapter=self.broker,
+                profit_calculator=self.profit_calculator,
+                enable_auto_execution=bool(siphon_config.get('auto_execute', False)),
+            )
+            logger.info(
+                "Weekly profit siphon wired into trading engine "
+                f"(auto_execute={self.siphon_automator.enable_auto_execution})"
+            )
+
             # ISS-003/TRD-006: Safety systems must exist before trade execution is wired.
             try:
                 safety_config = self.config.get('safety', get_default_safety_config())
                 self.safety_integration = TradingSafetyIntegration(safety_config)
-                if not asyncio.run(self.safety_integration.initialize(self)):
+                if not await self.safety_integration.initialize(self):
                     logger.error("Safety systems failed to initialize - trade execution disabled")
                     self.safety_integration = None
                     return False
@@ -214,6 +240,25 @@ class TradingEngine:
                 self.safety_integration.circuit_manager
             )
             logger.info("Trade executor wired with gate and circuit breaker controls")
+
+            try:
+                self.dpi_calculator = DistributionalPressureIndex()
+                self.kelly_calculator = KellyCriterionCalculator(
+                    self.dpi_calculator,
+                    self.gate_manager,
+                    max_kelly=float(self.config.get('risk', {}).get('max_kelly', 0.25)),
+                )
+                self.position_sizer = DynamicPositionSizer(
+                    self.kelly_calculator,
+                    self.dpi_calculator,
+                    self.gate_manager,
+                )
+                logger.info("Kelly/DPI position sizing wired into trading engine")
+            except Exception as e:
+                logger.warning(f"Kelly/DPI position sizing unavailable: {e}")
+                self.dpi_calculator = None
+                self.kelly_calculator = None
+                self.position_sizer = None
 
             # ISS-008: Initialize AntifragilityEngine with config
             try:
@@ -264,9 +309,17 @@ class TradingEngine:
             })
             return False
 
+    def initialize(self) -> bool:
+        """Synchronous initialization wrapper for CLI callers."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.initialize_async())
+        raise RuntimeError("TradingEngine.initialize() cannot run inside an event loop; await initialize_async() instead.")
+
     async def start(self):
         """Start the trading engine main loop."""
-        if not self.initialize():
+        if not await self.initialize_async():
             logger.error("Failed to initialize, cannot start")
             return
 
@@ -370,6 +423,10 @@ class TradingEngine:
                     "limit_pct": daily_loss_status["limit_pct"],
                     "timestamp": datetime.now().isoformat()
                 })
+                await self.activate_kill_switch(
+                    reason="daily_loss_limit",
+                    context=daily_loss_status,
+                )
                 return
 
 
@@ -378,7 +435,10 @@ class TradingEngine:
             cash_balance = await self.broker.get_cash_balance()
 
             logger.info(f"Portfolio Status - Value: ${portfolio_value}, Cash: ${cash_balance}")
-            logger.info(f"Daily P&L: {daily_loss_status["daily_change_pct"]*100:.2f}% (Limit: {daily_loss_status["limit_pct"]*100:.2f}%)")
+            logger.info(
+                f"Daily P&L: {daily_loss_status['daily_change_pct']*100:.2f}% "
+                f"(Limit: {daily_loss_status['limit_pct']*100:.2f}%)"
+            )
 
             # Execute rebalancing if portfolio value is sufficient
             if portfolio_value >= Decimal("10.00"):
@@ -388,6 +448,11 @@ class TradingEngine:
 
             # Create daily snapshot
             await self.portfolio_manager.create_daily_snapshot()
+
+            # Execute the weekly 50/50 profit siphon when its live schedule says
+            # it is due. This is part of the production cycle, not a standalone
+            # demo object.
+            await self._execute_due_weekly_siphon()
 
             # Audit log
             self._audit_log({
@@ -410,6 +475,42 @@ class TradingEngine:
                 'timestamp': datetime.now().isoformat()
             })
             self._log_memory_event(f"Trading cycle error: {e}", {'category': 'cycle', 'status': 'error'})
+
+    async def _execute_due_weekly_siphon(self):
+        """Run the configured weekly siphon when it is due."""
+        if not self.siphon_automator:
+            logger.debug("Weekly siphon skipped: automator unavailable")
+            return None
+
+        try:
+            should_execute, reason = self.siphon_automator.should_execute_siphon()
+            if not should_execute:
+                logger.debug(f"Weekly siphon not due: {reason}")
+                return None
+
+            result = await self.siphon_automator.execute_manual_siphon(force=False)
+            self._audit_log({
+                'event': 'weekly_profit_siphon',
+                'status': result.status.value,
+                'withdrawal_amount': str(result.withdrawal_amount),
+                'withdrawal_success': result.withdrawal_success,
+                'errors': result.errors,
+                'timestamp': datetime.now().isoformat()
+            })
+            self._log_memory_event(
+                f"Weekly profit siphon executed: {result.status.value}",
+                {'category': 'cycle', 'event': 'weekly_profit_siphon'}
+            )
+            return result
+
+        except Exception as e:
+            logger.error(f"Weekly siphon execution failed: {e}")
+            self._audit_log({
+                'event': 'weekly_profit_siphon_error',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            })
+            return None
 
     async def _execute_rebalancing(self, total_value: Decimal):
         """Execute Gary x Taleb strategy rebalancing."""
@@ -451,6 +552,11 @@ class TradingEngine:
                     for symbol, pct in allocations.items()
                 }
                 logger.info("Using config-based default allocations")
+
+            target_allocations = await self._apply_kelly_position_sizing(
+                target_allocations,
+                total_value,
+            )
 
             # ISS-011: Build gates from config or default
             asset_universe = self.config.get('asset_universe', {})
@@ -501,6 +607,56 @@ class TradingEngine:
                 'timestamp': datetime.now().isoformat()
             })
 
+    async def _apply_kelly_position_sizing(
+        self,
+        target_allocations: Dict[str, Decimal],
+        total_value: Decimal,
+    ) -> Dict[str, Decimal]:
+        """Cap rebalance targets with live Kelly/DPI sizing recommendations."""
+        if not self.kelly_calculator:
+            return target_allocations
+
+        adjusted_allocations: Dict[str, Decimal] = {}
+        for symbol, target_amount in target_allocations.items():
+            if target_amount <= Decimal("0"):
+                adjusted_allocations[symbol] = Decimal("0")
+                continue
+
+            if symbol.upper() == "CASH":
+                adjusted_allocations[symbol] = target_amount
+                continue
+
+            try:
+                current_price = await self.market_data.get_current_price(symbol)
+                if current_price is None or Decimal(str(current_price)) <= Decimal("0"):
+                    logger.warning(f"Kelly sizing blocked {symbol}: unavailable current price")
+                    adjusted_allocations[symbol] = Decimal("0")
+                    continue
+
+                recommendation = self.kelly_calculator.calculate_kelly_position(
+                    symbol=symbol,
+                    current_price=float(current_price),
+                    available_capital=float(total_value),
+                )
+
+                if not recommendation.gate_compliant or recommendation.kelly_percentage <= 0:
+                    logger.info(
+                        f"Kelly sizing blocked {symbol}: "
+                        f"kelly={recommendation.kelly_percentage:.2%}, "
+                        f"gate_compliant={recommendation.gate_compliant}"
+                    )
+                    adjusted_allocations[symbol] = Decimal("0")
+                    continue
+
+                kelly_cap = Decimal(str(recommendation.dollar_amount))
+                adjusted_allocations[symbol] = min(target_amount, kelly_cap)
+
+            except Exception as e:
+                logger.warning(f"Kelly sizing failed for {symbol}; target blocked: {e}")
+                adjusted_allocations[symbol] = Decimal("0")
+
+        return adjusted_allocations
+
     async def _check_system_health(self):
         """Check system health and connectivity."""
         try:
@@ -535,21 +691,10 @@ class TradingEngine:
 
                 if safety_state == SafetyState.CRITICAL.value:
                     logger.critical("CRITICAL STATE - ACTIVATING KILL SWITCH!")
-                    self.kill_switch_activated = True
-
-                    # Cancel pending orders if possible
-                    if hasattr(self, 'trade_executor') and self.trade_executor:
-                        try:
-                            await self.trade_executor.cancel_all_pending_orders()
-                            logger.critical("All pending orders cancelled")
-                        except Exception as e:
-                            logger.error(f"Failed to cancel orders: {e}")
-
-                    self._audit_log({
-                        'event': 'kill_switch_activated',
-                        'reason': 'CRITICAL safety state',
-                        'timestamp': datetime.now().isoformat()
-                    })
+                    await self.activate_kill_switch(
+                        reason="critical_safety_state",
+                        context={"safety_state": safety_state},
+                    )
                 elif safety_state == SafetyState.DEGRADED.value:
                     logger.warning("Safety system reports DEGRADED state")
 
@@ -652,15 +797,55 @@ class TradingEngine:
             logger.error(f"Error getting portfolio summary: {e}")
             return {"error": str(e)}
 
-    async def activate_kill_switch(self):
+    async def _cancel_all_open_orders(self) -> Dict[str, int]:
+        """Cancel locally tracked and broker-side open orders."""
+        local_canceled = 0
+        broker_canceled = 0
+
+        if getattr(self, "trade_executor", None):
+            try:
+                local_canceled = await self.trade_executor.cancel_all_pending_orders()
+                logger.info(f"Canceled {local_canceled} locally tracked pending orders")
+            except Exception as e:
+                logger.error(f"Failed to cancel locally tracked orders: {e}")
+
+        if getattr(self, "broker", None) and hasattr(self.broker, "cancel_all_orders"):
+            try:
+                broker_canceled = await self.broker.cancel_all_orders()
+                logger.info(f"Canceled {broker_canceled} broker-side open orders")
+            except Exception as e:
+                logger.error(f"Failed to cancel broker-side open orders: {e}")
+
+        return {
+            "local_canceled": int(local_canceled or 0),
+            "broker_canceled": int(broker_canceled or 0),
+        }
+
+    async def _close_all_positions(self) -> Optional[bool]:
+        """Flatten positions when the broker supports an emergency close-all API."""
+        if not (getattr(self, "broker", None) and hasattr(self.broker, "close_all_positions")):
+            return None
+
+        try:
+            closed = await self.broker.close_all_positions()
+            if closed:
+                logger.critical("All broker positions submitted for emergency close")
+            else:
+                logger.error("Broker close_all_positions returned False")
+            return bool(closed)
+        except Exception as e:
+            logger.error(f"Failed to close broker positions during kill switch: {e}")
+            return False
+
+    async def activate_kill_switch(self, reason: str = "manual", context: Optional[Dict] = None):
         """EMERGENCY STOP - Cancel all orders and halt trading."""
         logger.critical("KILL SWITCH ACTIVATED")
         self.kill_switch_activated = True
+        self.running = False
 
         try:
-            # Cancel all open orders
-            canceled_count = await self.trade_executor.cancel_all_pending_orders()
-            logger.info(f"Canceled {canceled_count} pending orders")
+            canceled = await self._cancel_all_open_orders()
+            positions_closed = await self._close_all_positions()
 
             # Get final positions for audit
             try:
@@ -673,24 +858,29 @@ class TradingEngine:
             # Log the event
             self._audit_log({
                 'event': 'KILL_SWITCH_ACTIVATED',
+                'reason': reason,
                 'timestamp': datetime.now().isoformat(),
                 'nav': str(nav),
                 'positions_count': len(positions),
-                'canceled_orders': canceled_count
+                'canceled_orders': canceled["local_canceled"] + canceled["broker_canceled"],
+                'local_canceled_orders': canceled["local_canceled"],
+                'broker_canceled_orders': canceled["broker_canceled"],
+                'positions_closed': positions_closed,
+                'context': context or {},
             })
 
             self._log_memory_event(
-                "KILL SWITCH ACTIVATED - TRADING HALTED",
-                {'category': 'safety', 'event': 'kill_switch', 'severity': 'critical'}
+                f"KILL SWITCH ACTIVATED - TRADING HALTED ({reason})",
+                {'category': 'safety', 'event': 'kill_switch', 'severity': 'critical', 'reason': reason}
             )
 
-            # ISS-003: Trigger safety emergency shutdown
+            # ISS-003: stop safety systems without recursing through emergency callbacks.
             if self.safety_integration:
                 try:
-                    await self.safety_integration.emergency_shutdown()
-                    logger.info("Safety emergency shutdown completed")
+                    await self.safety_integration.stop()
+                    logger.info("Safety systems stopped after kill switch")
                 except Exception as se:
-                    logger.error(f"Error in safety emergency shutdown: {se}")
+                    logger.error(f"Error stopping safety systems after kill switch: {se}")
 
             # Stop the engine
             await self.stop()
@@ -818,7 +1008,7 @@ class TradingEngine:
 
             # Initialize if not already done
             if not self.broker:
-                if not self.initialize():
+                if not await self.initialize_async():
                     raise Exception("Failed to initialize trading engine")
 
             # Check broker connection
@@ -857,6 +1047,10 @@ class TradingEngine:
                     "limit_pct": daily_loss_status["limit_pct"],
                     "timestamp": datetime.now().isoformat()
                 })
+                await self.activate_kill_switch(
+                    reason="daily_loss_limit",
+                    context=daily_loss_status,
+                )
                 return
 
             portfolio_summary = await self.get_portfolio_summary()

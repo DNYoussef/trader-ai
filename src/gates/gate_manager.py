@@ -631,7 +631,38 @@ class GateManager:
                     }
                 )
 
-        # 7. Add warnings for approaching limits
+        # 7. Check portfolio concentration limits. Prefer explicit sector
+        # metadata when available; otherwise fall back to symbol concentration so
+        # the configured gate cap still has runtime force.
+        if side == 'BUY':
+            concentration = self._post_trade_concentration(
+                trade_details=trade_details,
+                current_portfolio=current_portfolio,
+                trade_value=trade_value,
+            )
+            if (
+                concentration is not None
+                and concentration['concentration_pct'] > config.max_concentration_pct
+            ):
+                result.add_violation(
+                    ViolationType.CONCENTRATION_EXCEEDED,
+                    (
+                        f"Trade would exceed {config.max_concentration_pct*100:.0f}% "
+                        f"concentration limit for {concentration['group_type']} "
+                        f"{concentration['group_key']}"
+                    ),
+                    {
+                        'group_type': concentration['group_type'],
+                        'group_key': concentration['group_key'],
+                        'current_group_value': concentration['current_group_value'],
+                        'post_trade_group_value': concentration['post_trade_group_value'],
+                        'total_value': concentration['total_value'],
+                        'concentration_pct': concentration['concentration_pct'],
+                        'max_concentration_pct': config.max_concentration_pct,
+                    }
+                )
+
+        # 8. Add warnings for approaching limits
         if side == 'BUY':
             cash_utilization = 1 - (current_portfolio.get('cash', 0) /
                                   current_portfolio.get('total_value', 1))
@@ -660,6 +691,67 @@ class GateManager:
                 )
         
         return result
+
+    def _post_trade_concentration(
+        self,
+        *,
+        trade_details: Dict[str, Any],
+        current_portfolio: Dict[str, Any],
+        trade_value: float,
+    ) -> Optional[Dict[str, Any]]:
+        total_value = float(current_portfolio.get('total_value') or 0)
+        if total_value <= 0 or trade_value <= 0:
+            return None
+
+        positions = current_portfolio.get('positions', {}) or {}
+        symbol = str(trade_details.get('symbol', '')).upper()
+        trade_sector = trade_details.get('sector') or trade_details.get('asset_sector')
+        current_position = positions.get(symbol, {}) if hasattr(positions, 'get') else {}
+        if not trade_sector and isinstance(current_position, dict):
+            trade_sector = current_position.get('sector') or current_position.get('asset_sector')
+
+        group_key = str(trade_sector or symbol).upper()
+        group_type = 'sector' if trade_sector else 'symbol'
+        current_group_value = 0.0
+
+        for pos_symbol, pos in positions.items():
+            pos_key = str(pos_symbol).upper()
+            if group_type == 'sector':
+                pos_sector = None
+                if isinstance(pos, dict):
+                    pos_sector = pos.get('sector') or pos.get('asset_sector')
+                if str(pos_sector or '').upper() != group_key:
+                    continue
+            elif pos_key != group_key:
+                continue
+
+            current_group_value += self._position_market_value(pos, fallback_price=trade_details.get('price', 0))
+
+        post_trade_group_value = current_group_value + float(trade_value)
+        return {
+            'group_type': group_type,
+            'group_key': group_key,
+            'current_group_value': current_group_value,
+            'post_trade_group_value': post_trade_group_value,
+            'total_value': total_value,
+            'concentration_pct': post_trade_group_value / total_value,
+        }
+
+    @staticmethod
+    def _position_market_value(position: Any, fallback_price: Any = 0) -> float:
+        if isinstance(position, dict):
+            if position.get('market_value') is not None:
+                return abs(float(position.get('market_value') or 0))
+            quantity = float(position.get('quantity') or 0)
+            price = float(position.get('current_price') or fallback_price or 0)
+            return abs(quantity * price)
+
+        market_value = getattr(position, 'market_value', None)
+        if market_value is not None:
+            return abs(float(market_value))
+        quantity = float(getattr(position, 'quantity', 0) or 0)
+        price = float(getattr(position, 'current_price', fallback_price) or fallback_price or 0)
+        return abs(quantity * price)
     
     def _record_violation(self, violation_type: ViolationType, message: str, 
                          details: Dict[str, Any]):

@@ -6,17 +6,31 @@ Extracted to reduce magic literals and improve maintainability.
 # CORS Configuration
 # Include Railway deployment URLs and local development
 import os
-RAILWAY_URL = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8000",
-    f"https://{RAILWAY_URL}" if RAILWAY_URL else None,
-    # Allow all origins in production if needed (configure via env)
-    os.environ.get("CORS_ALLOW_ORIGIN", None),
-]
-# Filter out None values
-CORS_ORIGINS = [origin for origin in CORS_ORIGINS if origin]
+
+
+def _split_origins(value: str) -> list[str]:
+    return [origin.strip() for origin in value.split(",") if origin.strip() and origin.strip() != "*"]
+
+
+def get_cors_origins() -> list[str]:
+    """Build an explicit origin allowlist for credentialed CORS."""
+    origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000",
+    ]
+
+    railway_url = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
+    if railway_url:
+        origins.append(f"https://{railway_url}")
+
+    origins.extend(_split_origins(os.environ.get("CORS_ALLOW_ORIGIN", "")))
+    origins.extend(_split_origins(os.environ.get("CORS_ORIGINS", "")))
+
+    return list(dict.fromkeys(origins))
+
+
+CORS_ORIGINS = get_cors_origins()
 
 # API Endpoints
 API_ROOT = "/"

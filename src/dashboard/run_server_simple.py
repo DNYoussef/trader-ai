@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simplified startup script for the Gary×Taleb Risk Dashboard Server.
+Simplified startup script for the GaryÃ—Taleb Risk Dashboard Server.
 This version runs without Redis dependency for development.
 """
 
@@ -14,6 +14,7 @@ import time
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Set
 from dataclasses import dataclass
 
@@ -120,6 +121,7 @@ class SimpleDashboardServer:
     def __init__(self, trading_engine=None):
         self.app = FastAPI(title="Gary x Taleb Risk Dashboard")
         self.active_connections: Set[WebSocket] = set()
+        self.trading_engine = trading_engine
         self.setup_cors()
         self.setup_routes()
         # Static files MUST be setup AFTER routes (catch-all route should be last)
@@ -399,17 +401,76 @@ class SimpleDashboardServer:
 
         @self.app.post(C.API_TRADING_EXECUTE)
         async def execute_trade(trade_request: dict):
-            """Execute real trades through trading engine."""
-            try:
+            """Execute dashboard trades through the TradingEngine safety path."""
+            if not self.trading_engine or not hasattr(self.trading_engine, "execute_manual_trade"):
                 raise HTTPException(
-                    status_code=501,
-                    detail="Dashboard trade execution must be wired through TradingEngine safety controls."
+                    status_code=503,
+                    detail={
+                        "success": False,
+                        "execution_status": "unavailable_no_trading_engine",
+                        "evidence_status": "not_executed",
+                        "message": (
+                            "Dashboard trade execution requires a live TradingEngine "
+                            "with safety controls."
+                        ),
+                    },
                 )
+
+            try:
+                symbol = str(trade_request.get("symbol", "")).strip().upper()
+                action = str(trade_request.get("action") or trade_request.get("side") or "").strip().lower()
+                gate = str(trade_request.get("gate", "MANUAL")).strip() or "MANUAL"
+                amount_value = (
+                    trade_request.get("dollar_amount")
+                    if "dollar_amount" in trade_request
+                    else trade_request.get("amount", trade_request.get("notional"))
+                )
+
+                if not symbol:
+                    raise HTTPException(status_code=422, detail="symbol is required")
+                if action not in {"buy", "sell"}:
+                    raise HTTPException(status_code=422, detail="action must be buy or sell")
+                try:
+                    dollar_amount = Decimal(str(amount_value))
+                except (InvalidOperation, TypeError):
+                    raise HTTPException(status_code=422, detail="dollar_amount must be numeric")
+                if dollar_amount <= 0:
+                    raise HTTPException(status_code=422, detail="dollar_amount must be positive")
+
+                result = await self.trading_engine.execute_manual_trade(
+                    symbol=symbol,
+                    dollar_amount=dollar_amount,
+                    action=action,
+                    gate=gate,
+                )
+                if result is None:
+                    return {
+                        "success": False,
+                        "execution_status": "blocked_or_failed_by_trading_engine",
+                        "evidence_status": "not_executed",
+                    }
+
+                return {
+                    "success": True,
+                    "execution_status": "executed_through_trading_engine",
+                    "evidence_status": "trading_engine_result",
+                    "symbol": symbol,
+                    "action": action,
+                    "dollar_amount": str(dollar_amount),
+                    "gate": gate,
+                    "status": getattr(result, "status", None),
+                    "order_id": getattr(result, "order_id", None),
+                }
             except HTTPException:
                 raise
             except Exception as e:
                 logger.error(f"Error executing trade: {e}")
-                return {"success": False, "error": str(e)}
+                return {
+                    "success": False,
+                    "execution_status": "trading_engine_error",
+                    "evidence_status": "not_executed",
+                    "error": str(e),
+                }
 
         @self.app.websocket(C.WS_ENDPOINT)
         async def websocket_endpoint(websocket: WebSocket, client_id: str):

@@ -69,7 +69,7 @@ class TestWeeklyCycle:
     @pytest.fixture
     def weekly_cycle(self, mock_dependencies):
         """Create WeeklyCycle instance with mocks"""
-        return WeeklyCycle(**mock_dependencies)
+        return WeeklyCycle(**mock_dependencies, enable_dpi=False)
     
     def test_initialization(self, mock_dependencies):
         """Test WeeklyCycle initialization"""
@@ -79,9 +79,8 @@ class TestWeeklyCycle:
         assert cycle.trade_executor is not None
         assert cycle.market_data is not None
         assert cycle.holiday_calendar is not None
-        assert len(cycle.GATE_ALLOCATIONS) == 2
-        assert 'G0' in cycle.GATE_ALLOCATIONS
-        assert 'G1' in cycle.GATE_ALLOCATIONS
+        assert len(cycle.GATE_ALLOCATIONS) == 13
+        assert set(cycle.GATE_ALLOCATIONS) == {f'G{i}' for i in range(13)}
     
     @patch('src.cycles.weekly_cycle.datetime')
     def test_should_execute_buy_friday_correct_time(self, mock_datetime, weekly_cycle):
@@ -281,10 +280,12 @@ class TestWeeklyCycle:
     def test_get_weekly_performance(self, weekly_cycle):
         """Test weekly performance data retrieval"""
         # Add some mock weekly deltas
+        first_week = datetime(2024, 1, 1, tzinfo=WeeklyCycle.ET)
         for i in range(5):
+            week_start = first_week + timedelta(days=i * 7)
             delta = WeeklyDelta(
-                week_start=datetime(2024, 1, 1 + i*7, tzinfo=WeeklyCycle.ET),
-                week_end=datetime(2024, 1, 8 + i*7, tzinfo=WeeklyCycle.ET),
+                week_start=week_start,
+                week_end=week_start + timedelta(days=7),
                 nav_start=100000.0,
                 nav_end=101000.0,
                 deposits=0.0,

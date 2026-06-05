@@ -486,20 +486,22 @@ class EnhancedKellyCriterion:
             return total_cvar
 
         try:
-            # Get asset CVaRs
             assets = list(weights.keys())
-            np.array([self.asset_profiles[asset].cvar_95 for asset in assets])
             weights_array = np.array([weights[asset] for asset in assets])
+            volatilities = np.array([abs(self.asset_profiles[asset].volatility) for asset in assets])
 
             # Get correlation submatrix
             corr_sub = self.correlation_matrix.loc[assets, assets].values
 
-            # Calculate portfolio CVaR using correlation
-            portfolio_var = np.sqrt(np.dot(weights_array, np.dot(corr_sub, weights_array)))
+            covariance = np.outer(volatilities, volatilities) * corr_sub
+            portfolio_sigma = np.sqrt(max(0.0, np.dot(weights_array, np.dot(covariance, weights_array))))
 
-            # Approximate CVaR using normal distribution (conservative approximation)
-            z_score = norm.ppf(1 - confidence)
-            portfolio_cvar = portfolio_var * z_score
+            alpha = 1 - confidence
+            if alpha <= 0:
+                raise ValueError("confidence must be less than 1.0")
+
+            z_score = norm.ppf(alpha)
+            portfolio_cvar = portfolio_sigma * (norm.pdf(z_score) / alpha)
 
             return abs(portfolio_cvar)
 

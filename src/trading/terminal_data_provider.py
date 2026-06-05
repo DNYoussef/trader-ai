@@ -73,6 +73,7 @@ class AlgorithmicSignal:
     target_price: Optional[float] = None
     stop_loss: Optional[float] = None
     position_size: Optional[float] = None
+    evidence_status: str = "synthetic_demo_terminal_insight"
 
 
 @dataclass
@@ -85,6 +86,7 @@ class AIInflectionPoint:
     predicted_direction: str  # 'UP', 'DOWN', 'SIDEWAYS'
     time_horizon: int  # Minutes
     supporting_evidence: List[str]
+    evidence_status: str = "synthetic_demo_terminal_insight"
 
 
 @dataclass
@@ -131,6 +133,7 @@ class TradingTerminalDataProvider:
         # ISS-020: Real data provider integration
         self.alpaca_provider = alpaca_data_provider
         self.use_real_data = bool(self.alpaca_provider) and enable_live_data
+        self.synthetic_terminal_insights_allowed = not self.use_real_data
 
         # Data storage
         self.market_data: Dict[str, MarketDataPoint] = {}
@@ -156,6 +159,18 @@ class TradingTerminalDataProvider:
 
         data_source = "Real Alpaca API" if self.use_real_data else "Mock/Cached Data"
         logger.info(f"Trading Terminal Data Provider initialized - Data source: {data_source}")
+
+    def get_terminal_insight_status(self) -> Dict[str, str]:
+        """Return evidence labels for terminal-generated signal surfaces."""
+        if self.synthetic_terminal_insights_allowed:
+            return {
+                "algorithmic_signals": "synthetic_demo_terminal_insight",
+                "ai_inflections": "synthetic_demo_terminal_insight",
+            }
+        return {
+            "algorithmic_signals": "unavailable_no_live_signal_engine",
+            "ai_inflections": "unavailable_no_live_inflection_engine",
+        }
 
     def add_market_data_callback(self, callback: Callable):
         """Add callback for market data updates"""
@@ -266,9 +281,10 @@ class TradingTerminalDataProvider:
             except Exception as e:
                 logger.error(f"Error initializing real data for {symbol}: {e}")
 
-        # Generate initial signals and inflections (still mock for now)
-        await self._generate_algorithmic_signals()
-        await self._generate_ai_inflections()
+        logger.info(
+            "Live terminal signal and inflection engines are not configured; "
+            "synthetic terminal insights are disabled in live-data mode."
+        )
 
     async def _initialize_mock_data(self):
         """Initialize with mock market data (fallback when real data unavailable)"""
@@ -564,6 +580,10 @@ class TradingTerminalDataProvider:
 
     async def _generate_algorithmic_signals(self):
         """Generate algorithmic trading signals"""
+        if not self.synthetic_terminal_insights_allowed:
+            logger.info("Synthetic algorithmic signals disabled in live-data mode")
+            return
+
         current_time = time.time()
 
         # Generate 1-3 signals
@@ -599,7 +619,8 @@ class TradingTerminalDataProvider:
                 reason=reason,
                 target_price=current_price * (1.02 if signal_type == 'BUY' else 0.98),
                 stop_loss=current_price * (0.99 if signal_type == 'BUY' else 1.01),
-                position_size=np.random.uniform(0.1, 0.3)
+                position_size=np.random.uniform(0.1, 0.3),
+                evidence_status="synthetic_demo_terminal_insight",
             )
 
             self.algorithmic_signals.append(signal)
@@ -619,6 +640,10 @@ class TradingTerminalDataProvider:
 
     async def _generate_ai_inflections(self):
         """Generate AI inflection points"""
+        if not self.synthetic_terminal_insights_allowed:
+            logger.info("Synthetic AI inflections disabled in live-data mode")
+            return
+
         current_time = time.time()
 
         # Generate 1-2 inflections
@@ -653,7 +678,8 @@ class TradingTerminalDataProvider:
                 confidence=confidence,
                 predicted_direction=predicted_direction,
                 time_horizon=time_horizon,
-                supporting_evidence=supporting_evidence
+                supporting_evidence=supporting_evidence,
+                evidence_status="synthetic_demo_terminal_insight",
             )
 
             self.ai_inflections.append(inflection)
@@ -743,6 +769,7 @@ class TradingTerminalDataProvider:
             'technical_indicators': self.get_technical_indicators(),
             'algorithmic_signals': self.get_algorithmic_signals(),
             'ai_inflections': self.get_ai_inflections(),
+            'terminal_insight_status': self.get_terminal_insight_status(),
             'order_books': {symbol: self.get_order_book(symbol) for symbol in self.symbols},
             'timestamp': time.time()
         }

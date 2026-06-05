@@ -14,6 +14,7 @@ Key Features:
 """
 
 import logging
+import inspect
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
 
@@ -196,7 +197,9 @@ class TradingSafetyIntegration:
             # Stop trading engine immediately
             if self.trading_engine and hasattr(self.trading_engine, 'activate_kill_switch'):
                 try:
-                    self.trading_engine.activate_kill_switch()
+                    result = self.trading_engine.activate_kill_switch()
+                    if inspect.isawaitable(result):
+                        await result
                 except Exception as e:
                     logger.error(f"Failed to activate trading engine kill switch: {e}")
 
@@ -303,7 +306,9 @@ class TradingSafetyIntegration:
             if self.trading_engine:
                 try:
                     if hasattr(self.trading_engine, 'activate_kill_switch'):
-                        self.trading_engine.activate_kill_switch()
+                        result = self.trading_engine.activate_kill_switch()
+                        if inspect.isawaitable(result):
+                            await result
                     if hasattr(self.trading_engine, 'stop'):
                         await self.trading_engine.stop()
                 except Exception as e:

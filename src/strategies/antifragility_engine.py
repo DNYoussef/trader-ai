@@ -76,19 +76,18 @@ class AntifragilityEngine:
         self.volatility_lookback = 252  # 1 year of daily returns
         self.evt_threshold_percentile = 95  # Top 5% for extreme events
 
-        # ISS-011: Load barbell configuration from config or use defaults
+        # ISS-011: Load barbell configuration from config or use Taleb 80/20 defaults.
         if config and 'allocations' in config and 'barbell' in config['allocations']:
             barbell_cfg = config['allocations']['barbell']
-            safe_instruments = barbell_cfg.get('safe_instruments', ['SPY', 'VTIP', 'IAU'])
-            risky_instruments = barbell_cfg.get('risky_instruments', ['ULTY', 'AMDY'])
-            safe_allocation = barbell_cfg.get('safe_allocation', 0.65)
-            risky_allocation = barbell_cfg.get('risky_allocation', 0.35)
+            safe_instruments = barbell_cfg.get('safe_instruments', ['CASH', 'SHY', 'VTIP', 'IAU'])
+            risky_instruments = barbell_cfg.get('risky_instruments', ['QQQ', 'SPY', 'ULTY', 'AMDY'])
+            safe_allocation = barbell_cfg.get('safe_allocation', 0.80)
+            risky_allocation = barbell_cfg.get('risky_allocation', 0.20)
         else:
-            # Default Gary x Taleb allocation
-            safe_instruments = ['SPY', 'VTIP', 'IAU']
-            risky_instruments = ['ULTY', 'AMDY']
-            safe_allocation = 0.65
-            risky_allocation = 0.35
+            safe_instruments = ['CASH', 'SHY', 'VTIP', 'IAU']
+            risky_instruments = ['QQQ', 'SPY', 'ULTY', 'AMDY']
+            safe_allocation = 0.80
+            risky_allocation = 0.20
 
         self.barbell_config = BarbellAllocation(
             safe_allocation=safe_allocation,
@@ -201,8 +200,8 @@ class AntifragilityEngine:
         if volatility > 0:
             # Standard Kelly: f* = (bp - q) / b where b=odds, p=win_prob, q=lose_prob
             # For continuous case: f* = μ/σ² where μ=expected return, σ²=variance
-            mean_return = np.mean(returns)
-            kelly_base = mean_return / (volatility**2) if volatility > 0 else 0.0
+            annualized_mean_return = np.mean(returns) * 252
+            kelly_base = annualized_mean_return / (volatility**2) if volatility > 0 else 0.0
 
             # Convexity adjustment: increase allocation for positive convexity
             convexity_multiplier = 1.0 + max(0, gamma * 0.1)  # Scale gamma impact

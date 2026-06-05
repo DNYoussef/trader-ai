@@ -73,6 +73,8 @@ class PortfolioManager:
         # Portfolio state
         self.positions: Dict[str, Position] = {}
         self.cash_balance = initial_capital
+        self._last_total_value = initial_capital
+        self._last_sync_time = None
         self.total_deposits = initial_capital
         self.total_withdrawals = Decimal("0.00")
 
@@ -144,6 +146,9 @@ class PortfolioManager:
 
                     self.positions[pos.symbol] = portfolio_pos
 
+            positions_value = sum(pos.market_value for pos in self.positions.values())
+            self._last_total_value = self.cash_balance + positions_value
+            self._last_sync_time = datetime.now(timezone.utc)
             logger.info(f"Portfolio synced - Value: ${account_value}, Cash: ${cash_balance}, Positions: {len(self.positions)}")
             return True
 
@@ -186,12 +191,14 @@ class PortfolioManager:
             return (gate_value / total_value) * Decimal("100")
         return Decimal("0.00")
 
-    async def get_total_portfolio_value(self) -> Decimal:
+    async def get_total_portfolio_value(self, refresh: bool = False) -> Decimal:
         """Get total portfolio value (cash + positions)."""
-        await self.sync_with_broker()  # Refresh from broker
+        if refresh:
+            await self.sync_with_broker()
 
         positions_value = sum(pos.market_value for pos in self.positions.values())
-        return self.cash_balance + positions_value
+        self._last_total_value = self.cash_balance + positions_value
+        return self._last_total_value
 
     async def get_nav_at_date(self, target_date: date) -> Decimal:
         """
@@ -258,7 +265,7 @@ class PortfolioManager:
         end_date = datetime.now(timezone.utc).date()
         start_date = end_date - timedelta(days=period_days)
 
-        current_value = await self.get_total_portfolio_value()
+        current_value = await self.get_total_portfolio_value(refresh=True)
         start_value = await self.get_nav_at_date(start_date)
 
         deposits = self.get_deposits_in_period(start_date, end_date)
@@ -420,15 +427,20 @@ class PortfolioManager:
         
         # Reset at market open (9:30 AM) or first call of day
         if self.daily_start_value is None or self._should_reset_daily(current_time):
-            current_value = await self.get_total_portfolio_value()
+            current_value = await self.get_total_portfolio_value(refresh=True)
             self.daily_start_value = current_value
             self.daily_reset_time = current_time
             self.daily_loss_triggered = False
             logger.info(f"Daily loss limit reset - Start value: ${self.daily_start_value}")
-            return {'daily_reset': True, 'start_value': float(current_value)}
+            return {
+                'daily_reset': True,
+                'start_value': float(current_value),
+                'triggered': False,
+                'required_action': 'none',
+            }
         
         # Calculate daily change
-        current_value = await self.get_total_portfolio_value()
+        current_value = await self.get_total_portfolio_value(refresh=True)
         daily_change = (current_value - self.daily_start_value) / self.daily_start_value
         
         # Check limit
@@ -441,7 +453,8 @@ class PortfolioManager:
             'current_value': float(current_value),
             'daily_change_pct': float(daily_change),
             'limit_pct': float(self.daily_loss_limit_pct),
-            'triggered': self.daily_loss_triggered
+            'triggered': self.daily_loss_triggered,
+            'required_action': 'kill_switch' if self.daily_loss_triggered else 'none',
         }
 
     def _should_reset_daily(self, current_time: datetime) -> bool:
