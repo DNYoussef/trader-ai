@@ -1,5 +1,6 @@
 from decimal import Decimal
 from types import SimpleNamespace
+import sys
 
 import pytest
 from fastapi.testclient import TestClient
@@ -63,6 +64,11 @@ async def test_demo_terminal_mode_labels_synthetic_insights():
 
 
 def _dashboard_module_without_optional_runtime(monkeypatch):
+    constants_module = sys.modules.get("constants")
+    if constants_module is not None and not hasattr(constants_module, "CORS_ORIGINS"):
+        sys.modules.pop("constants", None)
+        sys.modules.pop("src.dashboard.run_server_simple", None)
+
     from src.dashboard import run_server_simple as dashboard
 
     monkeypatch.setattr(dashboard, "LIVE_DATA_AVAILABLE", False)
