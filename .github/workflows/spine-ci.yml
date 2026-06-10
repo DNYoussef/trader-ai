@@ -38,6 +38,7 @@ jobs:
       - name: Run exact spine tests
         run: |
           python -m pytest -q --maxfail=1 \
+            --cov=src/integration --cov-report=term-missing --cov-fail-under=50 \
             tests/test_ai_dashboard_integration.py \
             tests/test_dashboard_runtime_config.py \
             tests/test_mieza_spine_dry_run_report.py \
