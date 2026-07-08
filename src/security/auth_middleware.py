@@ -152,7 +152,11 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
                         detail="Authentication error"
                     )
             else:
-                logger.warning("Token verification function not available - authentication not enforced")
+                logger.error("Token verification unavailable - refusing request (fail closed)")
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Authentication unavailable",
+                )
 
         # Continue to next handler
         return await call_next(request)
@@ -210,8 +214,9 @@ def configure_jwt_auth_middleware(app, verify_token_func=None):
                 from src.security.auth import verify_token
                 verify_token_func = verify_token
                 logger.info("Using auth.verify_token for JWT verification")
-            except ImportError:
-                logger.warning("Could not import verify_token - tokens will be checked for format only")
+            except ImportError as e:
+                logger.error("verify_token import failed - refusing to start auth-less: %s", e)
+                raise
 
         # Add middleware
         app.add_middleware(JWTAuthMiddleware, verify_token_func=verify_token_func)
