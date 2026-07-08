@@ -56,8 +56,7 @@ try:
     JWT_AUTH_AVAILABLE = True
     logging.info("JWT authentication middleware loaded - API endpoints will be protected")
 except ImportError as e:
-    JWT_AUTH_AVAILABLE = False
-    logging.warning(f"JWT authentication middleware not available: {e}")
+    raise RuntimeError(f"JWT authentication middleware is required and failed to import: {e}")
 
 # Import AI dashboard integration
 try:
