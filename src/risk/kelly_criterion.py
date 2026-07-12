@@ -190,7 +190,7 @@ class KellyCriterionCalculator:
 
                 # 5. Convert to dollar amounts and shares
                 base_kelly = self._apply_constraints(kelly_components, risk_metrics)
-                final_kelly = min(base_kelly * ng_multiplier, 1.0)  # Apply NG multiplier with hard cap
+                final_kelly = min(base_kelly * ng_multiplier, self.max_kelly, 1.0)
                 dollar_amount = available_capital * final_kelly
                 share_quantity = int(dollar_amount / current_price) if current_price > 0 else 0
 
@@ -313,7 +313,6 @@ class KellyCriterionCalculator:
 
             # Calculate win rate
             win_rate = (returns > 0).mean()
-            1 - win_rate
 
             # Adjust for recent performance (weight recent data more heavily)
             recent_returns = returns.tail(min(60, len(returns)))  # Last 60 days
@@ -502,8 +501,8 @@ class KellyCriterionCalculator:
                 kelly_components, returns
             )
 
-            # Expected Sharpe ratio
-            expected_sharpe = kelly_components.edge / max(volatility, 0.01)
+            annualized_realized_return = returns.mean() * 252
+            expected_sharpe = annualized_realized_return / max(volatility, 0.01)
 
             return KellyRiskMetrics(
                 max_drawdown_risk=max_drawdown_risk,
@@ -730,11 +729,14 @@ class KellyCriterionCalculator:
             if kelly >= 1.0:
                 return 1.0  # High risk of ruin with overleverage
 
+            if volatility <= 0:
+                return float('inf')
+
             risk_of_ruin = np.exp(-2 * edge * kelly / (volatility ** 2))
 
-            if risk_of_ruin >= 0.99:
+            if risk_of_ruin <= 0.01:
                 return float('inf')  # Essentially never
-            elif risk_of_ruin <= 0.01:
+            elif risk_of_ruin >= 0.99:
                 return 1.0  # Very high risk
             else:
                 return -np.log(risk_of_ruin) / (edge * kelly)

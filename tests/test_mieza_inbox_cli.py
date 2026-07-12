@@ -1,5 +1,5 @@
 import json
-import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -11,6 +11,7 @@ from src.integration.mieza_signal_store import MiezaSQLiteStore
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "mieza_signal_envelope.json"
 SIGNING_KEY = "unit-test-mieza-signing-key"
+FIXTURE_MAX_AGE_SECONDS = "2000000"
 
 
 def _run_inbox(inbox: Path, db: Path, capsys) -> tuple[int, dict]:
@@ -21,28 +22,35 @@ def _run_inbox(inbox: Path, db: Path, capsys) -> tuple[int, dict]:
             "--db",
             str(db),
             "--max-age-seconds",
-            "2000000",
+            FIXTURE_MAX_AGE_SECONDS,
         ]
     )
     return code, json.loads(capsys.readouterr().out)
 
 
-def _copy_fixture(path: Path) -> None:
+def _current_signed_payload(nonce: str | None = None) -> dict:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    payload["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    if nonce is not None:
+        payload["nonce"] = nonce
+    payload["signature"] = sign_mieza_envelope(payload, SIGNING_KEY)
+    return payload
+
+
+def _copy_fixture(path: Path, payload: dict | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(FIXTURE_PATH, path)
+    path.write_text(json.dumps(payload or _current_signed_payload()), encoding="utf-8")
 
 
 def _write_tampered(path: Path) -> None:
-    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    payload = _current_signed_payload()
     payload["signals"][0]["confidence"] = 0.99
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
 def _write_valid_with_nonce(path: Path, nonce: str) -> None:
-    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    payload["nonce"] = nonce
-    payload["signature"] = sign_mieza_envelope(payload, SIGNING_KEY)
+    payload = _current_signed_payload(nonce)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -127,10 +135,11 @@ def test_inbox_duplicate_replay_archives_duplicate_without_new_execution(tmp_pat
     monkeypatch.setenv("MIEZA_SIGNAL_SIGNING_KEY", SIGNING_KEY)
     inbox = tmp_path / "inbox"
     db = tmp_path / "mieza.db"
-    _copy_fixture(inbox / "first.json")
+    payload = _current_signed_payload()
+    _copy_fixture(inbox / "first.json", payload)
     assert _run_inbox(inbox, db, capsys)[0] == 0
 
-    _copy_fixture(inbox / "second.json")
+    _copy_fixture(inbox / "second.json", payload)
     code, summary = _run_inbox(inbox, db, capsys)
 
     assert code == 0
@@ -156,7 +165,7 @@ def test_inbox_nonce_collision_with_new_content_is_rejected(tmp_path, monkeypatc
     _copy_fixture(inbox / "first.json")
     assert _run_inbox(inbox, db, capsys)[0] == 0
 
-    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    payload = _current_signed_payload()
     payload["signals"][0]["edge"] = 0.09
     payload["signals"][0]["estimated_fair_price"] = 0.51
     payload["signature"] = sign_mieza_envelope(payload, SIGNING_KEY)

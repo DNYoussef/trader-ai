@@ -1,12 +1,13 @@
 import json
 import os
-import shutil
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
 from src.integration.mieza_inbox_cli import main as inbox_main
+from src.integration.mieza_quant_bridge import sign_mieza_envelope
 from src.integration.mieza_signal_store import MiezaSQLiteStore
 from src.integration.mieza_spine_status_cli import main as status_main
 
@@ -40,12 +41,17 @@ def _run_inbox(inbox: Path, db: Path, capsys) -> tuple[int, dict]:
 
 
 def _copy_fixture(path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    payload["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    payload["signature"] = sign_mieza_envelope(payload, SIGNING_KEY)
     path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(FIXTURE_PATH, path)
+    path.write_text(json.dumps(payload), encoding="utf-8")
 
 
 def _write_tampered(path: Path) -> None:
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    payload["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    payload["signature"] = sign_mieza_envelope(payload, SIGNING_KEY)
     payload["signals"][0]["confidence"] = 0.99
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")

@@ -266,10 +266,10 @@ class LiveDataProvider:
 
         if not barbell:
             return {
-                'safe_allocation': 65,
-                'risky_allocation': 35,
-                'safe_instruments': ['SPY', 'VTIP', 'IAU'],
-                'risky_instruments': ['ULTY', 'AMDY'],
+                'safe_allocation': 80,
+                'risky_allocation': 20,
+                'safe_instruments': ['CASH', 'SHY', 'VTIP', 'IAU'],
+                'risky_instruments': ['QQQ', 'SPY', 'ULTY', 'AMDY'],
                 'source': 'default'
             }
 
@@ -279,10 +279,10 @@ class LiveDataProvider:
         """Async version of generate_barbell_allocation."""
         state = await self.get_state_async()
         return state.get('barbell', {
-            'safe_allocation': 65,
-            'risky_allocation': 35,
-            'safe_instruments': ['SPY', 'VTIP', 'IAU'],
-            'risky_instruments': ['ULTY', 'AMDY'],
+            'safe_allocation': 80,
+            'risky_allocation': 20,
+            'safe_instruments': ['CASH', 'SHY', 'VTIP', 'IAU'],
+            'risky_instruments': ['QQQ', 'SPY', 'ULTY', 'AMDY'],
             'source': 'default'
         })
 

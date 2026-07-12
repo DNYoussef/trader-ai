@@ -7,7 +7,8 @@ Integrates with existing JWT infrastructure in auth.py.
 
 import logging
 from typing import Set
-from fastapi import Request, HTTPException, status
+from fastapi import Request, status
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
@@ -27,14 +28,17 @@ PUBLIC_PATHS: Set[str] = {
 }
 
 
+def _auth_error(status_code: int, detail: str, headers=None) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"detail": detail}, headers=headers)
+
+
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     """
     Middleware to enforce JWT authentication on API endpoints.
 
-    All /api/* endpoints require valid JWT Bearer token except:
-    - Public paths (health checks, auth endpoints, docs)
-    - Static files
-    - WebSocket connections (handled separately)
+        All /api/* endpoints require valid JWT Bearer token except:
+        - Public paths (health checks, auth endpoints, docs)
+        - Static files
     """
 
     def __init__(self, app, verify_token_func=None):
@@ -60,9 +64,6 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
         Returns:
             Response from next handler
-
-        Raises:
-            HTTPException: 401 if authentication is required but missing/invalid
         """
         path = request.url.path
 
@@ -74,10 +75,6 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         if self._is_static_path(path):
             return await call_next(request)
 
-        # Allow WebSocket connections (auth handled in WebSocket handler)
-        if path.startswith("/ws"):
-            return await call_next(request)
-
         # Require authentication for all /api/* endpoints
         if path.startswith("/api/"):
             # Check for Authorization header
@@ -85,18 +82,18 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
             if not auth_header:
                 logger.warning(f"Missing Authorization header for {path}")
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Missing authorization header",
-                    headers={"WWW-Authenticate": "Bearer"}
+                return _auth_error(
+                    status.HTTP_401_UNAUTHORIZED,
+                    "Missing authorization header",
+                    {"WWW-Authenticate": "Bearer"},
                 )
 
             if not auth_header.startswith("Bearer "):
                 logger.warning(f"Invalid Authorization header format for {path}")
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid authorization header format. Expected: Bearer <token>",
-                    headers={"WWW-Authenticate": "Bearer"}
+                return _auth_error(
+                    status.HTTP_401_UNAUTHORIZED,
+                    "Invalid authorization header format. Expected: Bearer <token>",
+                    {"WWW-Authenticate": "Bearer"},
                 )
 
             # Extract token
@@ -112,9 +109,9 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
                     SECRET_KEY = os.getenv("JWT_SECRET_KEY")
                     if not SECRET_KEY:
                         logger.error("JWT_SECRET_KEY not configured")
-                        raise HTTPException(
-                            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="Authentication not configured"
+                        return _auth_error(
+                            status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            "Authentication not configured",
                         )
 
                     ALGORITHM = "HS256"
@@ -125,10 +122,10 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
                     if not user_id:
                         logger.warning(f"Token missing 'sub' claim for {path}")
-                        raise HTTPException(
-                            status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Invalid token: missing user identifier",
-                            headers={"WWW-Authenticate": "Bearer"}
+                        return _auth_error(
+                            status.HTTP_401_UNAUTHORIZED,
+                            "Invalid token: missing user identifier",
+                            {"WWW-Authenticate": "Bearer"},
                         )
 
                     # Add user_id to request state for use in handlers
@@ -138,21 +135,23 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
                 except JWTError as e:
                     logger.warning(f"JWT verification failed for {path}: {e}")
-                    raise HTTPException(
-                        status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Could not validate credentials",
-                        headers={"WWW-Authenticate": "Bearer"}
+                    return _auth_error(
+                        status.HTTP_401_UNAUTHORIZED,
+                        "Could not validate credentials",
+                        {"WWW-Authenticate": "Bearer"},
                     )
-                except HTTPException:
-                    raise
                 except Exception as e:
                     logger.error(f"Unexpected error verifying token for {path}: {e}")
-                    raise HTTPException(
-                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        detail="Authentication error"
+                    return _auth_error(
+                        status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        "Authentication error",
                     )
             else:
-                logger.warning("Token verification function not available - authentication not enforced")
+                logger.error("Token verification unavailable - refusing request (fail closed)")
+                return _auth_error(
+                    status.HTTP_503_SERVICE_UNAVAILABLE,
+                    "Authentication unavailable",
+                )
 
         # Continue to next handler
         return await call_next(request)
@@ -210,8 +209,9 @@ def configure_jwt_auth_middleware(app, verify_token_func=None):
                 from src.security.auth import verify_token
                 verify_token_func = verify_token
                 logger.info("Using auth.verify_token for JWT verification")
-            except ImportError:
-                logger.warning("Could not import verify_token - tokens will be checked for format only")
+            except ImportError as e:
+                logger.error("verify_token import failed - refusing to start auth-less: %s", e)
+                raise
 
         # Add middleware
         app.add_middleware(JWTAuthMiddleware, verify_token_func=verify_token_func)

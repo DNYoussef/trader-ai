@@ -97,6 +97,7 @@ class TestDailyLossLimit:
 
         assert result['triggered'] is True
         assert result['daily_change_pct'] == pytest.approx(-0.025, abs=0.001)
+        assert result['required_action'] == 'kill_switch'
         assert portfolio_manager.daily_loss_triggered is True
 
     @pytest.mark.asyncio

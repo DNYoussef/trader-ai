@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simplified startup script for the Gary×Taleb Risk Dashboard Server.
+Simplified startup script for the GaryÃ—Taleb Risk Dashboard Server.
 This version runs without Redis dependency for development.
 """
 
@@ -14,6 +14,7 @@ import time
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Set
 from dataclasses import dataclass
 
@@ -21,7 +22,7 @@ from dataclasses import dataclass
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -55,8 +56,7 @@ try:
     JWT_AUTH_AVAILABLE = True
     logging.info("JWT authentication middleware loaded - API endpoints will be protected")
 except ImportError as e:
-    JWT_AUTH_AVAILABLE = False
-    logging.warning(f"JWT authentication middleware not available: {e}")
+    raise RuntimeError(f"JWT authentication middleware is required and failed to import: {e}")
 
 # Import AI dashboard integration
 try:
@@ -120,6 +120,7 @@ class SimpleDashboardServer:
     def __init__(self, trading_engine=None):
         self.app = FastAPI(title="Gary x Taleb Risk Dashboard")
         self.active_connections: Set[WebSocket] = set()
+        self.trading_engine = trading_engine
         self.setup_cors()
         self.setup_routes()
         # Static files MUST be setup AFTER routes (catch-all route should be last)
@@ -399,52 +400,76 @@ class SimpleDashboardServer:
 
         @self.app.post(C.API_TRADING_EXECUTE)
         async def execute_trade(trade_request: dict):
-            """Execute real trades through trading engine."""
-            try:
+            """Execute dashboard trades through the TradingEngine safety path."""
+            if not self.trading_engine or not hasattr(self.trading_engine, "execute_manual_trade"):
                 raise HTTPException(
-                    status_code=501,
-                    detail="Dashboard trade execution must be wired through TradingEngine safety controls."
+                    status_code=503,
+                    detail={
+                        "success": False,
+                        "execution_status": "unavailable_no_trading_engine",
+                        "evidence_status": "not_executed",
+                        "message": (
+                            "Dashboard trade execution requires a live TradingEngine "
+                            "with safety controls."
+                        ),
+                    },
                 )
+
+            try:
+                symbol = str(trade_request.get("symbol", "")).strip().upper()
+                action = str(trade_request.get("action") or trade_request.get("side") or "").strip().lower()
+                gate = str(trade_request.get("gate", "MANUAL")).strip() or "MANUAL"
+                amount_value = (
+                    trade_request.get("dollar_amount")
+                    if "dollar_amount" in trade_request
+                    else trade_request.get("amount", trade_request.get("notional"))
+                )
+
+                if not symbol:
+                    raise HTTPException(status_code=422, detail="symbol is required")
+                if action not in {"buy", "sell"}:
+                    raise HTTPException(status_code=422, detail="action must be buy or sell")
+                try:
+                    dollar_amount = Decimal(str(amount_value))
+                except (InvalidOperation, TypeError):
+                    raise HTTPException(status_code=422, detail="dollar_amount must be numeric")
+                if dollar_amount <= 0:
+                    raise HTTPException(status_code=422, detail="dollar_amount must be positive")
+
+                result = await self.trading_engine.execute_manual_trade(
+                    symbol=symbol,
+                    dollar_amount=dollar_amount,
+                    action=action,
+                    gate=gate,
+                )
+                if result is None:
+                    return {
+                        "success": False,
+                        "execution_status": "blocked_or_failed_by_trading_engine",
+                        "evidence_status": "not_executed",
+                    }
+
+                return {
+                    "success": True,
+                    "execution_status": "executed_through_trading_engine",
+                    "evidence_status": "trading_engine_result",
+                    "symbol": symbol,
+                    "action": action,
+                    "dollar_amount": str(dollar_amount),
+                    "gate": gate,
+                    "status": getattr(result, "status", None),
+                    "order_id": getattr(result, "order_id", None),
+                }
             except HTTPException:
                 raise
             except Exception as e:
                 logger.error(f"Error executing trade: {e}")
-                return {"success": False, "error": str(e)}
-
-        @self.app.websocket(C.WS_ENDPOINT)
-        async def websocket_endpoint(websocket: WebSocket, client_id: str):
-            await self.connect(websocket)
-
-            # Connect to AI dashboard integrator if available
-            if AI_AVAILABLE:
-                ai_dashboard_integrator.add_websocket_connection(websocket)
-
-            try:
-                # Send initial data
-                await self.send_initial_data(websocket)
-
-                # Start sending updates
-                update_task = asyncio.create_task(self.send_periodic_updates(websocket))
-
-                # Keep connection alive and handle incoming messages
-                while True:
-                    try:
-                        data = await websocket.receive_text()
-                        message = json.loads(data)
-                        await self.handle_client_message(websocket, message)
-                    except WebSocketDisconnect:
-                        break
-                    except Exception as e:
-                        logger.error(f"Error handling message: {e}")
-
-                update_task.cancel()
-
-            except WebSocketDisconnect:
-                pass
-            finally:
-                if AI_AVAILABLE:
-                    ai_dashboard_integrator.remove_websocket_connection(websocket)
-                self.disconnect(websocket)
+                return {
+                    "success": False,
+                    "execution_status": "trading_engine_error",
+                    "evidence_status": "not_executed",
+                    "error": str(e),
+                }
 
     async def connect(self, websocket: WebSocket):
         """Accept new WebSocket connection."""

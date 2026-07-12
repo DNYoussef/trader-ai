@@ -76,10 +76,14 @@ class WeeklyCycle:
     BUY_TIME = time(16, 10)      # 4:10 PM ET
     SIPHON_TIME = time(18, 0)    # 6:00 PM ET
     
-    # Gate allocations
+    # Gate allocations for every capital gate. G2-G12 intentionally inherit the
+    # conservative four-asset split until a later policy phase defines distinct mixes.
     GATE_ALLOCATIONS = {
         'G0': GateAllocation(ulty_pct=70.0, amdy_pct=30.0),
-        'G1': GateAllocation(ulty_pct=50.0, amdy_pct=20.0, iau_pct=15.0, vtip_pct=15.0)
+        **{
+            f'G{i}': GateAllocation(ulty_pct=50.0, amdy_pct=20.0, iau_pct=15.0, vtip_pct=15.0)
+            for i in range(1, 13)
+        },
     }
     
     def __init__(

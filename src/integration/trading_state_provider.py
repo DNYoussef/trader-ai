@@ -367,10 +367,10 @@ class TradingStateProvider:
         """
         if not self._engine or not self._engine.antifragility_engine:
             return {
-                'safe_allocation': 65,
-                'risky_allocation': 35,
-                'safe_instruments': ['SPY', 'VTIP', 'IAU'],
-                'risky_instruments': ['ULTY', 'AMDY'],
+                'safe_allocation': 80,
+                'risky_allocation': 20,
+                'safe_instruments': ['CASH', 'SHY', 'VTIP', 'IAU'],
+                'risky_instruments': ['QQQ', 'SPY', 'ULTY', 'AMDY'],
                 'source': 'default'
             }
 
@@ -391,8 +391,8 @@ class TradingStateProvider:
         except Exception as e:
             logger.error(f"Error getting barbell allocation: {e}")
             return {
-                'safe_allocation': 65,
-                'risky_allocation': 35,
+                'safe_allocation': 80,
+                'risky_allocation': 20,
                 'error': str(e),
                 'source': 'error_fallback'
             }

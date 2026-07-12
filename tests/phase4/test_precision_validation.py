@@ -95,7 +95,7 @@ class TestPhase4PrecisionValidation(unittest.TestCase):
         # This test validates that the target_hit_rate variable scoping fix is working
         # by simulating the problematic scenario
         
-        def test_variable_scope():
+        def simulate_variable_scope():
             """Simulate the fixed variable scoping pattern."""
             # This is the FIXED pattern - variable declared outside try block
             target_value = 96.7
@@ -109,7 +109,7 @@ class TestPhase4PrecisionValidation(unittest.TestCase):
                 return target_value  # This would have failed before the fix
         
         # Test should complete without UnboundLocalError
-        result = test_variable_scope()
+        result = simulate_variable_scope()
         self.assertEqual(result, 96.7 * 0.9)
 
     def test_micro_operations_precision(self):
