@@ -4,6 +4,8 @@ import sys
 
 import pytest
 from fastapi.testclient import TestClient
+from starlette.routing import WebSocketRoute
+from starlette.websockets import WebSocketDisconnect
 
 from src.trading.terminal_data_provider import MarketDataPoint, TradingTerminalDataProvider
 
@@ -76,6 +78,16 @@ def _dashboard_module_without_optional_runtime(monkeypatch):
     monkeypatch.setattr(dashboard, "JWT_AUTH_AVAILABLE", False)
     monkeypatch.setattr(dashboard, "RATE_LIMITER_AVAILABLE", False)
     return dashboard
+
+
+def test_archived_dashboard_exposes_no_websocket(monkeypatch):
+    dashboard = _dashboard_module_without_optional_runtime(monkeypatch)
+    server = dashboard.SimpleDashboardServer(trading_engine=None)
+
+    assert not [route for route in server.app.routes if isinstance(route, WebSocketRoute)]
+    with pytest.raises(WebSocketDisconnect):
+        with TestClient(server.app).websocket_connect("/ws/f018-probe"):
+            pytest.fail("archived dashboard upgraded an unauthenticated WebSocket")
 
 
 def test_dashboard_trade_execute_fails_closed_without_trading_engine(monkeypatch):

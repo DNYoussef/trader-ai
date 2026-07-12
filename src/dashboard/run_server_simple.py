@@ -22,7 +22,7 @@ from dataclasses import dataclass
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -470,41 +470,6 @@ class SimpleDashboardServer:
                     "evidence_status": "not_executed",
                     "error": str(e),
                 }
-
-        @self.app.websocket(C.WS_ENDPOINT)
-        async def websocket_endpoint(websocket: WebSocket, client_id: str):
-            await self.connect(websocket)
-
-            # Connect to AI dashboard integrator if available
-            if AI_AVAILABLE:
-                ai_dashboard_integrator.add_websocket_connection(websocket)
-
-            try:
-                # Send initial data
-                await self.send_initial_data(websocket)
-
-                # Start sending updates
-                update_task = asyncio.create_task(self.send_periodic_updates(websocket))
-
-                # Keep connection alive and handle incoming messages
-                while True:
-                    try:
-                        data = await websocket.receive_text()
-                        message = json.loads(data)
-                        await self.handle_client_message(websocket, message)
-                    except WebSocketDisconnect:
-                        break
-                    except Exception as e:
-                        logger.error(f"Error handling message: {e}")
-
-                update_task.cancel()
-
-            except WebSocketDisconnect:
-                pass
-            finally:
-                if AI_AVAILABLE:
-                    ai_dashboard_integrator.remove_websocket_connection(websocket)
-                self.disconnect(websocket)
 
     async def connect(self, websocket: WebSocket):
         """Accept new WebSocket connection."""

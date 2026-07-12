@@ -11,14 +11,14 @@ Verifies that:
 import pytest
 import os
 from datetime import timedelta
+
+# Set JWT secret before importing the auth module.
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-testing-only-do-not-use-in-production"
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from src.security.auth_middleware import configure_jwt_auth_middleware
 from src.security.auth import create_access_token
-
-
-# Set JWT secret for testing
-os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-testing-only-do-not-use-in-production"
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_app():
 @pytest.fixture
 def client(test_app):
     """Create test client"""
-    return TestClient(test_app)
+    return TestClient(test_app, raise_server_exceptions=False)
 
 
 @pytest.fixture
@@ -101,6 +101,8 @@ class TestProtectedEndpointsWithoutAuth:
         """Protected endpoint should reject requests without auth"""
         response = client.get("/api/protected")
         assert response.status_code == 401
+        assert response.headers["content-type"].startswith("application/json")
+        assert response.headers["www-authenticate"] == "Bearer"
         assert "authorization" in response.json()["detail"].lower()
 
     def test_positions_endpoint_no_auth(self, client):
@@ -133,6 +135,8 @@ class TestInvalidAuthentication:
             headers={"Authorization": "Bearer invalid_token_123"}
         )
         assert response.status_code == 401
+        assert response.headers["content-type"].startswith("application/json")
+        assert response.headers["www-authenticate"] == "Bearer"
 
     def test_empty_token(self, client):
         """Should reject empty tokens"""
